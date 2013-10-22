@@ -9,10 +9,9 @@
   "bin": {
     "bitballoon": "./bin/bitballoon"
   },
-  "dependencies": {},
+  "dependencies": {
+    "xmlhttprequest": ">=1.3.0"
+  },
   "devDependencies": {},
-  "optionalDependencies": {},
-  "engines": {
-    "node": "*"
-  }
+  "optionalDependencies": {}
 }
