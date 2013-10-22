@@ -1,0 +1,18 @@
+{
+  "author": "BitBalloon",
+  "name": "bitballoon",
+  "description": "BitBalloon API client",
+  "version": "0.0.1",
+  "repository": {
+    "url": ""
+  },
+  "bin": {
+    "bitballoon": "./bin/bitballoon"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
