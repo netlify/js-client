@@ -3,6 +3,14 @@ BitBalloon Node Client
 
 BitBalloon is a hosting service for the programmable web. It understands your documents, processes forms and lets you do deploys, manage forms submissions, inject javascript snippets into sites and do intelligent updates of HTML documents through it's API.
 
+* * *
+
+## Work in progress!
+
+This is a work in progress, the README file is a draft of how the client should end up working, but not much is implemented yet. Give feedback if you feel it should work in a different way.
+
+* * *
+
 Installation
 ============
 
