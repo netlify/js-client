@@ -1,4 +1,6 @@
-var bitballoon = require("../lib/bitballoon.js");
+if (typeof(require) !== 'undefined') {
+  var bitballoon = require("../lib/bitballoon.js");
+}
 
 // Mock object for xhr requests
 var XHR = function() {
