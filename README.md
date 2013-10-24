@@ -27,36 +27,52 @@ You'll need an application client id and a client secret before you can access t
 Once you have your credentials you can instantiate a BitBalloon client.
 
 ```js
-bitballoon = require("bitballoon");
-
-client = bitballoon.createClient({access_token: OAUTH_ACCESS_TOKEN});
+var bitballoon = require("bitballoon"),
+    client     = bitballoon.createClient(options);
 ```
 
-You'll need an access_token before you can use the client. Often you'll have this stored in your database, but the bitballoon client lets you acquire an access token in two ways.
+Typically you'll have an `access_token` stored that you want to instantiate the client with:
+
+```
+var client = bitballoon.createClient({access_token: "my-access-token"});
+```
+
+A client need an access token before it can make requests to the BitBalloon API. Oauth2 gives you two ways to get an access token:
 
 1. **Authorize from credentials**: Authenticate directly with your API credentials.
 2. **Authorize from a URL**: send a user to a URL, where she can grant your access API access on her behalf.
 
-The first method is the simplest, but only works when accessing with your own BitBalloon users' permissions is what you need:
+The first method is the simplest, and works when you don't need to authenticate on behalf of some other user:
 
 ```js
-bitballoon.tokenFromCrendentials({client_id: CLIENT_ID, client_secret: CLIENT_SECRET}, function(err, access_token) {
-  return console.log(err) if (err)
-  console.log(access_token);
-});
-```
+var client = bitballoon.createClient({client_id: CLIENT_ID, client_secret: CLIENT_SECRET});
 
+client.authorizeFromCredentials(function(err, access_token) {
+  return console.log(err) if (err);
+  // Client is now ready to do requests
+  // You can store the access_token to avoid authorizing in the future
+});
+
+```
 To authorize on behalf of a user, you first need to send the user to a BitBalloon url where she'll be asked to grant your application permission. Once the user has visited that URL, she'll be redirected back to a redirect URI you specify (this must match the redirect URI on file for your Application). When the user returns to your app, you'll be able to access a `code` query parameter, that you can use to obtain the final `access_token`
 
 ```js
-url = client.authorizeUrl({redirectUri: "http://www.example.com/callback"});
-
-
-client.authorize({code: CODE_FROM_QUERY_PARAM, redirectUri: "http://www.example.com/callback"}, function(err, access_token) {
-  if (err) return console.log(err);
-  console.log(access_token);
+var client = bitballoon.createClient({
+  client_id: CLIENT_ID,
+  client_secret: CLIENT_SECRET,
+  redirect_uri: "http://www.example.com/callback"
 });
 
+var url = client.authorizeUrl();
+
+// Send the client to the url, they will be redirected back to the redirect_uri
+// Once they are back at your url, grab the code query param and use it to authorize
+
+client.authorizeFromCode(params.code, function(err, access_token) {
+  if (err) return console.log(err);
+  // Client is now ready to do requests
+  // You can store the access_token to avoid authorizing in the future  
+});
 ```
 
 Command Line Utility

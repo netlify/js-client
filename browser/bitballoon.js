@@ -1,14 +1,128 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Client = require("./client").Client;
+
+exports.createClient = function(options) {
+  return new Client(options);
+};
+
+if (typeof(window) !== 'undefined') {
+  window.bitballoon = exports;
+}
+
+
+},{"./client":2}],2:[function(require,module,exports){
 var base64 = require('base64-js');
 
-var ENDPOINT = 'https://www.bitballoon.com';
+var Client = function(options) {
+  options = options || {};
+  this.access_token  = options.access_token;
+  this.client_id     = options.client_id;
+  this.client_secret = options.client_secret;
+  this.redirect_uri  = options.redirect_uri;
+  this.XHR           = options.xhr      || Client.XMLHttpRequest;
+  this.ENDPOINT      = options.endpoint || 'https://www.bitballoon.com';
+};
 
 var stringToByteArray = function(str) {
   return Array.prototype.map.call(str, function (char) { return char.charCodeAt(0); });
 };
 
-var Client = function(access_token) {
-  this.access_token = access_token;
+Client.prototype = {
+  isAuthorized: function() { return !(this.access_token == null); },
+
+  authorizeFromCredentials: function(cb) {
+    var client = this;
+
+    if (!(this.client_id && this.client_secret)) {
+      return cb("Instantiate the client with a client_id and client_secret to authorize from credentials");
+    }
+    
+    this.request({
+      type: "post",
+      url: "/oauth/token",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      auth: {
+        user: this.client_id,
+        password: this.client_secret
+      },
+      body: "grant_type=client_credentials"
+    }, function(err, data) {
+      if (err) return cb(err);
+      client.access_token = data.access_token;
+      cb(null, data.access_token);
+    });
+  },
+  
+  authorizeFromCode: function(code, cb) {
+    var client = this;
+    
+    if (!(this.client_id && this.client_secret && this.redirect_uri)) {
+      return cb("Instantiate the client with a client_id, client_secret and redirect_uri to authorize from code");
+    }
+    
+    this.request({
+      type: "post",
+      url: "/oath/token",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      auth: {
+        user: this.client_id,
+        password: this.client_secret
+      },
+      body: [
+        "grant_type=authorization_code",
+        "code=" + code,
+        "redirect_uri=" + encodeURIComponent(this.redirect_uri)
+      ].join("&")
+    }, function(err, data) {
+      if (err) return cb(err);
+      client.access_token = data.access_token;
+      cb(null, data.access_token);
+    });
+  },
+  
+  authorizeUrl: function(options) {
+    if (!(this.client_id && this.redirect_uri)) {
+      throw("Instantiate the client with a client_id and a redirect_uri to generate an authorizeUrl");
+    }
+    return this.ENDPOINT + "/oauth/authorize?" + [
+      "response_type=code",
+      "client_id=" + this.client_id,
+      "redirect_uri=" + encodeURIComponent(this.redirect_uri)
+    ].join("&");
+  },
+  
+  request: function(options, cb) {
+    var xhr = new this.XHR;
+    xhr.open(options.type || "get", this.ENDPOINT + options.url, true);
+    if (options.headers) {
+      for (var header in options.headers) {
+        xhr.setRequestHeader(header, options.headers[header]);
+      }
+    }
+    if (options.auth) {
+      xhr.setRequestHeader("Authorization", "Basic " + base64.fromByteArray(
+        stringToByteArray(options.auth.user + ":" + options.auth.password)
+      ));
+    }
+
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4) {
+        if (xhr.status == 200) {
+          if (xhr.responseText) {
+            var data = JSON.parse(xhr.responseText);
+          }
+          cb(null, data);      
+        } else {
+          cb(xhr.responseText, null);
+        }
+      }
+    }
+    xhr.send(options.body);
+  }
 };
 
 if (typeof(XMLHttpRequest) === 'undefined') {
@@ -16,32 +130,9 @@ if (typeof(XMLHttpRequest) === 'undefined') {
 } else {
   Client.XMLHttpRequest = XMLHttpRequest;
 }
-  
-exports.createClient = function(options) {
-  return new Client(options.access_token);
-};
 
-exports.tokenFromCrendentials = function(options, cb) {
-  var xhr = new (options.xhr || Client.XMLHttpRequest);
-  xhr.open("post", ENDPOINT + "/oauth/token", true);
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  xhr.setRequestHeader("Authorization", "Basic " + base64.fromByteArray(
-    stringToByteArray(options.client_id + ":" + options.client_secret)
-  ));
-  xhr.onreadystatechange = function() {
-    switch(xhr.readyState) {
-      case 4:
-        var data = JSON.parse(xhr.responseText);
-        return cb(null, data.access_token);
-    }      
-  }
-  xhr.send("grant_type=client_credentials");    
-};
-
-if (typeof(window) !== 'undefined') {
-  window.bitballoon = exports;
-}
-},{"base64-js":2,"xmlhttprequest":3}],2:[function(require,module,exports){
+exports.Client = Client;
+},{"base64-js":3,"xmlhttprequest":4}],3:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -127,7 +218,7 @@ if (typeof(window) !== 'undefined') {
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 
 },{}]},{},[1])
 ;

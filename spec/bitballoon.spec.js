@@ -43,24 +43,25 @@ describe("bitballoon", function() {
   it("should create a client", function() {
     var client = bitballoon.createClient({access_token: "1234"});
     expect(client.access_token).toEqual("1234");
+    expect(client.isAuthorized()).toEqual(true);
   });
   
   it("should authenticate from credentials", function() {
-    var access_token = null;
+    var client = bitballoon.createClient({client_id: "client_id", client_secret: "client_secret", xhr: XHR});
+    var access_token = null;    
 
     XHR.expectations = function(xhr) {
       expect(xhr.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
-      expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZXJjcmV0");
+      expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=");
       expect(xhr.method).toEqual("post");
     }
     
-    XHR.readyState = 4;
     XHR.responseText = JSON.stringify({access_token: "1234"});
 
     runs(function() {
-      bitballoon.tokenFromCrendentials({client_id: "client_id", client_secret: "client_sercret", xhr: XHR}, function(err, token) {
+      client.authorizeFromCredentials(function(err, token) {
         access_token = token;
-      });      
+      });
     });
     waitsFor(function() {
       return access_token;
@@ -68,6 +69,52 @@ describe("bitballoon", function() {
     
     runs(function() {
       expect(access_token).toEqual("1234");
+      expect(client.isAuthorized()).toEqual(true);
     });    
   });
+  
+  it("should generate an authorize url", function() {
+    var client = bitballoon.createClient({
+      client_id: "client_id", 
+      client_secret: "client_secret",
+      redirect_uri: "http://www.example.com/callback"
+    });
+    var url = client.authorizeUrl();
+    
+    expect(url).toEqual("https://www.bitballoon.com/oauth/authorize?response_type=code&client_id=client_id&redirect_uri=http%3A%2F%2Fwww.example.com%2Fcallback")
+  });
+  
+  it("should authorize from authorization code", function() {
+    var client = bitballoon.createClient({
+      client_id: "client_id", 
+      client_secret: "client_secret",
+      redirect_uri: "http://www.example.com/callback",
+      xhr: XHR
+    });
+    var access_token = null;
+
+    XHR.expectations = function(xhr) {
+      expect(xhr.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
+      expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=");
+      expect(xhr.method).toEqual("post");
+    }
+
+    XHR.responseText = JSON.stringify({access_token: "1234"});
+
+    runs(function() {
+      client.authorizeFromCode("my-code", function(err, token) {
+        console.log("Got err, token", err, token);
+        access_token = token;
+      });
+    });
+
+    waitsFor(function() {
+      return access_token;
+    }, 100);
+    
+    runs(function() {
+      expect(access_token).toEqual("1234");
+      expect(client.isAuthorized()).toEqual(true);
+    });    
+  })
 });
