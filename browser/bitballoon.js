@@ -5,6 +5,8 @@ exports.createClient = function(options) {
   return new Client(options);
 };
 
+exports.Client = Client;
+
 if (typeof(window) !== 'undefined') {
   window.bitballoon = exports;
 }
@@ -22,6 +24,10 @@ var Client = function(options) {
   this.XHR           = options.xhr      || Client.XMLHttpRequest;
   this.ENDPOINT      = options.endpoint || 'https://www.bitballoon.com';
   this.VERSION       = options.version  || 'v1';
+};
+
+Client.models = {
+  Site: require("./site").Site
 };
 
 var stringToByteArray = function(str) {
@@ -97,21 +103,33 @@ Client.prototype = {
       "redirect_uri=" + encodeURIComponent(this.redirect_uri)
     ].join("&");
   },
-  
+
   sites: function(cb) {
     if (!this.isAuthorized()) return cb("Not authorized");
 
     this.request({
       url: "/sites"      
-    }, function(err, data) {
+    }, function(err, collection, client) {
       if (err) return cb(err);
-      cb(null, data);
+      cb(null, collection.map(function(data) { return new Client.models.Site(client, data); }));
     });
   },
-  
+
+  site: function(id, cb) {
+    if (!this.isAuthorized()) return cb("Not authorized");
+    
+    this.request({
+      url: "/sites/" + id
+    }, function(err, data, client) {
+      if (err) return cb(err);
+      cb(null, new Client.models.Site(client, data));
+    });
+  },
+
   request: function(options, cb) {
-    var xhr  = new this.XHR,
-        path = options.raw_path ? options.url : "/api/" + this.VERSION + options.url;
+    var client = this,
+        xhr    = new this.XHR,
+        path   = options.raw_path ? options.url : "/api/" + this.VERSION + options.url;
         
     xhr.open(options.type || "get", this.ENDPOINT + path, true);
     if (options.headers) {
@@ -133,9 +151,9 @@ Client.prototype = {
           if (xhr.responseText) {
             var data = JSON.parse(xhr.responseText);
           }
-          cb(null, data);      
+          cb(null, data, client);
         } else {
-          cb(xhr.responseText, null);
+          cb(xhr.responseText, null, client);
         }
       }
     }
@@ -150,7 +168,33 @@ if (typeof(XMLHttpRequest) === 'undefined') {
 }
 
 exports.Client = Client;
-},{"base64-js":3,"xmlhttprequest":4}],3:[function(require,module,exports){
+},{"./site":3,"base64-js":4,"xmlhttprequest":5}],3:[function(require,module,exports){
+var Site = function(client, attributes) {
+  for (var key in attributes) {
+    this[key] = attributes[key]
+  }
+
+  this.client = client;
+};
+
+Site.prototype = {
+  isReady: function() {
+    return this.state == "current";
+  },
+  refresh: function(cb) {
+    var self = this;
+    this.client.request({
+      url: "/sites/" + this.id
+    }, function(err, data, client) {
+      if (err) return cb(err);
+      Site.call(self, client, data);
+      cb(null, self);
+    });
+  }
+};
+
+exports.Site = Site;
+},{}],4:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -236,7 +280,7 @@ exports.Client = Client;
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 
 },{}]},{},[1])
 ;

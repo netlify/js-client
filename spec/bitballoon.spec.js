@@ -1,5 +1,5 @@
 if (typeof(require) !== 'undefined') {
-  var bitballoon = require("../lib/bitballoon.js");
+  var bitballoon  = require("../lib/bitballoon.js");
 }
 
 // Mock object for xhr requests
@@ -32,6 +32,16 @@ XHR.prototype = {
 }
 
 describe("bitballoon", function() {
+  var testApiCall = function(options) {
+    XHR.expectations = options.xhr.expectations;
+
+    XHR.responseText = JSON.stringify(options.xhr.response);
+
+    runs(options.apiCall);
+    waitsFor(options.waitsFor, 100);
+    runs(options.expectations);
+  };
+  
   beforeEach(function() {
     XHR.expectations = null;
     XHR.readyState = null;
@@ -48,28 +58,27 @@ describe("bitballoon", function() {
   it("should authenticate from credentials", function() {
     var client = bitballoon.createClient({client_id: "client_id", client_secret: "client_secret", xhr: XHR});
     var access_token = null;    
-
-    XHR.expectations = function(xhr) {
-      expect(xhr.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
-      expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=");
-      expect(xhr.method).toEqual("post");
-    }
-
-    XHR.responseText = JSON.stringify({access_token: "1234"});
-
-    runs(function() {
-      client.authorizeFromCredentials(function(err, token) {
-        access_token = token;
-      });
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
+          expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=");
+          expect(xhr.method).toEqual("post");          
+        },
+        response: {access_token: "1234"}
+      },
+      apiCall: function() {
+        client.authorizeFromCredentials(function(err, token) {
+          access_token = token;
+        });
+      },
+      waitsFor: function() { return access_token; },
+      expectations: function() {
+        expect(access_token).toEqual("1234");
+        expect(client.isAuthorized()).toEqual(true);
+      }
     });
-    waitsFor(function() {
-      return access_token;
-    }, 100);
-
-    runs(function() {
-      expect(access_token).toEqual("1234");
-      expect(client.isAuthorized()).toEqual(true);
-    });    
   });
 
   it("should generate an authorize url", function() {
@@ -91,56 +100,89 @@ describe("bitballoon", function() {
       xhr: XHR
     });
     var access_token = null;
-
-    XHR.expectations = function(xhr) {
-      expect(xhr.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
-      expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=");
-      expect(xhr.method).toEqual("post");
-    }
-
-    XHR.responseText = JSON.stringify({access_token: "1234"});
-
-    runs(function() {
-      client.authorizeFromCode("my-code", function(err, token) {
-        access_token = token;
-      });
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
+          expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=");
+          expect(xhr.method).toEqual("post");
+        },
+        response: {access_token: "1234"}
+      },
+      apiCall: function() {
+        client.authorizeFromCode("my-code", function(err, token) {
+          access_token = token;
+        });
+      },
+      waitsFor: function() { return access_token },
+      expectations: function() {
+        expect(access_token).toEqual("1234");
+        expect(client.isAuthorized()).toEqual(true);
+      }
     });
-
-    waitsFor(function() {
-      return access_token;
-    }, 100);
-
-    runs(function() {
-      expect(access_token).toEqual("1234");
-      expect(client.isAuthorized()).toEqual(true);
-    });    
   });
 
   it("should give a list of sites", function() {
     var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
         sites  = [];
-
-    XHR.expectations = function(xhr) {
-      expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-      expect(xhr.method).toEqual("get");
-      expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites");
-    }
-
-    XHR.responseText = JSON.stringify([{id: 1}, {id: 2}, {id: 3}, {id: 4}]);
-
-    runs(function() {
-      client.sites(function(err, data) {
-        expect(err).toEqual(null);
-        sites = data;
-      });
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+          expect(xhr.method).toEqual("get");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites");
+        },
+        response: [{id: 1}, {id: 2}, {id: 3}, {id: 4}]
+      },
+      apiCall: function() { client.sites(function(err, data) { sites = data; }); },
+      waitsFor: function() { return sites.length; },
+      expectations: function() {
+        expect(sites.map(function(s) { return s.id; })).toEqual([1,2,3,4]);
+      }
     });
+  });
+  
+  it("should get a simple site", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        site   = null;
 
-    waitsFor(function() {
-      return sites.length;
-    }, 100);
-
-    runs(function() {
-      expect(sites.map(function(s) { return s.id; })).toEqual([1,2,3,4]);
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+          expect(xhr.method).toEqual("get");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");          
+        },
+        response: {id: 123}
+      },
+      apiCall: function() { client.site(123, function(err, data) { site = data; }); },
+      waitsFor: function() { return site; },
+      expectations: function() {
+        expect(site.id).toEqual(123);
+      }
+    });
+  });
+  
+  it("should refresh the state of a site", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        site   = new bitballoon.Client.models.Site(client, {id: "123", state: "processing"});
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+          expect(xhr.method).toEqual("get");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");          
+        },
+        response: {id: 123, state: "current"}
+      },
+      apiCall: function() { site.refresh(function(err, site) { }); },
+      waitsFor: function() { return site.isReady(); },
+      expectations: function() {
+        expect(site.state).toEqual("current");
+      }
     });
   });
 });

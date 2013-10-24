@@ -119,7 +119,7 @@ client.site(id, function(err, site) {
 })
 ```
 
-Creating a site from a directory:
+Creating a site from a directory (requires node):
 
 ```js
 client.createSite({dir: "/tmp/my-site"}, function(err, site) {
@@ -127,7 +127,7 @@ client.createSite({dir: "/tmp/my-site"}, function(err, site) {
 });
 ```
 
-Creating a site from a zip file:
+Creating a site from a zip file (requires node):
 
 ```js
 client.createSite({zip: "/tmp/my-site.zip"}, function(err, site) {
