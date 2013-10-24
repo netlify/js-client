@@ -21,6 +21,7 @@ var Client = function(options) {
   this.redirect_uri  = options.redirect_uri;
   this.XHR           = options.xhr      || Client.XMLHttpRequest;
   this.ENDPOINT      = options.endpoint || 'https://www.bitballoon.com';
+  this.VERSION       = options.version  || 'v1';
 };
 
 var stringToByteArray = function(str) {
@@ -40,6 +41,7 @@ Client.prototype = {
     this.request({
       type: "post",
       url: "/oauth/token",
+      raw_path: true,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
@@ -65,6 +67,7 @@ Client.prototype = {
     this.request({
       type: "post",
       url: "/oath/token",
+      raw_path: true,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
@@ -95,9 +98,22 @@ Client.prototype = {
     ].join("&");
   },
   
+  sites: function(cb) {
+    if (!this.isAuthorized()) return cb("Not authorized");
+
+    this.request({
+      url: "/sites"      
+    }, function(err, data) {
+      if (err) return cb(err);
+      cb(null, data);
+    });
+  },
+  
   request: function(options, cb) {
-    var xhr = new this.XHR;
-    xhr.open(options.type || "get", this.ENDPOINT + options.url, true);
+    var xhr  = new this.XHR,
+        path = options.raw_path ? options.url : "/api/" + this.VERSION + options.url;
+        
+    xhr.open(options.type || "get", this.ENDPOINT + path, true);
     if (options.headers) {
       for (var header in options.headers) {
         xhr.setRequestHeader(header, options.headers[header]);
@@ -107,6 +123,8 @@ Client.prototype = {
       xhr.setRequestHeader("Authorization", "Basic " + base64.fromByteArray(
         stringToByteArray(options.auth.user + ":" + options.auth.password)
       ));
+    } else if (this.access_token) {
+      xhr.setRequestHeader("Authorization", "Bearer " + this.access_token);
     }
 
     xhr.onreadystatechange = function() {
