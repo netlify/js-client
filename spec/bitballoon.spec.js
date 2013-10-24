@@ -25,6 +25,7 @@ XHR.prototype = {
     if (this.onreadystatechange) {
       this.readyState = XHR.readyState || 4;
       this.responseText = XHR.responseText || "";
+      this.status = XHR.status || 200;
       this.onreadystatechange();
     }
   }
@@ -36,6 +37,7 @@ describe("bitballoon", function() {
     XHR.expectations = null;
     XHR.readyState = null;
     XHR.responseText = null;
+    XHR.status = null;
   });
   
   it("should create a client", function() {
