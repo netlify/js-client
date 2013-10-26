@@ -232,7 +232,7 @@ describe("bitballoon", function() {
               expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/files/index.html");
             },
             status: 201,
-            response: {}
+            response: "Hello, World"
           },
           {
             expectations: function(xhr) {
