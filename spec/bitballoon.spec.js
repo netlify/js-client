@@ -1,10 +1,16 @@
 if (typeof(require) !== 'undefined') {
-  var bitballoon  = require("../lib/bitballoon.js");
+  var bitballoon  = require("../lib/bitballoon.js"),
+      crypto      = require("crypto"),
+      fs          = require("fs");
 }
 
 // Mock object for xhr requests
 var XHR = function() {
   this.headers = {};
+};
+
+var firstIfArray = function(obj) {
+  return Array.isArray(obj) ? obj.shift() : obj;
 };
 
 XHR.prototype = {
@@ -20,12 +26,13 @@ XHR.prototype = {
   
   send: function(data) {
     if (XHR.expectations) {
-      XHR.expectations(this);
+      var fn = firstIfArray(XHR.expectations);
+      fn(this);
     }
     if (this.onreadystatechange) {
-      this.readyState = XHR.readyState || 4;
-      this.responseText = XHR.responseText || "";
-      this.status = XHR.status || 200;
+      this.readyState = firstIfArray(XHR.readyState) || 4;
+      this.responseText = firstIfArray(XHR.responseText) || "";
+      this.status = firstIfArray(XHR.status) || 200;
       this.onreadystatechange();
     }
   }
@@ -33,9 +40,16 @@ XHR.prototype = {
 
 describe("bitballoon", function() {
   var testApiCall = function(options) {
-    XHR.expectations = options.xhr.expectations;
-
-    XHR.responseText = JSON.stringify(options.xhr.response);
+    var xhr = Array.isArray(options.xhr) ? options.xhr : [options.xhr];
+    
+    xhr.forEach(function(xhr) {
+      XHR.expectations = XHR.expectations || [];
+      XHR.expectations.push(xhr.expectations);
+      XHR.status = XHR.status || [];
+      XHR.status.push(xhr.status);
+      XHR.responseText = XHR.responseText || [];
+      XHR.responseText.push(JSON.stringify(xhr.response));
+    });
 
     runs(options.apiCall);
     waitsFor(options.waitsFor, 100);
@@ -185,4 +199,58 @@ describe("bitballoon", function() {
       }
     });
   });
+  
+  
+  if (typeof(window) === "undefined") {
+    var crypto = require('crypto'),
+        fs     = require('fs');
+    
+    it("should upload a site from a dir", function() {
+      var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+          site   = null,
+          shasum = crypto.createHash('sha1');
+          
+      shasum.update(fs.readFileSync(__dirname + '/files/site-dir/index.html'));
+
+      var index_sha = shasum.digest('hex');
+
+      testApiCall({
+        xhr: [
+          {
+            expectations: function(xhr) {
+              expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+              expect(xhr.method).toEqual("post");
+              expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites"); 
+            },
+            status: 201,
+            response: {id: 123, state: "uploading", required: [index_sha]}
+          },
+          {
+            expectations: function(xhr) {
+              expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+              expect(xhr.method).toEqual("put");
+              expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/files/index.html");
+            },
+            status: 201,
+            response: {}
+          },
+          {
+            expectations: function(xhr) {
+              expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+              expect(xhr.method).toEqual("get");
+              expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");                      
+            },
+            response: {id: 123, state: "processing"}
+          }
+        ],
+        apiCall: function() { client.createSite({dir: "spec/files/site-dir"}, function(err, s) {
+          site = s;
+        })},
+        waitsFor: function() { return site; },
+        expectations: function() {
+          expect(site.state).toEqual("processing");
+        }
+      });
+    });
+  }
 });
