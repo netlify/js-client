@@ -200,7 +200,7 @@ describe("bitballoon", function() {
     });
   });
   
-  it("shoud update a site", function() {
+  it("should update a site", function() {
     var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
         site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"});
 
@@ -219,6 +219,31 @@ describe("bitballoon", function() {
       waitsFor: function() { return site.name == "changed" },
       expectations: function() {
         expect(site.name).toEqual("changed");
+      }
+    });
+  });
+  
+  it("should destroy a site", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
+        done   = false;
+
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+          expect(xhr.method).toEqual("delete");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");
+        },
+        response: ""
+      },
+      apiCall: function() { site.destroy(function(err, s) {
+        if (err) return;
+        done = true;
+      })},
+      waitsFor: function() { return done },
+      expectations: function() {
+        expect(done).toEqual(true);
       }
     });
   });
