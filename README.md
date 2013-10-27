@@ -3,14 +3,6 @@ BitBalloon Node Client
 
 BitBalloon is a hosting service for the programmable web. It understands your documents, processes forms and lets you do deploys, manage forms submissions, inject javascript snippets into sites and do intelligent updates of HTML documents through it's API.
 
-* * *
-
-## Work in progress!
-
-This is a work in progress, the README file is a draft of how the client should end up working, but not much is implemented yet. Give feedback if you feel it should work in a different way.
-
-* * *
-
 Installation
 ============
 
@@ -73,31 +65,6 @@ client.authorizeFromCode(params.code, function(err, access_token) {
   // Client is now ready to do requests
   // You can store the access_token to avoid authorizing in the future  
 });
-```
-
-Command Line Utility
-====================
-
-The BitBalloon gem comes with a handy command line utility for deploying and redeploying sites.
-
-To deploy the site in the current working directory:
-
-```
-bitballoon deploy
-```
-
-The first time you deploy, you will be asked for your `client id` and `client secret`. After the deploy the tool will store an `access_token` and the `site_id` in `.bitballoon`. Next time you run the command the tool will redeploy the site using the stored `access_token`.
-
-You can also deploy a specific path:
-
-```
-bitballoon deploy /path/to/my/site
-```
-
-Or a zip file:
-
-```
-bitballoon deploy /path/to/my/site.zip
 ```
 
 Sites
