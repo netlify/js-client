@@ -200,6 +200,28 @@ describe("bitballoon", function() {
     });
   });
   
+  it("shoud update a site", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"});
+
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+          expect(xhr.method).toEqual("put");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");
+        },
+        response: {id: 123, name: "changed"}
+      },
+      apiCall: function() { site.update({name: "changed"}, function(err, s) {
+        site = s;
+      })},
+      waitsFor: function() { return site.name == "changed" },
+      expectations: function() {
+        expect(site.name).toEqual("changed");
+      }
+    });
+  });
   
   if (typeof(window) === "undefined") {
     var crypto = require('crypto'),
