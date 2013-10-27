@@ -252,5 +252,29 @@ describe("bitballoon", function() {
         }
       });
     });
+    
+    it("should upload a site from a zip", function() {
+      var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+          site   = null;
+      
+      testApiCall({
+        xhr: {
+          expectations: function(xhr) {
+            expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+            expect(xhr.method).toEqual("post");
+            expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites");
+          },
+          status: 201,
+          response: {id: 123, state: "processing", required: []}
+        },
+        apiCall: function() { client.createSite({zip: "spec/files/site-dir.zip"}, function(err, s) {
+          site = s;
+        })},
+        waitsFor: function() { return site; },
+        expectations: function() {
+          expect(site.state).toEqual("processing");
+        }
+      })
+    });
   }
 });
