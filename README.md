@@ -195,7 +195,7 @@ client.site(id, function(err, site) {
 Update the name of the site (its subdomain), the custom domain and the notification email for form submissions:
 
 ```js
-site.update({name: "my-site", customDomain: "www.example.com", notificationEmail: "me@example.com"}, function(err, site) {
+site.update({name: "my-site", customDomain: "www.example.com", notificationEmail: "me@example.com", password: "secret"}, function(err, site) {
   if (err) return console.log("Error updating site %o", err);
   console.log("Updated site");
 });

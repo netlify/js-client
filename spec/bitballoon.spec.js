@@ -158,7 +158,7 @@ describe("bitballoon", function() {
     });
   });
   
-  it("should get a simple site", function() {
+  it("should get a single site", function() {
     var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
         site   = null;
 
@@ -169,12 +169,12 @@ describe("bitballoon", function() {
           expect(xhr.method).toEqual("get");
           expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");          
         },
-        response: {id: 123}
+        response: {id: "123"}
       },
-      apiCall: function() { client.site(123, function(err, data) { site = data; }); },
+      apiCall: function() { client.site("123", function(err, data) { site = data; }); },
       waitsFor: function() { return site; },
       expectations: function() {
-        expect(site.id).toEqual(123);
+        expect(site.id).toEqual("123");
       }
     });
   });
@@ -248,6 +248,49 @@ describe("bitballoon", function() {
     });
   });
   
+  it("should list all forms", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        forms = null;
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("get");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/forms");
+        },
+        response: [{id: 1, name: "Form 1"}, {id: 2, name: "Form 2"}]
+      },
+      apiCall: function() { client.forms(function(err, result) { forms = result; }); },
+      waitsFor: function() { return forms; },
+      expectations: function() {
+        expect(forms.map(function(f) { return f.name; })).toEqual(["Form 1", "Form 2"]);
+      }
+    });
+  });
+  
+  it("should list forms for a site", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
+        forms  = null;
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("get");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/forms");
+        },
+        response: [{id: 1, name: "Form 1"}, {id: 2, name: "Form 2"}]
+      },
+      apiCall: function() { site.forms(function(err, result) { forms = result; })},
+      waitsFor: function() { return forms; },
+      expectations: function() {
+        expect(forms.map(function(f) { return f.name })).toEqual(["Form 1", "Form 2"]);
+      }
+    });
+  })
+  
+  
+  // Node specific methods
   if (typeof(window) === "undefined") {
     var crypto = require('crypto'),
         fs     = require('fs');

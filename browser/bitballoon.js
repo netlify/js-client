@@ -27,7 +27,9 @@ var Client = function(options) {
 };
 
 Client.models = {
-  Site: require("./site").Site
+  Site: require("./site").Site,
+  Form: require("./form").Form,
+  Submission: require("./submission").Submission
 };
 
 var stringToByteArray = function(str) {
@@ -48,9 +50,7 @@ Client.prototype = {
       type: "post",
       url: "/oauth/token",
       raw_path: true,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
+      contentType: "application/x-www-form-urlencoded",
       auth: {
         user: this.client_id,
         password: this.client_secret
@@ -74,9 +74,7 @@ Client.prototype = {
       type: "post",
       url: "/oath/token",
       raw_path: true,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
+      contentType: "application/x-www-form-urlencoded",
       auth: {
         user: this.client_id,
         password: this.client_secret
@@ -104,26 +102,50 @@ Client.prototype = {
     ].join("&");
   },
 
-  sites: function(cb) {
-    if (!this.isAuthorized()) return cb("Not authorized");
+  sites: function(cb) { this.collection(Client.models.Site, cb); },
 
-    this.request({
-      url: "/sites"      
-    }, function(err, collection, client) {
-      if (err) return cb(err);
-      cb(null, collection.map(function(data) { return new Client.models.Site(client, data); }));
+  site: function(id, cb) { this.element(Client.models.Site, id, cb); },
+  
+  createSite: function(options, cb) {    
+    this.withAuthorization(cb, function() {
+      if (options.dir) {
+        Client.models.Site.createFromDir(this, options.dir, cb);
+      } else if (options.zip) {
+        Client.models.Site.createFromZip(this, options.zip, cb);
+      }
     });
   },
 
-  site: function(id, cb) {
-    if (!this.isAuthorized()) return cb("Not authorized");
-    
-    this.request({
-      url: "/sites/" + id
-    }, function(err, data, client) {
-      if (err) return cb(err);
-      cb(null, new Client.models.Site(client, data));
+  forms: function(cb) { this.collection(Client.models.Form, cb); },
+
+  form: function(id, cb) { this.element(Client.models.Form, id, cb); },
+  
+  submissions: function(cb) { this.collection(Client.models.Submission, cb); },
+  
+  submission: function(cb) { this.element(Client.models.Submission, cb); },
+  
+  collection: function(prefix, model, cb) {
+    if (arguments.length === 2) { cb = model; model = prefix; prefix = null; }
+    this.withAuthorization(cb, function() {
+      this.request({
+        url: (prefix || "") + model.path
+      }, function(err, collection, client) {
+        if (err) return cb(err);
+        cb(null, collection.map(function(data) { return new model(client, data); }));
+      })
     });
+  },
+  
+  element: function(prefix, model, id, cb) {
+    if (arguments.length === 3) { cb = id; id = model; model = prefix; prefix = null; }
+    this.withAuthorization(cb, function() {
+      this.request({
+        url: model.path + "/" + id
+      }, function(err, data, client) {
+        if (err) return cb(err);
+        cb(null, new model(client, data));
+      });
+    });    
   },
 
   request: function(options, cb) {
@@ -137,6 +159,7 @@ Client.prototype = {
         xhr.setRequestHeader(header, options.headers[header]);
       }
     }
+    xhr.setRequestHeader("Content-Type", options.contentType || "application/json");
     if (options.auth) {
       xhr.setRequestHeader("Authorization", "Basic " + base64.fromByteArray(
         stringToByteArray(options.auth.user + ":" + options.auth.password)
@@ -146,18 +169,30 @@ Client.prototype = {
     }
 
     xhr.onreadystatechange = function() {
+      var data;
       if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
+        if (xhr.status >= 200 && xhr.status <= 300) {
           if (xhr.responseText) {
-            var data = JSON.parse(xhr.responseText);
+            if (!options.ignoreResponse) {
+              data = JSON.parse(xhr.responseText);
+            }
           }
           cb(null, data, client);
         } else {
-          cb(xhr.responseText, null, client);
+          if (xhr.status == 401) {
+            cb("Authentication failed", null, client);
+          } else {
+            cb(xhr.responseText, null, client);
+          }
         }
       }
     }
     xhr.send(options.body);
+  },
+  
+  withAuthorization: function(cb, fn) {
+    if (!this.isAuthorized()) return cb("Not authorized: Instantiate client with access_token");
+    fn.call(this);
   }
 };
 
@@ -168,13 +203,174 @@ if (typeof(XMLHttpRequest) === 'undefined') {
 }
 
 exports.Client = Client;
-},{"./site":3,"base64-js":4,"xmlhttprequest":5}],3:[function(require,module,exports){
-var Site = function(client, attributes) {
-  for (var key in attributes) {
-    this[key] = attributes[key]
-  }
+},{"./form":4,"./site":6,"./submission":8,"base64-js":9,"xmlhttprequest":10}],3:[function(require,module,exports){
+var model = require("./model");
 
-  this.client = client;
+var File = model.constructor();
+File.path = "/files";
+
+exports.File = File;
+},{"./model":5}],4:[function(require,module,exports){
+var model = require("./model"),
+    Submission = require("./submission").Submission;;
+
+var Form = model.constructor();
+Form.path = "/forms";
+
+Form.prototype = {
+  submissions: function(cb) {
+    this.client.collection(this.apiPath, Submission, cb);
+  }
+};
+
+exports.Form = Form;
+},{"./model":5,"./submission":8}],5:[function(require,module,exports){
+exports.constructor = function() {
+  var obj = function(client, attributes) {
+    for (var key in attributes) {
+      this[key] = attributes[key]
+    }
+
+    this.client  = client;
+    this.apiPath = obj.path + "/" + this.id;
+  };
+  return obj;
+}
+},{}],6:[function(require,module,exports){
+var process=require("__browserify_process");var model = require("./model"),
+    Form  = require("./form").Form,
+    Submission = require("./submission").Submission,
+    File = require("./file").File,
+    Snippet = require("./snippet").Snippet;
+
+if (typeof(require) !== 'undefined') {
+  var glob   = require("glob"),
+      path   = require("path"),
+      crypto = require("crypto"),
+      fs     = require("fs");
+}
+
+var Site = model.constructor();
+Site.path = "/sites";
+
+var globFiles = function(dir, cb) {
+  glob("**/*", {cwd: dir}, function(err, files) {
+    if (err) return cb(err);
+
+    var filtered = files.filter(function(file) {
+      return file.match(/(\/__MACOSX|\/\.)/) ? false : true;
+    }).map(function(file) { return {rel: file, abs: path.resolve(dir, file)}; });
+
+    filterFiles(filtered, cb);
+  });
+};
+
+var filterFiles = function(filesAndDirs, cb) {
+  var processed = [],
+      files     = [],
+      cbCalled  = false;
+  filesAndDirs.forEach(function(fileOrDir) {
+    fs.lstat(fileOrDir.abs, function(err, stat) {
+      if (cbCalled) return null;
+      if (err) { cbCalled = true; return cb(err); }
+      if (stat.isFile()) {
+        files.push(fileOrDir);
+      }
+      processed.push(fileOrDir);
+      if (processed.length == filesAndDirs.length) {
+        cb(null, files);
+      }
+    });
+  });
+};
+
+var calculateShas = function(files, cb) {
+  var shas = {},
+      cbCalled = false,
+      processed = [];
+
+  files.forEach(function(file) {
+    fs.readFile(file.abs, function(err, data) {
+      if (cbCalled) return null;
+      if (err) { cbCalled = true; return cb(err); }
+
+      var shasum = crypto.createHash('sha1');
+      shasum.update(data);
+      shas[file.rel] = shasum.digest('hex');
+      processed.push(file);
+      if (processed.length == files.length) {
+        cb(null, shas);
+      }
+    });
+  });
+};
+
+var createFromDir = function(client, dir, siteId, cb) {
+  var fullDir = dir.match(/^\//) ? dir : process.cwd() + "/" + dir;
+
+  globFiles(fullDir, function(err, files) {
+    calculateShas(files, function(err, filesWithShas) {
+      client.request({
+        url: "/sites" + (siteId ? "/" + siteId : ""),
+        type: siteId ? "put" : "post",
+        body: JSON.stringify({
+          files: filesWithShas
+        })
+      }, function(err, data) {
+        if (err) return cb(err);
+        var site = new Site(client, data);
+        var shas = {};
+        data.required.forEach(function(sha) { shas[sha] = true; });
+        var filtered = files.filter(function(file) { return shas[filesWithShas[file.rel]]; });
+        site.uploadFiles(filtered, function(err, site) {
+          cb(err, site);
+        });
+      });
+    });
+  });
+};
+
+var createFromZip = function(client, zip, siteId, cb) {
+  var fullPath = zip.match(/^\//) ? zip : process.cwd() + "/" + zip;
+  
+  fs.readFile(fullPath, function(err, zipData) {
+    if (err) return cb(err);
+    
+    client.request({
+      url: "/sites" + (siteId ? "/" + siteId : ""),
+      type: siteId ? "put" : "post",
+      body: zipData,
+      contentType: "application/zip"
+    }, function(err, data) {
+      if (err) return cb(err);
+      
+      return cb(null, new Site(client, data));
+    });
+  });
+};
+
+var attributesForUpdate = function(attributes) {
+  var mapping = {
+        name: "name",
+        customDomain: "custom_domain",
+        notificationEmail: "notification_email",
+        password: "password"
+      },
+      result = {};
+  
+  for (var key in attributes) {
+    if (mapping[key]) result[mapping[key]] = attributes[key];
+  }
+  
+  return result;
+};
+
+Site.createFromDir = function(client, dir, cb) {
+  createFromDir(client, dir, null, cb);
+};
+
+Site.createFromZip = function(client, zip, cb) {
+  createFromZip(client, zip, null, cb);
 };
 
 Site.prototype = {
@@ -190,11 +386,125 @@ Site.prototype = {
       Site.call(self, client, data);
       cb(null, self);
     });
+  },
+
+  update: function(attributes, cb) {
+    attributes = attributes || {};
+
+    var self = this;
+    
+    if (attributes.dir) {
+      createFromDir(this.client, attributes.dir, this.id, cb);
+    } else if (attributes.zip) {
+      createFromZip(this.client, attributes.zip, this.id, cb);
+    } else {
+      this.client.request({
+        url: "/sites/" + this.id,
+        type: "put",
+        body: attributesForUpdate(attributes)
+      }, function(err, data, client) {
+        if (err) return cb(err);
+        Site.call(self, client, data);
+        cb(null, self);
+      });
+    }
+  },
+  
+  destroy: function(cb) {
+    var self = this;
+
+    this.client.request({
+      url: "/sites/" + this.id,
+      type: "delete",
+      ignoreResponse: true
+    }, function(err) {
+      cb(err, self);
+    });
+  },
+  
+  waitForReady: function(cb) {
+    var self = this;
+
+    if (this.isReady()) {
+      process.nextTick(function() { cb(null, self); });
+    } else {
+      setTimeout(function() { self.waitForReady(cb); }, 1000);
+    }
+  },
+  
+  forms: function(cb) {
+    this.client.collection(this.apiPath, Form, cb);
+  },
+  
+  submissions: function(cb) {
+    this.client.collection(this.apiPath, Submission, cb);
+  },
+  
+  files: function(cb) {
+    this.client.collection(this.apiPath, File, cb);
+  },
+  
+  file: function(path, cb) {
+    this.client.element(this.apiPath, File, path, cb);
+  },
+  
+  snippets: function(cb) {
+    this.client.collection(this.apiPath, Snippet, cb);
+  },
+  
+  snippet: function(id, cb) {
+    this.client.element(this.apiPath, Snippet, cb);
+  },
+
+  uploadFiles: function(files, cb) {
+    if (this.state !== "uploading") return cb(null, this);
+    if (files.length == 0) { return this.refresh(cb); }
+
+    var self = this,
+        cbCalled = false,
+        uploaded = [];
+    
+    files.forEach(function(file) {
+      fs.readFile(file.abs, function(err, data) {
+        if (cbCalled) return null;
+        if (err) { cbCalled = true; return cb(err); }
+
+        self.client.request({
+          url: "/sites/" + self.id + "/files/" + file.rel,
+          type: "put",
+          body: data,
+          contentType: "application/octet-stream",
+          ignoreResponse: true
+        }, function(err) {
+          if (cbCalled) return null;
+          if (err) { cbCalled = true; return cb(err); }
+          uploaded.push(file);
+        
+          if (uploaded.length == files.length) {
+            self.refresh(cb);
+          }
+        });
+      });
+    });
   }
 };
 
 exports.Site = Site;
-},{}],4:[function(require,module,exports){
+},{"./file":3,"./form":4,"./model":5,"./snippet":7,"./submission":8,"__browserify_process":11,"crypto":10,"fs":10,"glob":10,"path":10}],7:[function(require,module,exports){
+var model = require("./model");
+
+var Snippet = model.constructor();
+Snippet.path = "/snippets";
+
+exports.Snippet = Snippet;
+},{"./model":5}],8:[function(require,module,exports){
+var model = require("./model");
+
+var Submission = model.constructor();
+Submission.path = "/submissions";
+
+exports.Submission = Submission;
+},{"./model":5}],9:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -280,7 +590,61 @@ exports.Site = Site;
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],5:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
+
+},{}],11:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
 
 },{}]},{},[1])
 ;
