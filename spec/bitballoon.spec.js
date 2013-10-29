@@ -464,6 +464,31 @@ describe("bitballoon", function() {
     })
   });  
   
+  it("should restore an old deploy", function() {
+    var client  = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        deploy = new bitballoon.Client.models.Deploy(client, {id: "1", state: "old", site_id: "123"}),
+        done    = false;
+
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("post");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/deploys/1/restore");
+        },
+        response: {id: "1", state: "current", site_id: "123"}
+      },
+      apiCall: function() {
+        deploy.restore(function(err, s) {
+          done = true;
+        });
+      },
+      waitsFor: function() { return done; },
+      expectations: function() {
+        expect(done).toEqual(true);
+      }
+    });
+  });
+  
   // Node specific methods
   if (typeof(window) === "undefined") {
     var crypto = require('crypto'),

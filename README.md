@@ -286,6 +286,36 @@ client.site(id, function(err, site) {
 });
 ```
 
+Deploys
+=======
+
+Access all deploys for a site
+
+```js
+site.deploys(function(err, deploys) {
+  // do work
+});
+```
+
+Access a specific deploy
+
+```js
+site.deploy(id, function(err, deploy) {
+  // do work
+});
+```
+
+Restore a deploy (makes it the current live version of the site)
+
+```js
+site.deploy(id, function(err, deploy) {
+  if (err) return console.log(err);
+  deploy.restore(function(err, deploy) {
+    // restored
+  });
+});
+```
+
 Snippets
 ========
 
