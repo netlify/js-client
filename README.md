@@ -40,7 +40,7 @@ The first method is the simplest, and works when you don't need to authenticate 
 var client = bitballoon.createClient({client_id: CLIENT_ID, client_secret: CLIENT_SECRET});
 
 client.authorizeFromCredentials(function(err, access_token) {
-  return console.log(err) if (err);
+  if (err) return console.log(err);
   // Client is now ready to do requests
   // You can store the access_token to avoid authorizing in the future
 });
@@ -309,6 +309,103 @@ client.site(id, function(err, site) {
   site.snippet(snippetId, function(err, snippet) {
     if (err) return console.log("Error getting snippet %o", err);
     // do work
+  });
+});
+```
+
+Add a snippet to a site
+
+You can specify a `general` snippet that will be inserted into all pages, and a `goal` snippet that will be injected into a page following a successful form submission. Each snippet must have a title. You can optionally set the position of both the general and the goal snippet to `head` or `footer` to determine if it gets injected into the head tag or at the end of the page.
+
+```js
+client.site(id, function(err, site) {
+  if (err) return console.log("Error getting site %o", err);
+  site.createSnippet({
+    general: "<script>alert('Hello')</script>",
+    general_position: "head",
+    goal: "<script>alert('Success')</script>",
+    goal_position: "footer",
+    title: "Alerts"
+  }, function(err, snippet) {
+    if (err) return console.log("Error creating snippet %o", err);
+    console.log(snippet);
+  });
+});
+```
+
+Update a snippet
+
+```js
+snippet.update({
+  general: "<script>alert('Hello')</script>",
+  general_position: "head",
+  goal: "<script>alert('Success')</script>",
+  goal_position: "footer",
+  title: "Alerts"
+}, function(err, snippet) {
+  if (err) return console.log("Error creating snippet %o", err);
+  console.log(snippet);
+});
+```
+
+Delete a snippet
+
+```js
+snippet.destroy(function(err) {
+  if (err) return console.log("Error deleting snippet");
+  console.log("Snippet deleted");
+});
+```
+
+Users
+=====
+
+The user methods are mainly useful for resellers. Creating, deleting and updating users are limited to resellers.
+
+Getting a list of users
+
+```js
+client.users(function(err, users) {
+  // do work
+});
+```
+
+Getting a specific user
+
+```js
+client.user(id, function(err, user) {
+  // do work
+});
+```
+
+Creating a new user (`email` is required, `uid` is optional. Both must be unique)
+
+```js
+client.createUser({email: "user@example.com", uid: "12345"}, function(err, user) {
+  if (err) return console("Error creating user");
+  console.log(user);
+});
+```
+
+Updating a user
+
+```js
+client.user(id, function(err, user) {
+  if (err) return console.log("Error getting user");
+  user.update({email: "user@example.com", uid: "12345"}, function(err, user) {
+    if (err) return console("Error updating user");
+    console.log(user);
+  });
+});
+```
+
+Deleting a user
+
+```js
+client.user(id, function(err, user) {
+  if (err) return console.log("Error getting user");
+  user.destroy(function(err) {
+    if (err) return console("Error deleting");
   });
 });
 ```

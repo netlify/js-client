@@ -137,7 +137,7 @@ describe("bitballoon", function() {
     });
   });
 
-  it("should give a list of sites", function() {
+  it("should get a list of sites", function() {
     var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
         sites  = [];
     
@@ -157,7 +157,28 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
+  it("should get a list of sites with pagination", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        sites  = [];
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
+          expect(xhr.method).toEqual("get");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites?page=2&per_page=4");
+        },
+        response: [{id: 1}, {id: 2}, {id: 3}, {id: 4}]
+      },
+      apiCall: function() { client.sites({page: 2, per_page: 4}, function(err, data) { sites = data; }); },
+      waitsFor: function() { return sites.length; },
+      expectations: function() {
+        expect(sites.map(function(s) { return s.id; })).toEqual([1,2,3,4]);
+      }
+    });
+  });
+
   it("should get a single site", function() {
     var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
         site   = null;
@@ -289,6 +310,159 @@ describe("bitballoon", function() {
     });
   })
   
+  it("should create a user", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        user = null;
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("post");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/users");
+        },
+        response: {id: "123", email: "user@example.com"}
+      },
+      apiCall: function() {
+        client.createUser({email: "user@example.com"}, function(err, u) {
+          user = u;
+        });
+      },
+      waitsFor: function() { return user; },
+      expectations: function() {
+        expect(user.id).toEqual("123");
+      }
+    })
+  });
+  
+  it("should update a user", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        user   = new bitballoon.Client.models.User(client, {id: "123", email: "test@example.com"}),
+        done   = false;
+
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("put");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/users/123");
+        },
+        response: {id: "123", email: "user@example.com"}
+      },
+      apiCall: function() {
+        user.update({email: "user@example.com"}, function(err, u) {
+          done = true;
+        });
+      },
+      waitsFor: function() { return done; },
+      expectations: function() {
+        expect(user.email).toEqual("user@example.com");
+      }
+    });
+  });
+  
+  it("should destroy a user", function() {
+    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        user   = new bitballoon.Client.models.User(client, {id: "123", email: "test@example.com"}),
+        done   = false;
+
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("delete");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/users/123");
+        },
+        response: ""
+      },
+      apiCall: function() {
+        user.destroy(function(err) {
+          done = true;
+        });
+      },
+      waitsFor: function() { return done; },
+      expectations: function() {
+        expect(done).toEqual(true);
+      }
+    });
+  });
+  
+  it("should create a snippet", function() {
+    var client  = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        site    = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
+        snippet = null;
+    
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("post");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/snippets");
+        },
+        response: {general: "<script>alert('Hello')</script>", title: "Alert"}
+      },
+      apiCall: function() {
+        site.createSnippet({
+          general: "<script>alert('Hello')</script>",
+          title: "Alert"
+        }, function(err, s) {
+          snippet = s;
+        });
+      },
+      waitsFor: function() { return snippet; },
+      expectations: function() {
+        expect(snippet.title).toEqual("Alert");
+      }
+    });
+  });
+  
+  it("should update a snippet", function() {
+    var client  = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        snippet = new bitballoon.Client.models.Snippet(client, {id: "1", title: "test", site_id: "123"}),
+        done    = false;
+
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("put");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/snippets/1");
+        },
+        response: {title: "hello"}
+      },
+      apiCall: function() {
+        snippet.update({
+          title: "hello"
+        }, function(err, s) {
+          done = true;
+        });
+      },
+      waitsFor: function() { return done; },
+      expectations: function() {
+        expect(snippet.title).toEqual("hello");
+      }
+    })
+  });
+  
+  it("should delete a snippet", function() {
+    var client  = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+        snippet = new bitballoon.Client.models.Snippet(client, {id: "1", title: "test", site_id: "123"}),
+        done    = false;
+
+    testApiCall({
+      xhr: {
+        expectations: function(xhr) {
+          expect(xhr.method).toEqual("delete");
+          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/snippets/1");
+        },
+        response: ""
+      },
+      apiCall: function() {
+        snippet.destroy(function(err, s) {
+          done = true;
+        });
+      },
+      waitsFor: function() { return done; },
+      expectations: function() {
+        expect(done).toEqual(true);
+      }
+    })
+  });  
   
   // Node specific methods
   if (typeof(window) === "undefined") {
