@@ -439,3 +439,15 @@ client.user(id, function(err, user) {
   });
 });
 ```
+
+Getting sites belonging to a user
+
+```js
+client.user(id, function(err, user) {
+  if (err) return console.log("Error getting user");
+  user.sites(function(err, sites) {
+    if (err) return console("Error getting sites");
+    console.log(sites);
+  });
+});
+```
