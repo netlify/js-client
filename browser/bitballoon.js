@@ -29,7 +29,10 @@ var Client = function(options) {
 Client.models = {
   Site: require("./site").Site,
   Form: require("./form").Form,
-  Submission: require("./submission").Submission
+  Submission: require("./submission").Submission,
+  User: require("./user").User,
+  Snippet: require("./snippet").Snippet,
+  Deploy: require("./deploy").Deploy
 };
 
 var stringToByteArray = function(str) {
@@ -102,9 +105,9 @@ Client.prototype = {
     ].join("&");
   },
 
-  sites: function(cb) { this.collection(Client.models.Site, cb); },
+  sites: function(options, cb) { this.collection({model: Client.models.Site}, options, cb); },
 
-  site: function(id, cb) { this.element(Client.models.Site, id, cb); },
+  site: function(id, cb) { this.element({model: Client.models.Site, id: id}, cb); },
   
   createSite: function(options, cb) {    
     this.withAuthorization(cb, function() {
@@ -116,36 +119,85 @@ Client.prototype = {
     });
   },
 
-  forms: function(cb) { this.collection(Client.models.Form, cb); },
+  forms: function(cb) { this.collection({model: Client.models.Form}, cb); },
 
-  form: function(id, cb) { this.element(Client.models.Form, id, cb); },
+  form: function(id, cb) { this.element({model: Client.models.Form, id: id}, cb); },
   
-  submissions: function(cb) { this.collection(Client.models.Submission, cb); },
+  submissions: function(options, cb) { this.collection({model: Client.models.Submission}, options, cb); },
   
-  submission: function(cb) { this.element(Client.models.Submission, cb); },
+  submission: function(id, cb) { this.element({model: Client.models.Submission, id: id}, cb); },
   
-  collection: function(prefix, model, cb) {
-    if (arguments.length === 2) { cb = model; model = prefix; prefix = null; }
+  users: function(options, cb) { this.collection({model: Client.models.User}, options, cb); },
+
+  user: function(id, cb) { this.element({model: Client.models.User, id: id}, cb); },
+  
+  createUser: function(attributes, cb) {
+    this.create({model: Client.models.User, attributes: attributes}, cb);
+  },
+  
+  collection: function(options, pagination, cb) {
+    if (cb === undefined) { cb = pagination; pagination = {}}
+    var params = [];
+    if (pagination.page) { params.push(["page", pagination.page].join("=")) }
+    if (pagination.per_page) { params.push(["per_page", pagination.per_page].join("=")) }
     this.withAuthorization(cb, function() {
       this.request({
-        url: (prefix || "") + model.path
+        url: (options.prefix || "") + options.model.path + (params.length ? "?" + params.join("&") : "")
       }, function(err, collection, client) {
         if (err) return cb(err);
-        cb(null, collection.map(function(data) { return new model(client, data); }));
+        cb(null, collection.map(function(data) { return new options.model(client, data); }));
       })
     });
   },
   
-  element: function(prefix, model, id, cb) {
-    if (arguments.length === 3) { cb = id; id = model; model = prefix; prefix = null; }
+  element: function(options, cb) {
     this.withAuthorization(cb, function() {
       this.request({
-        url: model.path + "/" + id
+        url: (options.prefix || "" ) + options.model.path + "/" + options.id
       }, function(err, data, client) {
         if (err) return cb(err);
-        cb(null, new model(client, data));
+        cb(null, new options.model(client, data));
       });
     });    
+  },
+  
+  create: function(options, cb) {
+    this.withAuthorization(cb, function() {
+      this.request({
+        url: (options.prefix || "") + options.model.path,
+        type: "post",
+        body: options.attributes
+      }, function(err, data, client) {
+        if (err) return cb(err);
+        cb(null, new options.model(client, data));
+      });
+    });    
+  },
+
+  update: function(options, cb) {
+    this.withAuthorization(cb, function() {
+      this.request({
+        url: (options.prefix || "") + options.element.apiPath,
+        type: "put",
+        body: options.attributes
+      }, function(err, data, client) {
+        if (err) return cb(err);
+        options.model.call(options.element, client, data);
+        cb(null, options.element);
+      });
+    });
+  },
+  
+  destroy: function(options, cb) {
+    this.withAuthorization(cb, function() {
+      this.request({
+        url: (options.prefix || "") + options.element.apiPath,
+        type: "delete",
+        ignoreResponse: true
+      }, function(err) {
+        return cb(err);
+      });
+    });
   },
 
   request: function(options, cb) {
@@ -203,14 +255,35 @@ if (typeof(XMLHttpRequest) === 'undefined') {
 }
 
 exports.Client = Client;
-},{"./form":4,"./site":6,"./submission":8,"base64-js":9,"xmlhttprequest":10}],3:[function(require,module,exports){
+},{"./deploy":3,"./form":5,"./site":7,"./snippet":8,"./submission":9,"./user":10,"base64-js":11,"xmlhttprequest":12}],3:[function(require,module,exports){
+var model = require("./model");
+
+var Deploy = model.constructor();
+Deploy.path = "/deploys";
+
+Deploy.prototype = {
+  restore: function(cb) {
+    var self = this;
+    this.client.request({
+      url: "/sites/" + this.site_id + "/deploys/" + this.id + "/restore",
+      type: "post"
+    }, function(err, data, client) {
+      if (err) return cb(err);
+      Deploy.call(self, client, data);
+      cb(null, self);
+    });
+  }
+};
+
+exports.Deploy = Deploy;
+},{"./model":6}],4:[function(require,module,exports){
 var model = require("./model");
 
 var File = model.constructor();
 File.path = "/files";
 
 exports.File = File;
-},{"./model":5}],4:[function(require,module,exports){
+},{"./model":6}],5:[function(require,module,exports){
 var model = require("./model"),
     Submission = require("./submission").Submission;;
 
@@ -219,12 +292,12 @@ Form.path = "/forms";
 
 Form.prototype = {
   submissions: function(cb) {
-    this.client.collection(this.apiPath, Submission, cb);
+    this.client.collection({prefix: this.apiPath, model: Submission}, cb);
   }
 };
 
 exports.Form = Form;
-},{"./model":5,"./submission":8}],5:[function(require,module,exports){
+},{"./model":6,"./submission":9}],6:[function(require,module,exports){
 exports.constructor = function() {
   var obj = function(client, attributes) {
     for (var key in attributes) {
@@ -236,12 +309,13 @@ exports.constructor = function() {
   };
   return obj;
 }
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var process=require("__browserify_process");var model = require("./model"),
     Form  = require("./form").Form,
     Submission = require("./submission").Submission,
     File = require("./file").File,
-    Snippet = require("./snippet").Snippet;
+    Snippet = require("./snippet").Snippet,
+    Deploy = require("./deploy").Deploy;
 
 if (typeof(require) !== 'undefined') {
   var glob   = require("glob"),
@@ -398,28 +472,12 @@ Site.prototype = {
     } else if (attributes.zip) {
       createFromZip(this.client, attributes.zip, this.id, cb);
     } else {
-      this.client.request({
-        url: "/sites/" + this.id,
-        type: "put",
-        body: attributesForUpdate(attributes)
-      }, function(err, data, client) {
-        if (err) return cb(err);
-        Site.call(self, client, data);
-        cb(null, self);
-      });
+      this.client.update({model: Site, element: this, attributes: attributesForUpdate(attributes)}, cb);
     }
   },
   
   destroy: function(cb) {
-    var self = this;
-
-    this.client.request({
-      url: "/sites/" + this.id,
-      type: "delete",
-      ignoreResponse: true
-    }, function(err) {
-      cb(err, self);
-    });
+    this.client.destroy({element: this}, cb);
   },
   
   waitForReady: function(cb) {
@@ -432,30 +490,42 @@ Site.prototype = {
     }
   },
   
-  forms: function(cb) {
-    this.client.collection(this.apiPath, Form, cb);
+  forms: function(options, cb) {
+    this.client.collection({prefix: this.apiPath, model: Form}, options, cb);
   },
   
-  submissions: function(cb) {
-    this.client.collection(this.apiPath, Submission, cb);
+  submissions: function(options, cb) {
+    this.client.collection({prefix: this.apiPath, model: Submission}, options, cb);
   },
   
   files: function(cb) {
-    this.client.collection(this.apiPath, File, cb);
+    this.client.collection({prefix: this.apiPath, model: File}, cb);
   },
   
   file: function(path, cb) {
-    this.client.element(this.apiPath, File, path, cb);
+    this.client.element({prefix: this.apiPath, model: File, id: path}, cb);
   },
   
   snippets: function(cb) {
-    this.client.collection(this.apiPath, Snippet, cb);
+    this.client.collection({prefix: this.apiPath, model: Snippet}, cb);
   },
   
   snippet: function(id, cb) {
-    this.client.element(this.apiPath, Snippet, cb);
+    this.client.element({prefix: this.apiPath, model: Snippet, id: id}, cb);
   },
-
+  
+  createSnippet: function(attributes, cb) {
+    this.client.create({prefix: this.apiPath, model: Snippet, attributes: attributes}, cb);
+  },
+  
+  deploys: function(options, cb) {
+    this.client.collection({prefix: this.apiPath, model: Deploy}, options, cb);
+  },
+  
+  deploy: function(id, cb) {
+    this.client.element({prefix: this.apiPath, model: Deploy, id: id}, cb);
+  },
+  
   uploadFiles: function(files, cb) {
     if (this.state !== "uploading") return cb(null, this);
     if (files.length == 0) { return this.refresh(cb); }
@@ -490,21 +560,46 @@ Site.prototype = {
 };
 
 exports.Site = Site;
-},{"./file":3,"./form":4,"./model":5,"./snippet":7,"./submission":8,"__browserify_process":11,"crypto":10,"fs":10,"glob":10,"path":10}],7:[function(require,module,exports){
+},{"./deploy":3,"./file":4,"./form":5,"./model":6,"./snippet":8,"./submission":9,"__browserify_process":13,"crypto":12,"fs":12,"glob":12,"path":12}],8:[function(require,module,exports){
 var model = require("./model");
 
 var Snippet = model.constructor();
 Snippet.path = "/snippets";
 
+Snippet.prototype = {
+  update: function(attributes, cb) {
+    this.client.update({prefix: "/sites/" + this.site_id, model: Snippet, element: this, attributes: attributes}, cb);
+  },
+  destroy: function(cb) {
+    this.client.destroy({prefix: "/sites/" + this.site_id, model: Snippet, element: this}, cb);
+  }
+}
+
 exports.Snippet = Snippet;
-},{"./model":5}],8:[function(require,module,exports){
+},{"./model":6}],9:[function(require,module,exports){
 var model = require("./model");
 
 var Submission = model.constructor();
 Submission.path = "/submissions";
 
 exports.Submission = Submission;
-},{"./model":5}],9:[function(require,module,exports){
+},{"./model":6}],10:[function(require,module,exports){
+var model = require("./model");
+
+var User = model.constructor();
+User.path = "/users";
+
+User.prototype = {
+  update: function(attributes, cb) {
+    this.client.update({element: this, model: User, attributes: attributes}, cb);
+  },
+  destroy: function(cb) {
+    this.client.destroy({element: this}, cb);
+  }
+};
+
+exports.User = User;
+},{"./model":6}],11:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -590,9 +685,9 @@ exports.Submission = Submission;
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
