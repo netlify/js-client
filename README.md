@@ -40,7 +40,7 @@ The first method is the simplest, and works when you don't need to authenticate 
 var client = bitballoon.createClient({client_id: CLIENT_ID, client_secret: CLIENT_SECRET});
 
 client.authorizeFromCredentials(function(err, access_token) {
-  if (err) return console.log(err);
+  if (err) return console.log(err); 
   // Client is now ready to do requests
   // You can store the access_token to avoid authorizing in the future
 });
