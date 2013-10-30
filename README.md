@@ -451,3 +451,80 @@ client.user(id, function(err, user) {
   });
 });
 ```
+
+DNS
+===
+
+Resellers can create and manage DNS Zones through the BitBalloon API.
+
+Getting a list of DNS Zones:
+
+```js
+client.dnsZones(function(err, zones) {
+  console.log(zones);
+});
+```
+
+Getting a specific DNS zone:
+
+```js
+client.dnsZone(id, function(err, zone) {
+  console.log(zone);
+});
+```
+
+Creating a new zone
+
+```js
+client.createDnsZone({name: "example.com"}, function(err, zone) {
+  console.log(zone);
+});
+```
+
+Deleting a zone
+
+```js
+client.dnsZone(id, function(err, zone) {
+  if (err) return console.log(err);
+  zone.destroy(function(err) {
+    // Deleted
+  });
+});
+```
+
+Getting records for a zone
+
+```js
+zone.records(function(err, records) {
+  console.log(records);
+});
+```
+
+Getting a specific record
+
+```js
+zone.record(id, function(err, record) {
+  console.log(record);
+});
+```
+
+Adding a new record (supported types: A, CNAME, TXT, MX)
+
+```js
+zone.createRecord({
+  hostname: "www",
+  type: "CNAME",
+  value: "bitballoon.com",
+  ttl: 3600
+}, function(err, record) {
+  console.log(record);
+});
+```
+
+Deleting a record
+
+```js
+record.destroy(function(err) {
+  // deleted
+});
+```
