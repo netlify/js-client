@@ -4,51 +4,60 @@ if (typeof(require) !== 'undefined') {
       fs          = require("fs");
 }
 
-// Mock object for xhr requests
-var XHR = function() {
-  this.headers = {};
+var Emitter = function() {
+  var subscribers = {};
+  this.emit = function(event) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    subscribers[event].forEach(function(subscriber) {
+      subscriber.apply(null, args);
+    });
+  },
+  this.on = function(event, cb) {
+    subscribers[event] = subscribers[event] || [];
+    subscribers[event].push(cb);
+  }
+};
+
+// Mock the node http lib
+var http = {
+  request: function(options, cb) {
+    var test = firstIfArray(http.test),
+        request = new Emitter(),
+        response = new Emitter(),
+        requestBody = "";
+    
+    request.write = function(data) { requestBody += data; };
+    request.end = function() {
+      options.body = requestBody;
+
+      test.expectations(options);
+
+      response.statusCode = test.status;
+
+      setTimeout(function() {
+        cb(response);
+        response.emit('data', test.response);
+        response.emit('end');
+      }, 0);        
+    }
+    
+    return request;
+  }
 };
 
 var firstIfArray = function(obj) {
   return Array.isArray(obj) ? obj.shift() : obj;
 };
 
-XHR.prototype = {
-  open: function(method, url, async) {
-    this.method = method;
-    this.url = url;
-    this.async = async;
-  },
-  
-  setRequestHeader: function(header, value) {
-    this.headers[header] = value;
-  },
-  
-  send: function(data) {
-    if (XHR.expectations) {
-      var fn = firstIfArray(XHR.expectations);
-      fn(this);
-    }
-    if (this.onreadystatechange) {
-      this.readyState = firstIfArray(XHR.readyState) || 4;
-      this.responseText = firstIfArray(XHR.responseText) || "";
-      this.status = firstIfArray(XHR.status) || 200;
-      this.onreadystatechange();
-    }
-  }
-}
-
 describe("bitballoon", function() {
   var testApiCall = function(options) {
-    var xhr = Array.isArray(options.xhr) ? options.xhr : [options.xhr];
-    
-    xhr.forEach(function(xhr) {
-      XHR.expectations = XHR.expectations || [];
-      XHR.expectations.push(xhr.expectations);
-      XHR.status = XHR.status || [];
-      XHR.status.push(xhr.status);
-      XHR.responseText = XHR.responseText || [];
-      XHR.responseText.push(JSON.stringify(xhr.response));
+    var httpCalls = Array.isArray(options.http) ? options.http : [options.http];
+    httpCalls.forEach(function(httpCall) {
+      http.test.push({
+        expectations: httpCall.expectations,
+        status: httpCall.status || 200,
+        response: httpCall.response ? JSON.stringify(httpCall.response) : ""
+      });
     });
 
     runs(options.apiCall);
@@ -57,10 +66,7 @@ describe("bitballoon", function() {
   };
   
   beforeEach(function() {
-    XHR.expectations = null;
-    XHR.readyState = null;
-    XHR.responseText = null;
-    XHR.status = null;
+    http.test = [];
   });
 
   it("should create a client", function() {
@@ -70,15 +76,15 @@ describe("bitballoon", function() {
   });
 
   it("should authenticate from credentials", function() {
-    var client = bitballoon.createClient({client_id: "client_id", client_secret: "client_secret", xhr: XHR});
+    var client = bitballoon.createClient({client_id: "client_id", client_secret: "client_secret", http: http});
     var access_token = null;    
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
-          expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=");
-          expect(xhr.method).toEqual("post");          
+      http: {
+        expectations: function(options) {
+          expect(options.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
+          expect(options.auth).toEqual("client_id:client_secret");
+          expect(options.method).toEqual("post");
         },
         response: {access_token: "1234"}
       },
@@ -111,16 +117,16 @@ describe("bitballoon", function() {
       client_id: "client_id", 
       client_secret: "client_secret",
       redirect_uri: "http://www.example.com/callback",
-      xhr: XHR
+      http: http
     });
     var access_token = null;
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
-          expect(xhr.headers['Authorization']).toEqual("Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=");
-          expect(xhr.method).toEqual("post");
+      http: {
+        expectations: function(options) {
+          expect(options.headers['Content-Type']).toEqual("application/x-www-form-urlencoded");
+          expect(options.auth).toEqual("client_id:client_secret");
+          expect(options.method).toEqual("post");
         },
         response: {access_token: "1234"}
       },
@@ -138,15 +144,15 @@ describe("bitballoon", function() {
   });
 
   it("should get a list of sites", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         sites  = [];
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-          expect(xhr.method).toEqual("get");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites");
+      http: {
+        expectations: function(options) {
+          expect(options.headers['Authorization']).toEqual("Bearer 1234");
+          expect(options.method).toEqual("get");
+          expect(options.path).toEqual("/api/v1/sites");
         },
         response: [{id: 1}, {id: 2}, {id: 3}, {id: 4}]
       },
@@ -159,15 +165,15 @@ describe("bitballoon", function() {
   });
 
   it("should get a list of sites with pagination", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         sites  = [];
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-          expect(xhr.method).toEqual("get");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites?page=2&per_page=4");
+      http: {
+        expectations: function(options) {
+          expect(options.headers['Authorization']).toEqual("Bearer 1234");
+          expect(options.method).toEqual("get");
+          expect(options.path).toEqual("/api/v1/sites?page=2&per_page=4");
         },
         response: [{id: 1}, {id: 2}, {id: 3}, {id: 4}]
       },
@@ -180,15 +186,15 @@ describe("bitballoon", function() {
   });
 
   it("should get a single site", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         site   = null;
 
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-          expect(xhr.method).toEqual("get");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");          
+      http: {
+        expectations: function(options) {
+          expect(options.headers['Authorization']).toEqual("Bearer 1234");
+          expect(options.method).toEqual("get");
+          expect(options.path).toEqual("/api/v1/sites/123");          
         },
         response: {id: "123"}
       },
@@ -201,15 +207,15 @@ describe("bitballoon", function() {
   });
   
   it("should refresh the state of a site", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         site   = new bitballoon.Client.models.Site(client, {id: "123", state: "processing"});
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-          expect(xhr.method).toEqual("get");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");          
+      http: {
+        expectations: function(options) {
+          expect(options.headers['Authorization']).toEqual("Bearer 1234");
+          expect(options.method).toEqual("get");
+          expect(options.path).toEqual("/api/v1/sites/123");          
         },
         response: {id: 123, state: "current"}
       },
@@ -222,15 +228,15 @@ describe("bitballoon", function() {
   });
   
   it("should update a site", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"});
 
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-          expect(xhr.method).toEqual("put");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");
+      http: {
+        expectations: function(options) {
+          expect(options.headers['Authorization']).toEqual("Bearer 1234");
+          expect(options.method).toEqual("put");
+          expect(options.path).toEqual("/api/v1/sites/123");
         },
         response: {id: 123, name: "changed"}
       },
@@ -245,16 +251,16 @@ describe("bitballoon", function() {
   });
   
   it("should destroy a site", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
         done   = false;
 
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-          expect(xhr.method).toEqual("delete");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");
+      http: {
+        expectations: function(options) {
+          expect(options.headers['Authorization']).toEqual("Bearer 1234");
+          expect(options.method).toEqual("delete");
+          expect(options.path).toEqual("/api/v1/sites/123");
         },
         response: ""
       },
@@ -270,14 +276,14 @@ describe("bitballoon", function() {
   });
   
   it("should list all forms", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         forms = null;
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("get");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/forms");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("get");
+          expect(options.path).toEqual("/api/v1/forms");
         },
         response: [{id: 1, name: "Form 1"}, {id: 2, name: "Form 2"}]
       },
@@ -290,15 +296,15 @@ describe("bitballoon", function() {
   });
   
   it("should list forms for a site", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
         forms  = null;
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("get");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/forms");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("get");
+          expect(options.path).toEqual("/api/v1/sites/123/forms");
         },
         response: [{id: 1, name: "Form 1"}, {id: 2, name: "Form 2"}]
       },
@@ -311,14 +317,14 @@ describe("bitballoon", function() {
   })
   
   it("should create a user", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         user = null;
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("post");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/users");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("post");
+          expect(options.path).toEqual("/api/v1/users");
         },
         response: {id: "123", email: "user@example.com"}
       },
@@ -335,15 +341,15 @@ describe("bitballoon", function() {
   });
   
   it("should update a user", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         user   = new bitballoon.Client.models.User(client, {id: "123", email: "test@example.com"}),
         done   = false;
 
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("put");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/users/123");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("put");
+          expect(options.path).toEqual("/api/v1/users/123");
         },
         response: {id: "123", email: "user@example.com"}
       },
@@ -360,15 +366,15 @@ describe("bitballoon", function() {
   });
   
   it("should destroy a user", function() {
-    var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client = bitballoon.createClient({access_token: "1234", http: http}),
         user   = new bitballoon.Client.models.User(client, {id: "123", email: "test@example.com"}),
         done   = false;
 
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("delete");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/users/123");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("delete");
+          expect(options.path).toEqual("/api/v1/users/123");
         },
         response: ""
       },
@@ -385,15 +391,15 @@ describe("bitballoon", function() {
   });
   
   it("should create a snippet", function() {
-    var client  = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client  = bitballoon.createClient({access_token: "1234", http: http}),
         site    = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
         snippet = null;
     
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("post");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/snippets");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("post");
+          expect(options.path).toEqual("/api/v1/sites/123/snippets");
         },
         response: {general: "<script>alert('Hello')</script>", title: "Alert"}
       },
@@ -413,15 +419,15 @@ describe("bitballoon", function() {
   });
   
   it("should update a snippet", function() {
-    var client  = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client  = bitballoon.createClient({access_token: "1234", http: http}),
         snippet = new bitballoon.Client.models.Snippet(client, {id: "1", title: "test", site_id: "123"}),
         done    = false;
 
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("put");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/snippets/1");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("put");
+          expect(options.path).toEqual("/api/v1/sites/123/snippets/1");
         },
         response: {title: "hello"}
       },
@@ -440,15 +446,15 @@ describe("bitballoon", function() {
   });
   
   it("should delete a snippet", function() {
-    var client  = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client  = bitballoon.createClient({access_token: "1234", http: http}),
         snippet = new bitballoon.Client.models.Snippet(client, {id: "1", title: "test", site_id: "123"}),
         done    = false;
 
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("delete");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/snippets/1");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("delete");
+          expect(options.path).toEqual("/api/v1/sites/123/snippets/1");
         },
         response: ""
       },
@@ -465,15 +471,15 @@ describe("bitballoon", function() {
   });  
   
   it("should restore an old deploy", function() {
-    var client  = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+    var client  = bitballoon.createClient({access_token: "1234", http: http}),
         deploy = new bitballoon.Client.models.Deploy(client, {id: "1", state: "old", site_id: "123"}),
         done    = false;
 
     testApiCall({
-      xhr: {
-        expectations: function(xhr) {
-          expect(xhr.method).toEqual("post");
-          expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/deploys/1/restore");
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("post");
+          expect(options.path).toEqual("/api/v1/sites/123/deploys/1/restore");
         },
         response: {id: "1", state: "current", site_id: "123"}
       },
@@ -495,7 +501,7 @@ describe("bitballoon", function() {
         fs     = require('fs');
     
     it("should upload a site from a dir", function() {
-      var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+      var client = bitballoon.createClient({access_token: "1234", http: http}),
           site   = null,
           shasum = crypto.createHash('sha1');
           
@@ -504,30 +510,30 @@ describe("bitballoon", function() {
       var index_sha = shasum.digest('hex');
 
       testApiCall({
-        xhr: [
+        http: [
           {
-            expectations: function(xhr) {
-              expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-              expect(xhr.method).toEqual("post");
-              expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites"); 
+            expectations: function(options) {
+              expect(options.headers['Authorization']).toEqual("Bearer 1234");
+              expect(options.method).toEqual("post");
+              expect(options.path).toEqual("/api/v1/sites"); 
             },
             status: 201,
             response: {id: 123, state: "uploading", required: [index_sha]}
           },
           {
-            expectations: function(xhr) {
-              expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-              expect(xhr.method).toEqual("put");
-              expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123/files/index.html");
+            expectations: function(options) {
+              expect(options.headers['Authorization']).toEqual("Bearer 1234");
+              expect(options.method).toEqual("put");
+              expect(options.path).toEqual("/api/v1/sites/123/files/index.html");
             },
             status: 201,
             response: "Hello, World"
           },
           {
-            expectations: function(xhr) {
-              expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-              expect(xhr.method).toEqual("get");
-              expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites/123");                      
+            expectations: function(options) {
+              expect(options.headers['Authorization']).toEqual("Bearer 1234");
+              expect(options.method).toEqual("get");
+              expect(options.path).toEqual("/api/v1/sites/123");                      
             },
             response: {id: 123, state: "processing"}
           }
@@ -543,15 +549,15 @@ describe("bitballoon", function() {
     });
     
     it("should upload a site from a zip", function() {
-      var client = bitballoon.createClient({access_token: "1234", xhr: XHR}),
+      var client = bitballoon.createClient({access_token: "1234", http: http}),
           site   = null;
       
       testApiCall({
-        xhr: {
-          expectations: function(xhr) {
-            expect(xhr.headers['Authorization']).toEqual("Bearer 1234");
-            expect(xhr.method).toEqual("post");
-            expect(xhr.url).toEqual("https://www.bitballoon.com/api/v1/sites");
+        http: {
+          expectations: function(options) {
+            expect(options.headers['Authorization']).toEqual("Bearer 1234");
+            expect(options.method).toEqual("post");
+            expect(options.path).toEqual("/api/v1/sites");
           },
           status: 201,
           response: {id: 123, state: "processing", required: []}
