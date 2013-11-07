@@ -218,7 +218,8 @@ Client.prototype = {
     var client  = this,
         http    = this.http,
         path    = options.raw_path ? options.url : "/api/" + this.VERSION + options.url,
-        headers = options.headers || {};
+        headers = options.headers || {},
+        retries = options.retries || 3;
 
     headers['Content-Type'] = options.contentType || "application/json";
     headers['Content-Length'] = options.body ? options.body.length : 0;
@@ -228,7 +229,7 @@ Client.prototype = {
     }
     
     var requestOptions = {
-      method: options.type || "get",
+      method: (options.type || "get").toLowerCase(),
       hostname: this.hostname,
       path: path,
       port: this.port,
@@ -252,19 +253,32 @@ Client.prototype = {
         } else if (res.statusCode == 401) {
           cb("Authentication failed", null, client);
         } else {
-          cb(body, null, client);
+          if (requestOptions.method == "get" || requestOptions.method == "put" || requestOptions.method == "delete" && retries > 0) {
+            options.retries = retries - 1;
+            setTimeout(function() { request(options, cb); }, 500);
+          } else {
+            cb(body, null, client);
+          }
         }
       });
     });
     
     request.on("error", function(err) {
-      cb(err);
+      if (requestOptions.method == "get" || requestOptions.method == "put" || requestOptions.method == "delete" && retries > 0) {
+        options.retries = retries - 1;
+        setTimeout(function() { request(options, cb); }, 500);
+      } else {
+        cb(err, null, client);
+      }
     });
     
     if (options.body) {
-      request.write(typeof(options.body) == "string" ? options.body : JSON.stringify(options.body));
+      request.write(
+        typeof(options.body) == "string" ?
+          options.body :
+          headers['Content-Type'] == "application/json" ? JSON.stringify(options.body) : options.body
+      );
     }
-    
     request.end();
   },
   
@@ -547,7 +561,12 @@ Site.prototype = {
     if (this.isReady()) {
       process.nextTick(function() { cb(null, self); });
     } else {
-      setTimeout(function() { self.waitForReady(cb); }, 1000);
+      setTimeout(function() { 
+        self.refresh(function(err) {
+          if (err) return cb(err);
+          self.waitForReady(cb);
+        });
+      }, 1000);
     }
   },
   
