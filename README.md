@@ -528,3 +528,28 @@ record.destroy(function(err) {
   // deleted
 });
 ```
+
+Access Tokens
+=============
+
+Resellers can use the node client to create and revoke access tokens on behalf of their users. To use any of these methods your OAuth access token must belong to a reseller admin user.
+
+Creating an access token:
+
+```js
+client.createAccessToken({user: {email: "test@example.com", uid: "1234"}}, function(err, accessToken) {
+  // accessToken.access_token
+});
+```
+
+The user must have either an email or a uid (or both) as a unique identifier. If the user doesn't exist, a new user will be created on the fly.
+
+Deleting an access token:
+
+```js
+client.accessToken("token-string", function(err, accessToken) {
+  accessToken.destroy(function(err) {
+    console.log("Access token revoked");
+  });
+});
+```
