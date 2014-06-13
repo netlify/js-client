@@ -40,7 +40,7 @@ The first method is the simplest, and works when you don't need to authenticate 
 var client = bitballoon.createClient({client_id: CLIENT_ID, client_secret: CLIENT_SECRET});
 
 client.authorizeFromCredentials(function(err, access_token) {
-  if (err) return console.log(err); 
+  if (err) return console.log(err);
   // Client is now ready to do requests
   // You can store the access_token to avoid authorizing in the future
 });
@@ -86,72 +86,33 @@ client.site(id, function(err, site) {
 })
 ```
 
-Creating a site from a directory (requires node):
+Creating a new empty site:
 
 ```js
-client.createSite({dir: "/tmp/my-site"}, function(err, site) {
-  // do work
-});
-```
+client.createSite({name: "my-unique-site-name", domain: "example.com", password: "secret"}, function(err, site) {
+  console.log(site);
+})
 
-Creating a site from a zip file (requires node):
-
-```js
-client.createSite({zip: "/tmp/my-site.zip"}, function(err, site) {
-  // do work
-});
-```
-
-Both methods will create the site and upload the files. The site will then be processing.
+To deploy a site from a dir and wait for the processing of the site to finish:
 
 ```js
-client.createSite({zip: "/tmp-my-site.zip"}, function(err, site) {
-  site.state == "processing"
-});
-```
-
-Refresh a site to update the state:
-
-```js
-site.refresh(function(err, site) {
-  console.log(site.state);
-});
-```
-
-Use `waitForReady` to wait until a site has finished processing.
-
-```js
-client.createSite({zip: "/tmp-my-site.zip"}, function(err, site) {
-  site.waitForReady(function(err, site) {
-    if (err) return console.log("Error deploying site %o", err);
-    console.log("Site deployed");
-  });
-});
-```
-
-Redeploy a site from a dir:
-
-```js
-client.site(id, function(err, site) {
-  if (err) return console.log("Error finding site %o", err);
-  site.update({dir: "/tmp/my-site"}, function(err, site) {
-    if (err) return console.log("Error updating site %o", err);
-    site.waitForReady(function(err, site) {
-      if (err) return console.log("Error updating site %o", err);
-      console.log("Site redeployed");
+client.createSite({}, function(err, site) {
+  site.createDeploy({dir: "/tmp/my-site"}, function(err, deploy) {
+    deploy.waitForReady(function(deploy) {
+      console.log("Deploy is done: ", deploy);
     });
   });
-})
+});
 ```
 
-Redeploy a site from a zip file:
+Creating a new deploy for a site from a zip file:
 
 ```ruby
 client.site(id, function(err, site) {
   if (err) return console.log("Error finding site %o", err);
-  site.update({zip: "/tmp/my-site.zip"}, function(err, site) {
+  site.createDeploy({zip: "/tmp/my-site.zip"}, function(err, deploy) {
     if (err) return console.log("Error updating site %o", err);
-    site.waitForReady(function(err, site) {
+    deploy.waitForReady(function(err, deploy) {
       if (err) return console.log("Error updating site %o", err);
       console.log("Site redeployed");
     });
@@ -272,12 +233,12 @@ client.site(id, function(err, site) {
   if (err) return console.log("Error getting site %o", err);
   site.file(path, function(err, file) {
     if (err) return console.log("Error getting file %o", err);
-    
+
     file.readFile(function(err, data) {
       if (err) return console.log("Error reading file %o", err);
       console.log("Got data %o", data);
     });
-    
+
     file.writeFile("Hello, World!", function(err, file) {
       if (err) return console.log("Error writing to file %o", err);
       console.log("Wrote to file - site will now be processing");
@@ -305,16 +266,33 @@ site.deploy(id, function(err, deploy) {
 });
 ```
 
-Restore a deploy (makes it the current live version of the site)
+Create a new deploy:
+
+```js
+site.createDeploy({dir: "/path/to/folder"}, function(err, deploy) {
+  console.log(deploy)
+})
+```
+
+Create a draft deploy (wont get published after processing):
+
+```js
+site.createDeploy({dir: "/path/to/folder", draft: true}, function(err, deploy) {
+  console.log(deploy);
+})
+```
+
+Publish a deploy (makes it the current live version of the site)
 
 ```js
 site.deploy(id, function(err, deploy) {
   if (err) return console.log(err);
-  deploy.restore(function(err, deploy) {
+  deploy.publish(function(err, deploy) {
     // restored
   });
 });
 ```
+
 
 Snippets
 ========
