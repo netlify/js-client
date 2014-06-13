@@ -1,4 +1,17 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var model = require("./model")
+
+var AccessToken = model.constructor();
+AccessToken.path = "/access_tokens";
+
+AccessToken.prototype = {
+  destroy: function(cb) {
+    this.client.destroy({element: this}, cb);
+  },
+};
+
+exports.AccessToken = AccessToken;
+},{"./model":9}],2:[function(require,module,exports){
 var Client = require("./client").Client;
 
 exports.createClient = function(options) {
@@ -12,7 +25,7 @@ if (typeof(window) !== 'undefined') {
 }
 
 
-},{"./client":2}],2:[function(require,module,exports){
+},{"./client":3}],3:[function(require,module,exports){
 var base64 = require('base64-js'),
     http   = require('http'),
     https  = require('https');
@@ -38,11 +51,16 @@ Client.models = {
   User: require("./user").User,
   Snippet: require("./snippet").Snippet,
   Deploy: require("./deploy").Deploy,
-  DnsZone: require("./dns-zone").DnsZone
+  DnsZone: require("./dns-zone").DnsZone,
+  AccessToken: require("./access-token").AccessToken
 };
 
 var stringToByteArray = function(str) {
   return Array.prototype.map.call(str, function (char) { return char.charCodeAt(0); });
+};
+
+var prepareBody = function(body, headers) {
+  return typeof(body) == "string" ? body : (headers['Content-Type'] == "application/json" ? JSON.stringify(body) : body);
 };
 
 Client.prototype = {
@@ -54,7 +72,7 @@ Client.prototype = {
     if (!(this.client_id && this.client_secret)) {
       return cb("Instantiate the client with a client_id and client_secret to authorize from credentials");
     }
-    
+
     this.request({
       type: "post",
       url: "/oauth/token",
@@ -71,14 +89,14 @@ Client.prototype = {
       cb(null, data.access_token);
     });
   },
-  
+
   authorizeFromCode: function(code, cb) {
     var client = this;
-    
+
     if (!(this.client_id && this.client_secret && this.redirect_uri)) {
       return cb("Instantiate the client with a client_id, client_secret and redirect_uri to authorize from code");
     }
-    
+
     this.request({
       type: "post",
       url: "/oath/token",
@@ -99,7 +117,7 @@ Client.prototype = {
       cb(null, data.access_token);
     });
   },
-  
+
   authorizeUrl: function(options) {
     if (!(this.client_id && this.redirect_uri)) {
       throw("Instantiate the client with a client_id and a redirect_uri to generate an authorizeUrl");
@@ -114,13 +132,15 @@ Client.prototype = {
   sites: function(options, cb) { this.collection({model: Client.models.Site}, options, cb); },
 
   site: function(id, cb) { this.element({model: Client.models.Site, id: id}, cb); },
-  
-  createSite: function(options, cb) {    
+
+  createSite: function(options, cb) {
     this.withAuthorization(cb, function() {
       if (options.dir) {
         Client.models.Site.createFromDir(this, options.dir, cb);
       } else if (options.zip) {
         Client.models.Site.createFromZip(this, options.zip, cb);
+      } else {
+        Client.models.Site.create(this, options, cb);
       }
     });
   },
@@ -128,27 +148,33 @@ Client.prototype = {
   forms: function(cb) { this.collection({model: Client.models.Form}, cb); },
 
   form: function(id, cb) { this.element({model: Client.models.Form, id: id}, cb); },
-  
+
   submissions: function(options, cb) { this.collection({model: Client.models.Submission}, options, cb); },
-  
+
   submission: function(id, cb) { this.element({model: Client.models.Submission, id: id}, cb); },
-  
+
   users: function(options, cb) { this.collection({model: Client.models.User}, options, cb); },
 
   user: function(id, cb) { this.element({model: Client.models.User, id: id}, cb); },
-  
+
   createUser: function(attributes, cb) {
     this.create({model: Client.models.User, attributes: attributes}, cb);
   },
-  
+
   dnsZones: function(options, cb) { this.collection({model: Client.models.DnsZone}, options, cb); },
-  
+
   dnsZone: function(id, cb) { this.element({model: Client.models.DnsZone, id: id}, cb); },
-  
+
   createDnsZone: function(attributes, cb) {
     this.create({model: Client.models.DnsZone, attributes: attributes}, cb);
   },
-  
+
+  accessToken: function(id, cb) { this.element({model: Client.models.AccessToken, id: id}, cb); },
+
+  createAccessToken: function(attributes, cb) {
+    this.create({model: Client.models.AccessToken, attributes: attributes}, cb);
+  },
+
   collection: function(options, pagination, cb) {
     if (cb === undefined) { cb = pagination; pagination = {}}
     var params = [];
@@ -163,7 +189,7 @@ Client.prototype = {
       })
     });
   },
-  
+
   element: function(options, cb) {
     this.withAuthorization(cb, function() {
       this.request({
@@ -172,9 +198,9 @@ Client.prototype = {
         if (err) return cb(err);
         cb(null, new options.model(client, data));
       });
-    });    
+    });
   },
-  
+
   create: function(options, cb) {
     this.withAuthorization(cb, function() {
       this.request({
@@ -185,7 +211,7 @@ Client.prototype = {
         if (err) return cb(err);
         cb(null, new options.model(client, data));
       });
-    });    
+    });
   },
 
   update: function(options, cb) {
@@ -201,7 +227,7 @@ Client.prototype = {
       });
     });
   },
-  
+
   destroy: function(options, cb) {
     this.withAuthorization(cb, function() {
       this.request({
@@ -219,15 +245,21 @@ Client.prototype = {
         http    = this.http,
         path    = options.raw_path ? options.url : "/api/" + this.VERSION + options.url,
         headers = options.headers || {},
-        retries = options.retries || 3;
+        retries = options.retries ? options.retries : options.retries === 0 ? 0 : 3,
+        body    = null;
 
     headers['Content-Type'] = options.contentType || "application/json";
-    headers['Content-Length'] = options.body ? options.body.length : 0;
+
+    if (options.body) {
+      body = prepareBody(options.body, headers);
+    }
+
+    headers['Content-Length'] = body ? body.length : 0;
 
     if (this.access_token && !options.auth) {
       headers['Authorization'] = "Bearer " + this.access_token
     }
-    
+
     var requestOptions = {
       method: (options.type || "get").toLowerCase(),
       hostname: this.hostname,
@@ -240,7 +272,7 @@ Client.prototype = {
     var request = http.request(requestOptions, function(res) {
       var body = "",
           data = null;
-          
+
       res.on("data", function(chunk) {
         body += chunk;
       });
@@ -250,38 +282,40 @@ Client.prototype = {
             data = JSON.parse(body);
           }
           cb(null, data, client);
-        } else if (res.statusCode == 401) {
+        } else if (res.statusCode == 401 || res.statusCode == 403) {
           cb("Authentication failed", null, client);
         } else {
-          if (requestOptions.method == "get" || requestOptions.method == "put" || requestOptions.method == "delete" && retries > 0) {
+          if ((requestOptions.method === "get" ||
+               requestOptions.method === "put" ||
+               requestOptions.method === "delete") &&
+              (retries > 0 && res.statusCode !== 422 && res.statusCode !== 404)) {
             options.retries = retries - 1;
-            setTimeout(function() { request(options, cb); }, 500);
+            setTimeout(function() { client.request(options, cb); }, 500);
           } else {
             cb(body, null, client);
           }
         }
       });
     });
-    
+
     request.on("error", function(err) {
-      if (requestOptions.method == "get" || requestOptions.method == "put" || requestOptions.method == "delete" && retries > 0) {
+      if ((requestOptions.method == "get" ||
+           requestOptions.method == "put" ||
+           requestOptions.method == "delete") &&
+           retries > 0) {
         options.retries = retries - 1;
-        setTimeout(function() { request(options, cb); }, 500);
+        setTimeout(function() { client.request(options, cb); }, 500);
       } else {
         cb(err, null, client);
       }
     });
-    
-    if (options.body) {
-      request.write(
-        typeof(options.body) == "string" ?
-          options.body :
-          headers['Content-Type'] == "application/json" ? JSON.stringify(options.body) : options.body
-      );
+
+    if (body) {
+      request.write(body);
     }
     request.end();
   },
-  
+
   withAuthorization: function(cb, fn) {
     if (!this.isAuthorized()) return cb("Not authorized: Instantiate client with access_token");
     fn.call(this);
@@ -289,13 +323,21 @@ Client.prototype = {
 };
 
 exports.Client = Client;
-},{"./deploy":3,"./dns-zone":5,"./form":7,"./site":9,"./snippet":10,"./submission":11,"./user":12,"base64-js":13,"http":31,"https":23}],3:[function(require,module,exports){
-var model = require("./model");
+
+},{"./access-token":1,"./deploy":4,"./dns-zone":6,"./form":8,"./site":10,"./snippet":11,"./submission":12,"./user":13,"base64-js":14,"http":32,"https":24}],4:[function(require,module,exports){
+var process=require("__browserify_process");var model = require("./model");
+
+if (typeof(require) !== 'undefined') {
+  var fs = require("fs");
+}
 
 var Deploy = model.constructor();
 Deploy.path = "/deploys";
 
 Deploy.prototype = {
+  isReady: function() {
+    return this.state == "ready" || this.state == "current";
+  },
   restore: function(cb) {
     var self = this;
     this.client.request({
@@ -306,11 +348,70 @@ Deploy.prototype = {
       Deploy.call(self, client, data);
       cb(null, self);
     });
+  },
+  publish: function(cb) {
+    this.restore(cb);
+  },
+  refresh: function(cb) {
+    var self = this;
+    this.client.request({
+      url: this.apiPath
+    }, function(err, data, client) {
+      if (err) return cb(err);
+      Deploy.call(self, client, data);
+      cb(null, self);
+    });
+  },
+  waitForReady: function(cb) {
+    var self = this;
+
+    if (this.isReady()) {
+      process.nextTick(function() { cb(null, self); });
+    } else {
+      setTimeout(function() {
+        self.refresh(function(err) {
+          if (err) return cb(err);
+          self.waitForReady(cb);
+        });
+      }, 1000);
+    }
+  },
+  uploadFiles: function(files, cb) {
+    if (this.state !== "uploading") return cb(null, this);
+    if (files.length == 0) { return this.refresh(cb); }
+
+    var self = this,
+        cbCalled = false,
+        uploaded = [];
+
+    files.forEach(function(file) {
+      fs.readFile(file.abs, function(err, data) {
+        if (cbCalled) return null;
+        if (err) { cbCalled = true; return cb(err); }
+
+        self.client.request({
+          url: "/deploys/" + self.id + "/files/" + file.rel,
+          type: "put",
+          body: data,
+          contentType: "application/octet-stream",
+          ignoreResponse: true
+        }, function(err) {
+          if (cbCalled) return null;
+          if (err) { cbCalled = true; return cb(err); }
+          uploaded.push(file);
+
+          if (uploaded.length == files.length) {
+            self.refresh(cb);
+          }
+        });
+      });
+    });
   }
 };
 
 exports.Deploy = Deploy;
-},{"./model":8}],4:[function(require,module,exports){
+
+},{"./model":9,"__browserify_process":50,"fs":15}],5:[function(require,module,exports){
 var model = require("./model"),
     DnsZone = require("./dns-zone");
 
@@ -324,7 +425,7 @@ DnsRecord.prototype = {
 };
 
 exports.DnsRecord = DnsRecord;
-},{"./dns-zone":5,"./model":8}],5:[function(require,module,exports){
+},{"./dns-zone":6,"./model":9}],6:[function(require,module,exports){
 var model = require("./model"),
     DnsRecord = require("./dns-record").DnsRecord;
 
@@ -347,14 +448,14 @@ DnsZone.prototype = {
 };
 
 exports.DnsZone = DnsZone;
-},{"./dns-record":4,"./model":8}],6:[function(require,module,exports){
+},{"./dns-record":5,"./model":9}],7:[function(require,module,exports){
 var model = require("./model");
 
 var File = model.constructor();
 File.path = "/files";
 
 exports.File = File;
-},{"./model":8}],7:[function(require,module,exports){
+},{"./model":9}],8:[function(require,module,exports){
 var model = require("./model"),
     Submission = require("./submission").Submission;;
 
@@ -368,7 +469,7 @@ Form.prototype = {
 };
 
 exports.Form = Form;
-},{"./model":8,"./submission":11}],8:[function(require,module,exports){
+},{"./model":9,"./submission":12}],9:[function(require,module,exports){
 exports.constructor = function() {
   var obj = function(client, attributes) {
     for (var key in attributes) {
@@ -380,8 +481,10 @@ exports.constructor = function() {
   };
   return obj;
 }
-},{}],9:[function(require,module,exports){
-var process=require("__browserify_process");var model = require("./model"),
+
+},{}],10:[function(require,module,exports){
+var process=require("__browserify_process");var path = require("path"),
+    model = require("./model"),
     Form  = require("./form").Form,
     Submission = require("./submission").Submission,
     File = require("./file").File,
@@ -450,50 +553,50 @@ var calculateShas = function(files, cb) {
   });
 };
 
-var createFromDir = function(client, dir, siteId, cb) {
-  var fullDir = dir.match(/^\//) ? dir : process.cwd() + "/" + dir;
+var deployFromDir = function(site, dir, cb) {
+  var fullDir = path.resolve(dir);
 
   fs.stat(fullDir, function(err, stat) {
     if (err || stat.isFile()) return cb("No such dir " + dir + " (" + fullDir + ")");
 
     globFiles(fullDir, function(err, files) {
       calculateShas(files, function(err, filesWithShas) {
-        client.request({
-          url: "/sites" + (siteId ? "/" + siteId : ""),
-          type: siteId ? "put" : "post",
+        site.client.request({
+          url: site.apiPath + "/deploys",
+          type: "post",
           body: JSON.stringify({
             files: filesWithShas
           })
         }, function(err, data) {
           if (err) return cb(err);
-          var site = new Site(client, data);
+          var deploy = new Deploy(site.client, data);
           var shas = {};
           data.required.forEach(function(sha) { shas[sha] = true; });
           var filtered = files.filter(function(file) { return shas[filesWithShas[file.rel]]; });
-          site.uploadFiles(filtered, function(err, site) {
-            cb(err, site);
+          deploy.uploadFiles(filtered, function(err, deploy) {
+            cb(err, deploy);
           });
         });
       });
-    });    
+    });
   });
 };
 
-var createFromZip = function(client, zip, siteId, cb) {
+var deployFromZip = function(site, zip, cb) {
   var fullPath = zip.match(/^\//) ? zip : process.cwd() + "/" + zip;
-  
+
   fs.readFile(fullPath, function(err, zipData) {
     if (err) return cb(err);
-    
-    client.request({
-      url: "/sites" + (siteId ? "/" + siteId : ""),
-      type: siteId ? "put" : "post",
+
+    site.client.request({
+      url: site.apiPath + "/deploys",
+      type: "post",
       body: zipData,
       contentType: "application/zip"
     }, function(err, data) {
       if (err) return cb(err);
-      
-      return cb(null, new Site(client, data));
+
+      return cb(null, new Deploy(site.client, data));
     });
   });
 };
@@ -506,20 +609,34 @@ var attributesForUpdate = function(attributes) {
         password: "password"
       },
       result = {};
-  
+
   for (var key in attributes) {
     if (mapping[key]) result[mapping[key]] = attributes[key];
   }
-  
+
   return result;
 };
 
 Site.createFromDir = function(client, dir, cb) {
-  createFromDir(client, dir, null, cb);
+  Site.create(client, {}, function(err, site) {
+    site.createDeploy({dir: dir}, function(err, deploy) {
+      site.deploy_id = deploy.id;
+      cb(null, site);
+    })
+  });
 };
 
 Site.createFromZip = function(client, zip, cb) {
-  createFromZip(client, zip, null, cb);
+  Site.create(client, {}, function(err, site) {
+    site.createDeploy({zip: zip}, function(err, deploy) {
+      site.deploy_id = deploy.id;
+      cb(null, site);
+    })
+  });
+};
+
+Site.create = function(client, attributes, cb) {
+  client.create({model: Site, attributes: attributesForUpdate(attributes)}, cb);
 };
 
 Site.prototype = {
@@ -541,7 +658,7 @@ Site.prototype = {
     attributes = attributes || {};
 
     var self = this;
-    
+
     if (attributes.dir) {
       createFromDir(this.client, attributes.dir, this.id, cb);
     } else if (attributes.zip) {
@@ -550,18 +667,33 @@ Site.prototype = {
       this.client.update({model: Site, element: this, attributes: attributesForUpdate(attributes)}, cb);
     }
   },
-  
+
   destroy: function(cb) {
     this.client.destroy({element: this}, cb);
   },
-  
+
+  createDeploy: function(attributes, cb) {
+    if (attributes.dir) {
+      deployFromDir(this, attributes.dir, cb);
+    } else if (attributes.zip) {
+      deployFromZip(this, attributes.zip, cb);
+    } else {
+      cb("You must specify a 'dir' or a 'zip' to deploy");
+    }
+  },
+
+  createDraftDeploy: function(attributes, cb) {
+    attributes.draft = true;
+    this.createDeploy(attributes, cb);
+  },
+
   waitForReady: function(cb) {
     var self = this;
 
     if (this.isReady()) {
       process.nextTick(function() { cb(null, self); });
     } else {
-      setTimeout(function() { 
+      setTimeout(function() {
         self.refresh(function(err) {
           if (err) return cb(err);
           self.waitForReady(cb);
@@ -569,78 +701,47 @@ Site.prototype = {
       }, 1000);
     }
   },
-  
+
   forms: function(options, cb) {
     this.client.collection({prefix: this.apiPath, model: Form}, options, cb);
   },
-  
+
   submissions: function(options, cb) {
     this.client.collection({prefix: this.apiPath, model: Submission}, options, cb);
   },
-  
+
   files: function(cb) {
     this.client.collection({prefix: this.apiPath, model: File}, cb);
   },
-  
+
   file: function(path, cb) {
     this.client.element({prefix: this.apiPath, model: File, id: path}, cb);
   },
-  
+
   snippets: function(cb) {
     this.client.collection({prefix: this.apiPath, model: Snippet}, cb);
   },
-  
+
   snippet: function(id, cb) {
     this.client.element({prefix: this.apiPath, model: Snippet, id: id}, cb);
   },
-  
+
   createSnippet: function(attributes, cb) {
     this.client.create({prefix: this.apiPath, model: Snippet, attributes: attributes}, cb);
   },
-  
+
   deploys: function(options, cb) {
     this.client.collection({prefix: this.apiPath, model: Deploy}, options, cb);
   },
-  
+
   deploy: function(id, cb) {
     this.client.element({prefix: this.apiPath, model: Deploy, id: id}, cb);
-  },
-  
-  uploadFiles: function(files, cb) {
-    if (this.state !== "uploading") return cb(null, this);
-    if (files.length == 0) { return this.refresh(cb); }
-
-    var self = this,
-        cbCalled = false,
-        uploaded = [];
-    
-    files.forEach(function(file) {
-      fs.readFile(file.abs, function(err, data) {
-        if (cbCalled) return null;
-        if (err) { cbCalled = true; return cb(err); }
-
-        self.client.request({
-          url: "/sites/" + self.id + "/files/" + file.rel,
-          type: "put",
-          body: data,
-          contentType: "application/octet-stream",
-          ignoreResponse: true
-        }, function(err) {
-          if (cbCalled) return null;
-          if (err) { cbCalled = true; return cb(err); }
-          uploaded.push(file);
-        
-          if (uploaded.length == files.length) {
-            self.refresh(cb);
-          }
-        });
-      });
-    });
   }
 };
 
 exports.Site = Site;
-},{"./deploy":3,"./file":6,"./form":7,"./model":8,"./snippet":10,"./submission":11,"__browserify_process":49,"crypto":14,"fs":14,"glob":14,"path":14}],10:[function(require,module,exports){
+
+},{"./deploy":4,"./file":7,"./form":8,"./model":9,"./snippet":11,"./submission":12,"__browserify_process":50,"crypto":15,"fs":15,"glob":15,"path":15}],11:[function(require,module,exports){
 var model = require("./model");
 
 var Snippet = model.constructor();
@@ -656,14 +757,14 @@ Snippet.prototype = {
 }
 
 exports.Snippet = Snippet;
-},{"./model":8}],11:[function(require,module,exports){
+},{"./model":9}],12:[function(require,module,exports){
 var model = require("./model");
 
 var Submission = model.constructor();
 Submission.path = "/submissions";
 
 exports.Submission = Submission;
-},{"./model":8}],12:[function(require,module,exports){
+},{"./model":9}],13:[function(require,module,exports){
 var model = require("./model"),
     Site  = require("./site").Site;
 
@@ -683,7 +784,7 @@ User.prototype = {
 };
 
 exports.User = User;
-},{"./model":8,"./site":9}],13:[function(require,module,exports){
+},{"./model":9,"./site":10}],14:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -769,9 +870,9 @@ exports.User = User;
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],14:[function(require,module,exports){
-
 },{}],15:[function(require,module,exports){
+
+},{}],16:[function(require,module,exports){
 
 
 //
@@ -989,7 +1090,7 @@ if (typeof Object.getOwnPropertyDescriptor === 'function') {
   exports.getOwnPropertyDescriptor = valueObject;
 }
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1062,7 +1163,7 @@ function onend() {
   timers.setImmediate(shims.bind(this.end, this));
 }
 
-},{"_shims":15,"_stream_readable":18,"_stream_writable":20,"timers":26,"util":27}],17:[function(require,module,exports){
+},{"_shims":16,"_stream_readable":19,"_stream_writable":21,"timers":27,"util":28}],18:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1105,7 +1206,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"_stream_transform":19,"util":27}],18:[function(require,module,exports){
+},{"_stream_transform":20,"util":28}],19:[function(require,module,exports){
 var process=require("__browserify_process");// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2026,7 +2127,7 @@ function endReadable(stream) {
   }
 }
 
-},{"__browserify_process":49,"_shims":15,"buffer":29,"events":22,"stream":24,"string_decoder":25,"timers":26,"util":27}],19:[function(require,module,exports){
+},{"__browserify_process":50,"_shims":16,"buffer":30,"events":23,"stream":25,"string_decoder":26,"timers":27,"util":28}],20:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2232,7 +2333,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"_stream_duplex":16,"util":27}],20:[function(require,module,exports){
+},{"_stream_duplex":17,"util":28}],21:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2602,7 +2703,7 @@ function endWritable(stream, state, cb) {
   state.ended = true;
 }
 
-},{"buffer":29,"stream":24,"timers":26,"util":27}],21:[function(require,module,exports){
+},{"buffer":30,"stream":25,"timers":27,"util":28}],22:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2919,7 +3020,7 @@ assert.doesNotThrow = function(block, /*optional*/message) {
 };
 
 assert.ifError = function(err) { if (err) {throw err;}};
-},{"_shims":15,"util":27}],22:[function(require,module,exports){
+},{"_shims":16,"util":28}],23:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -3200,7 +3301,7 @@ EventEmitter.listenerCount = function(emitter, type) {
     ret = emitter._events[type].length;
   return ret;
 };
-},{"util":27}],23:[function(require,module,exports){
+},{"util":28}],24:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -3214,7 +3315,7 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":31}],24:[function(require,module,exports){
+},{"http":32}],25:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -3343,7 +3444,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"_stream_duplex":16,"_stream_passthrough":17,"_stream_readable":18,"_stream_transform":19,"_stream_writable":20,"events":22,"util":27}],25:[function(require,module,exports){
+},{"_stream_duplex":17,"_stream_passthrough":18,"_stream_readable":19,"_stream_transform":20,"_stream_writable":21,"events":23,"util":28}],26:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -3536,7 +3637,7 @@ function base64DetectIncompleteChar(buffer) {
   return incomplete;
 }
 
-},{"buffer":29}],26:[function(require,module,exports){
+},{"buffer":30}],27:[function(require,module,exports){
 try {
     // Old IE browsers that do not curry arguments
     if (!setTimeout.call) {
@@ -3655,7 +3756,7 @@ if (!exports.setImmediate) {
   };
 }
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4200,7 +4301,7 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-},{"_shims":15}],28:[function(require,module,exports){
+},{"_shims":16}],29:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -4286,7 +4387,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var assert;
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -5412,9 +5513,9 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
   writeDouble(this, value, offset, true, noAssert);
 };
 
-},{"./buffer_ieee754":28,"assert":21,"base64-js":30}],30:[function(require,module,exports){
-module.exports=require(13)
-},{}],31:[function(require,module,exports){
+},{"./buffer_ieee754":29,"assert":22,"base64-js":31}],31:[function(require,module,exports){
+module.exports=require(14)
+},{}],32:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -5476,7 +5577,7 @@ var xhrHttp = (function () {
     }
 })();
 
-},{"./lib/request":32,"events":22}],32:[function(require,module,exports){
+},{"./lib/request":33,"events":23}],33:[function(require,module,exports){
 var Stream = require('stream');
 var Response = require('./response');
 var concatStream = require('concat-stream');
@@ -5610,7 +5711,7 @@ var indexOf = function (xs, x) {
     return -1;
 };
 
-},{"./response":33,"Base64":34,"concat-stream":35,"stream":24,"util":27}],33:[function(require,module,exports){
+},{"./response":34,"Base64":35,"concat-stream":36,"stream":25,"util":28}],34:[function(require,module,exports){
 var Stream = require('stream');
 var util = require('util');
 
@@ -5732,7 +5833,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":24,"util":27}],34:[function(require,module,exports){
+},{"stream":25,"util":28}],35:[function(require,module,exports){
 ;(function () {
 
   var
@@ -5789,7 +5890,7 @@ var isArray = Array.isArray || function (xs) {
 
 }());
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var stream = require('stream')
 var bops = require('bops')
 var util = require('util')
@@ -5840,7 +5941,7 @@ module.exports = function(cb) {
 
 module.exports.ConcatStream = ConcatStream
 
-},{"bops":36,"stream":24,"util":27}],36:[function(require,module,exports){
+},{"bops":37,"stream":25,"util":28}],37:[function(require,module,exports){
 var proto = {}
 module.exports = proto
 
@@ -5861,9 +5962,9 @@ function mix(from, into) {
   }
 }
 
-},{"./copy.js":39,"./create.js":40,"./from.js":41,"./is.js":42,"./join.js":43,"./read.js":45,"./subarray.js":46,"./to.js":47,"./write.js":48}],37:[function(require,module,exports){
-module.exports=require(13)
-},{}],38:[function(require,module,exports){
+},{"./copy.js":40,"./create.js":41,"./from.js":42,"./is.js":43,"./join.js":44,"./read.js":46,"./subarray.js":47,"./to.js":48,"./write.js":49}],38:[function(require,module,exports){
+module.exports=require(14)
+},{}],39:[function(require,module,exports){
 module.exports = to_utf8
 
 var out = []
@@ -5938,7 +6039,7 @@ function reduced(list) {
   return out
 }
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports = copy
 
 var slice = [].slice
@@ -5992,12 +6093,12 @@ function slow_copy(from, to, j, i, jend) {
   }
 }
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = function(size) {
   return new Uint8Array(size)
 }
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports = from
 
 var base64 = require('base64-js')
@@ -6057,13 +6158,13 @@ function from_base64(str) {
   return new Uint8Array(base64.toByteArray(str)) 
 }
 
-},{"base64-js":37}],42:[function(require,module,exports){
+},{"base64-js":38}],43:[function(require,module,exports){
 
 module.exports = function(buffer) {
   return buffer instanceof Uint8Array;
 }
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports = join
 
 function join(targets, hint) {
@@ -6101,7 +6202,7 @@ function get_length(targets) {
   return size
 }
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 var proto
   , map
 
@@ -6123,7 +6224,7 @@ function get(target) {
   return out
 }
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = {
     readUInt8:      read_uint8
   , readInt8:       read_int8
@@ -6212,14 +6313,14 @@ function read_double_be(target, at) {
   return dv.getFloat64(at + target.byteOffset, false)
 }
 
-},{"./mapped.js":44}],46:[function(require,module,exports){
+},{"./mapped.js":45}],47:[function(require,module,exports){
 module.exports = subarray
 
 function subarray(buf, from, to) {
   return buf.subarray(from || 0, to || buf.length)
 }
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports = to
 
 var base64 = require('base64-js')
@@ -6257,7 +6358,7 @@ function to_base64(buf) {
 }
 
 
-},{"base64-js":37,"to-utf8":38}],48:[function(require,module,exports){
+},{"base64-js":38,"to-utf8":39}],49:[function(require,module,exports){
 module.exports = {
     writeUInt8:      write_uint8
   , writeInt8:       write_int8
@@ -6345,7 +6446,7 @@ function write_double_be(target, value, at) {
   return dv.setFloat64(at + target.byteOffset, value, false)
 }
 
-},{"./mapped.js":44}],49:[function(require,module,exports){
+},{"./mapped.js":45}],50:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6399,5 +6500,5 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}]},{},[1])
+},{}]},{},[2])
 ;
