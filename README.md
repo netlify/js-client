@@ -67,6 +67,20 @@ client.authorizeFromCode(params.code, function(err, access_token) {
 });
 ```
 
+Deploy a new version of a site
+==============================
+
+If you're just going to deploy a new version of a site from a script, the module exports a simple deploy method that will handle this:
+
+```js
+var bitballoon = require("bitballoon");
+
+bitballoon.deploy({access_token: "some-token", site_id: "some-site", dir: "/path/to/site"}, function(err, deploy) {
+  if (err) { return console.log(err); }
+  console.log("New deploy is live");
+});
+```
+
 Sites
 =====
 
