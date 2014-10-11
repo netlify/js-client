@@ -1,15 +1,12 @@
 {
-  "author": "BitBalloon",
-  "name": "bitballoon",
-  "description": "BitBalloon API client",
-  "version": "0.2.0",
+  "author": "Netlify",
+  "name": "netlify",
+  "description": "Netlify API client",
+  "version": "0.1.0",
   "repository": {
     "url": ""
   },
-  "bin": {
-    "bitballoon": "./bin/bitballoon"
-  },
-  "main": "lib/bitballoon.js",
+  "main": "lib/netlify.js",
   "dependencies": {
     "base64-js": ">=0.0.4",
     "glob": ">=3.2.6"

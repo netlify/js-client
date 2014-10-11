@@ -1,35 +1,35 @@
-BitBalloon Node Client
+Netlify Node Client
 ======================
 
-BitBalloon is a hosting service for the programmable web. It understands your documents, processes forms and lets you do deploys, manage forms submissions, inject javascript snippets into sites and do intelligent updates of HTML documents through it's API.
+Netlify is a hosting service for the programmable web. It understands your documents, processes forms and lets you do deploys, manage forms submissions, inject javascript snippets into sites and do intelligent updates of HTML documents through it's API.
 
 Installation
 ============
 
 Install by running
 
-    npm install bitballoon
+    npm install netlify
 
 
 Authenticating
 ==============
 
-Register a new application at https://www.bitballoon.com/applications to get your Oauth2 secret and key.
+Register a new application at https://app.netlify.com/applications to get your Oauth2 secret and key.
 
-Once you have your credentials you can instantiate a BitBalloon client.
+Once you have your credentials you can instantiate a Netlify client.
 
 ```js
-var bitballoon = require("bitballoon"),
-    client     = bitballoon.createClient(options);
+var netlify = require("netlify"),
+    client     = netlify.createClient(options);
 ```
 
 Typically you'll have an `access_token` stored that you want to instantiate the client with:
 
 ```
-var client = bitballoon.createClient({access_token: "my-access-token"});
+var client = netlify.createClient({access_token: "my-access-token"});
 ```
 
-A client need an access token before it can make requests to the BitBalloon API. Oauth2 gives you two ways to get an access token:
+A client need an access token before it can make requests to the Netlify API. Oauth2 gives you two ways to get an access token:
 
 1. **Authorize from credentials**: Authenticate directly with your API credentials.
 2. **Authorize from a URL**: send a user to a URL, where she can grant your access API access on her behalf.
@@ -37,7 +37,7 @@ A client need an access token before it can make requests to the BitBalloon API.
 The first method is the simplest, and works when you don't need to authenticate on behalf of some other user:
 
 ```js
-var client = bitballoon.createClient({client_id: CLIENT_ID, client_secret: CLIENT_SECRET});
+var client = netlify.createClient({client_id: CLIENT_ID, client_secret: CLIENT_SECRET});
 
 client.authorizeFromCredentials(function(err, access_token) {
   if (err) return console.log(err);
@@ -46,10 +46,10 @@ client.authorizeFromCredentials(function(err, access_token) {
 });
 
 ```
-To authorize on behalf of a user, you first need to send the user to a BitBalloon url where she'll be asked to grant your application permission. Once the user has visited that URL, she'll be redirected back to a redirect URI you specify (this must match the redirect URI on file for your Application). When the user returns to your app, you'll be able to access a `code` query parameter, that you can use to obtain the final `access_token`
+To authorize on behalf of a user, you first need to send the user to a Netlify url where she'll be asked to grant your application permission. Once the user has visited that URL, she'll be redirected back to a redirect URI you specify (this must match the redirect URI on file for your Application). When the user returns to your app, you'll be able to access a `code` query parameter, that you can use to obtain the final `access_token`
 
 ```js
-var client = bitballoon.createClient({
+var client = netlify.createClient({
   client_id: CLIENT_ID,
   client_secret: CLIENT_SECRET,
   redirect_uri: "http://www.example.com/callback"
@@ -73,9 +73,9 @@ Deploy a new version of a site
 If you're just going to deploy a new version of a site from a script, the module exports a simple deploy method that will handle this:
 
 ```js
-var bitballoon = require("bitballoon");
+var netlify = require("netlify");
 
-bitballoon.deploy({access_token: "some-token", site_id: "some-site", dir: "/path/to/site"}, function(err, deploy) {
+netlify.deploy({access_token: "some-token", site_id: "some-site", dir: "/path/to/site"}, function(err, deploy) {
   if (err) { return console.log(err); }
   console.log("New deploy is live");
 });
@@ -447,7 +447,7 @@ client.user(id, function(err, user) {
 DNS
 ===
 
-Resellers can create and manage DNS Zones through the BitBalloon API.
+Resellers can create and manage DNS Zones through the Netlify API.
 
 Getting a list of DNS Zones:
 
@@ -506,7 +506,7 @@ Adding a new record (supported types: A, CNAME, TXT, MX)
 zone.createRecord({
   hostname: "www",
   type: "CNAME",
-  value: "bitballoon.com",
+  value: "netlify.com",
   ttl: 3600
 }, function(err, record) {
   console.log(record);
