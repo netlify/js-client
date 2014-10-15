@@ -3,9 +3,14 @@
   "name": "netlify",
   "description": "Netlify API client",
   "version": "0.1.0",
-  "repository": {
-    "url": ""
+  "bugs": {
+    "url": "https://github.com/netlify/netlify-js/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/netlify/netlify-js.git"
+  },
+  "homepage": "https://github.com/netlify/netlify-js",
   "main": "lib/netlify.js",
   "dependencies": {
     "base64-js": ">=0.0.4",
