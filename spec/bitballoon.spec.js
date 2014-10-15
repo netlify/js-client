@@ -1,5 +1,5 @@
 if (typeof(require) !== 'undefined') {
-  var bitballoon  = require("../lib/bitballoon.js"),
+  var netlify  = require("../lib/netlify.js"),
       crypto      = require("crypto"),
       fs          = require("fs");
 }
@@ -25,7 +25,7 @@ var http = {
         request = new Emitter(),
         response = new Emitter(),
         requestBody = "";
-    
+
     request.write = function(data) { requestBody += data; };
     request.end = function() {
       options.body = requestBody;
@@ -38,9 +38,9 @@ var http = {
         cb(response);
         response.emit('data', test.response);
         response.emit('end');
-      }, 0);        
+      }, 0);
     }
-    
+
     return request;
   }
 };
@@ -49,7 +49,7 @@ var firstIfArray = function(obj) {
   return Array.isArray(obj) ? obj.shift() : obj;
 };
 
-describe("bitballoon", function() {
+describe("netlify", function() {
   var testApiCall = function(options) {
     var httpCalls = Array.isArray(options.http) ? options.http : [options.http];
     httpCalls.forEach(function(httpCall) {
@@ -64,21 +64,21 @@ describe("bitballoon", function() {
     waitsFor(options.waitsFor, 100);
     runs(options.expectations);
   };
-  
+
   beforeEach(function() {
     http.test = [];
   });
 
   it("should create a client", function() {
-    var client = bitballoon.createClient({access_token: "1234"});
+    var client = netlify.createClient({access_token: "1234"});
     expect(client.access_token).toEqual("1234");
     expect(client.isAuthorized()).toEqual(true);
   });
 
   it("should authenticate from credentials", function() {
-    var client = bitballoon.createClient({client_id: "client_id", client_secret: "client_secret", http: http});
-    var access_token = null;    
-    
+    var client = netlify.createClient({client_id: "client_id", client_secret: "client_secret", http: http});
+    var access_token = null;
+
     testApiCall({
       http: {
         expectations: function(options) {
@@ -102,25 +102,25 @@ describe("bitballoon", function() {
   });
 
   it("should generate an authorize url", function() {
-    var client = bitballoon.createClient({
-      client_id: "client_id", 
+    var client = netlify.createClient({
+      client_id: "client_id",
       client_secret: "client_secret",
       redirect_uri: "http://www.example.com/callback"
     });
     var url = client.authorizeUrl();
 
-    expect(url).toEqual("https://www.bitballoon.com/oauth/authorize?response_type=code&client_id=client_id&redirect_uri=http%3A%2F%2Fwww.example.com%2Fcallback")
+    expect(url).toEqual("https://www.netlify.com/oauth/authorize?response_type=code&client_id=client_id&redirect_uri=http%3A%2F%2Fwww.example.com%2Fcallback")
   });
 
   it("should authorize from authorization code", function() {
-    var client = bitballoon.createClient({
-      client_id: "client_id", 
+    var client = netlify.createClient({
+      client_id: "client_id",
       client_secret: "client_secret",
       redirect_uri: "http://www.example.com/callback",
       http: http
     });
     var access_token = null;
-    
+
     testApiCall({
       http: {
         expectations: function(options) {
@@ -144,9 +144,9 @@ describe("bitballoon", function() {
   });
 
   it("should get a list of sites", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
         sites  = [];
-    
+
     testApiCall({
       http: {
         expectations: function(options) {
@@ -165,9 +165,9 @@ describe("bitballoon", function() {
   });
 
   it("should get a list of sites with pagination", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
         sites  = [];
-    
+
     testApiCall({
       http: {
         expectations: function(options) {
@@ -186,7 +186,7 @@ describe("bitballoon", function() {
   });
 
   it("should get a single site", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
         site   = null;
 
     testApiCall({
@@ -194,7 +194,7 @@ describe("bitballoon", function() {
         expectations: function(options) {
           expect(options.headers['Authorization']).toEqual("Bearer 1234");
           expect(options.method).toEqual("get");
-          expect(options.path).toEqual("/api/v1/sites/123");          
+          expect(options.path).toEqual("/api/v1/sites/123");
         },
         response: {id: "123"}
       },
@@ -205,17 +205,17 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   it("should refresh the state of a site", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
-        site   = new bitballoon.Client.models.Site(client, {id: "123", state: "processing"});
-    
+    var client = netlify.createClient({access_token: "1234", http: http}),
+        site   = new netlify.Client.models.Site(client, {id: "123", state: "processing"});
+
     testApiCall({
       http: {
         expectations: function(options) {
           expect(options.headers['Authorization']).toEqual("Bearer 1234");
           expect(options.method).toEqual("get");
-          expect(options.path).toEqual("/api/v1/sites/123");          
+          expect(options.path).toEqual("/api/v1/sites/123");
         },
         response: {id: 123, state: "current"}
       },
@@ -226,10 +226,10 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   it("should update a site", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
-        site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"});
+    var client = netlify.createClient({access_token: "1234", http: http}),
+        site   = new netlify.Client.models.Site(client, {id: "123", name: "test"});
 
     testApiCall({
       http: {
@@ -249,10 +249,10 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   it("should destroy a site", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
-        site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
+        site   = new netlify.Client.models.Site(client, {id: "123", name: "test"}),
         done   = false;
 
     testApiCall({
@@ -274,11 +274,11 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   it("should list all forms", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
         forms = null;
-    
+
     testApiCall({
       http: {
         expectations: function(options) {
@@ -294,12 +294,12 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   it("should list forms for a site", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
-        site   = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
+        site   = new netlify.Client.models.Site(client, {id: "123", name: "test"}),
         forms  = null;
-    
+
     testApiCall({
       http: {
         expectations: function(options) {
@@ -315,11 +315,11 @@ describe("bitballoon", function() {
       }
     });
   })
-  
+
   it("should create a user", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
         user = null;
-    
+
     testApiCall({
       http: {
         expectations: function(options) {
@@ -339,10 +339,10 @@ describe("bitballoon", function() {
       }
     })
   });
-  
+
   it("should update a user", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
-        user   = new bitballoon.Client.models.User(client, {id: "123", email: "test@example.com"}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
+        user   = new netlify.Client.models.User(client, {id: "123", email: "test@example.com"}),
         done   = false;
 
     testApiCall({
@@ -364,10 +364,10 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   it("should destroy a user", function() {
-    var client = bitballoon.createClient({access_token: "1234", http: http}),
-        user   = new bitballoon.Client.models.User(client, {id: "123", email: "test@example.com"}),
+    var client = netlify.createClient({access_token: "1234", http: http}),
+        user   = new netlify.Client.models.User(client, {id: "123", email: "test@example.com"}),
         done   = false;
 
     testApiCall({
@@ -389,12 +389,12 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   it("should create a snippet", function() {
-    var client  = bitballoon.createClient({access_token: "1234", http: http}),
-        site    = new bitballoon.Client.models.Site(client, {id: "123", name: "test"}),
+    var client  = netlify.createClient({access_token: "1234", http: http}),
+        site    = new netlify.Client.models.Site(client, {id: "123", name: "test"}),
         snippet = null;
-    
+
     testApiCall({
       http: {
         expectations: function(options) {
@@ -417,10 +417,10 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   it("should update a snippet", function() {
-    var client  = bitballoon.createClient({access_token: "1234", http: http}),
-        snippet = new bitballoon.Client.models.Snippet(client, {id: "1", title: "test", site_id: "123"}),
+    var client  = netlify.createClient({access_token: "1234", http: http}),
+        snippet = new netlify.Client.models.Snippet(client, {id: "1", title: "test", site_id: "123"}),
         done    = false;
 
     testApiCall({
@@ -444,10 +444,10 @@ describe("bitballoon", function() {
       }
     })
   });
-  
+
   it("should delete a snippet", function() {
-    var client  = bitballoon.createClient({access_token: "1234", http: http}),
-        snippet = new bitballoon.Client.models.Snippet(client, {id: "1", title: "test", site_id: "123"}),
+    var client  = netlify.createClient({access_token: "1234", http: http}),
+        snippet = new netlify.Client.models.Snippet(client, {id: "1", title: "test", site_id: "123"}),
         done    = false;
 
     testApiCall({
@@ -468,11 +468,11 @@ describe("bitballoon", function() {
         expect(done).toEqual(true);
       }
     })
-  });  
-  
+  });
+
   it("should restore an old deploy", function() {
-    var client  = bitballoon.createClient({access_token: "1234", http: http}),
-        deploy = new bitballoon.Client.models.Deploy(client, {id: "1", state: "old", site_id: "123"}),
+    var client  = netlify.createClient({access_token: "1234", http: http}),
+        deploy = new netlify.Client.models.Deploy(client, {id: "1", state: "old", site_id: "123"}),
         done    = false;
 
     testApiCall({
@@ -494,17 +494,17 @@ describe("bitballoon", function() {
       }
     });
   });
-  
+
   // Node specific methods
   if (typeof(window) === "undefined") {
     var crypto = require('crypto'),
         fs     = require('fs');
-    
+
     it("should upload a site from a dir", function() {
-      var client = bitballoon.createClient({access_token: "1234", http: http}),
+      var client = netlify.createClient({access_token: "1234", http: http}),
           site   = null,
           shasum = crypto.createHash('sha1');
-          
+
       shasum.update(fs.readFileSync(__dirname + '/files/site-dir/index.html'));
 
       var index_sha = shasum.digest('hex');
@@ -515,7 +515,7 @@ describe("bitballoon", function() {
             expectations: function(options) {
               expect(options.headers['Authorization']).toEqual("Bearer 1234");
               expect(options.method).toEqual("post");
-              expect(options.path).toEqual("/api/v1/sites"); 
+              expect(options.path).toEqual("/api/v1/sites");
             },
             status: 201,
             response: {id: 123, state: "uploading", required: [index_sha]}
@@ -533,7 +533,7 @@ describe("bitballoon", function() {
             expectations: function(options) {
               expect(options.headers['Authorization']).toEqual("Bearer 1234");
               expect(options.method).toEqual("get");
-              expect(options.path).toEqual("/api/v1/sites/123");                      
+              expect(options.path).toEqual("/api/v1/sites/123");
             },
             response: {id: 123, state: "processing"}
           }
@@ -547,11 +547,11 @@ describe("bitballoon", function() {
         }
       });
     });
-    
+
     it("should upload a site from a zip", function() {
-      var client = bitballoon.createClient({access_token: "1234", http: http}),
+      var client = netlify.createClient({access_token: "1234", http: http}),
           site   = null;
-      
+
       testApiCall({
         http: {
           expectations: function(options) {
