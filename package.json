@@ -2,7 +2,7 @@
   "author": "Netlify",
   "name": "netlify",
   "description": "Netlify API client",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "bugs": {
     "url": "https://github.com/netlify/netlify-js/issues"
   },
@@ -14,7 +14,8 @@
   "main": "lib/netlify.js",
   "dependencies": {
     "base64-js": ">=0.0.4",
-    "glob": ">=3.2.6"
+    "glob": ">=3.2.6",
+    "graceful-fs": "^3.0.4"
   },
   "devDependencies": {
     "jasmine-node": ">=1.11.0",
