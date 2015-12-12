@@ -152,6 +152,20 @@ site.destroy(function(err) {
 });
 ```
 
+Pagination and Rate Limits
+==========================
+
+Any collection returned by the client will have a meta attribute that lets you check pagination and rate limit values.
+
+```js
+client.sites(function(err, sites) {
+  // Pagination has first, next, prev and last
+  console.log(sites.meta.pagination);
+  // Rate has the rate limit, remaining requests and the unix timestamp when the limit will reset
+  console.log(sites.meta.rate);
+});
+```
+
 Forms
 =====
 
