@@ -32,9 +32,7 @@ var http = {
       test.expectations(options);
 
       response.statusCode = test.status;
-      response.getHeader = function(header) {
-        return test.headers && test.headers[header];
-      };
+      response.headers = test.headers;
 
       setTimeout(function() {
         cb(response);
@@ -180,7 +178,7 @@ describe("netlify", function() {
           expect(options.path).toEqual("/api/v1/sites?page=2&per_page=4");
         },
         headers: {
-          "Link": '<https://api.netlify.com/api/v1/sites?page=3&per_page=4>; rel="next", <https://api.netlify.com/api/v1/sites?page=5&per_page=4>; rel="last"'
+          link: '<https://api.netlify.com/api/v1/sites?page=3&per_page=4>; rel="next", <https://api.netlify.com/api/v1/sites?page=5&per_page=4>; rel="last"'
         },
         response: [{id: 1}, {id: 2}, {id: 3}, {id: 4}]
       },
