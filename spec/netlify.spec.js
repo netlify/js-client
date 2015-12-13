@@ -205,7 +205,7 @@ describe("netlify", function() {
         },
         response: {id: "123"}
       },
-      apiCall: function() { client.site("123", function(err, data) { site = data; }); },
+      apiCall: function() { client.site("123").then(function(data) { site = data; }); },
       waitsFor: function() { return site; },
       expectations: function() {
         expect(site.id).toEqual("123");
@@ -226,7 +226,7 @@ describe("netlify", function() {
         },
         response: {id: 123, state: "current"}
       },
-      apiCall: function() { site.refresh(function(err, site) { }); },
+      apiCall: function() { site.refresh(); },
       waitsFor: function() { return site.isReady(); },
       expectations: function() {
         expect(site.state).toEqual("current");
@@ -247,7 +247,7 @@ describe("netlify", function() {
         },
         response: {id: 123, name: "changed"}
       },
-      apiCall: function() { site.update({name: "changed"}, function(err, s) {
+      apiCall: function() { site.update({name: "changed"}).then(function(s) {
         site = s;
       })},
       waitsFor: function() { return site.name == "changed" },
@@ -271,8 +271,7 @@ describe("netlify", function() {
         },
         response: ""
       },
-      apiCall: function() { site.destroy(function(err, s) {
-        if (err) return;
+      apiCall: function() { site.destroy().then(function() {
         done = true;
       })},
       waitsFor: function() { return done },
@@ -336,7 +335,7 @@ describe("netlify", function() {
         response: {id: "123", email: "user@example.com"}
       },
       apiCall: function() {
-        client.createUser({email: "user@example.com"}, function(err, u) {
+        client.createUser({email: "user@example.com"}).then(function(u) {
           user = u;
         });
       },
@@ -361,7 +360,7 @@ describe("netlify", function() {
         response: {id: "123", email: "user@example.com"}
       },
       apiCall: function() {
-        user.update({email: "user@example.com"}, function(err, u) {
+        user.update({email: "user@example.com"}).then(function(u) {
           done = true;
         });
       },
@@ -386,7 +385,7 @@ describe("netlify", function() {
         response: ""
       },
       apiCall: function() {
-        user.destroy(function(err) {
+        user.destroy().then(function() {
           done = true;
         });
       },
@@ -414,7 +413,7 @@ describe("netlify", function() {
         site.createSnippet({
           general: "<script>alert('Hello')</script>",
           title: "Alert"
-        }, function(err, s) {
+        }).then(function(s) {
           snippet = s;
         });
       },
@@ -441,7 +440,7 @@ describe("netlify", function() {
       apiCall: function() {
         snippet.update({
           title: "hello"
-        }, function(err, s) {
+        }).then(function(s) {
           done = true;
         });
       },
@@ -466,7 +465,7 @@ describe("netlify", function() {
         response: ""
       },
       apiCall: function() {
-        snippet.destroy(function(err, s) {
+        snippet.destroy().then(function(s) {
           done = true;
         });
       },
@@ -491,7 +490,7 @@ describe("netlify", function() {
         response: {id: "1", state: "current", site_id: "123"}
       },
       apiCall: function() {
-        deploy.restore(function(err, s) {
+        deploy.restore().then(function(s) {
           done = true;
         });
       },
@@ -554,7 +553,7 @@ describe("netlify", function() {
             response: {id: 234, state: "processing"}
           }
         ],
-        apiCall: function() { client.createSite({dir: "spec/files/site-dir"}, function(err, s) {
+        apiCall: function() { client.createSite({dir: "spec/files/site-dir"}).then(function(s) {
           site = s;
         })},
         waitsFor: function() { return site; },
@@ -587,7 +586,7 @@ describe("netlify", function() {
           status: 201,
           response: {id: 234, state: "processing", required: []}
         }],
-        apiCall: function() { client.createSite({zip: "spec/files/site-dir.zip"}, function(err, s) {
+        apiCall: function() { client.createSite({zip: "spec/files/site-dir.zip"}).then(function(s) {
           site = s;
         })},
         waitsFor: function() { return site; },
