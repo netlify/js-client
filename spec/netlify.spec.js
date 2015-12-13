@@ -534,7 +534,7 @@ describe("netlify", function() {
               expect(options.path).toEqual("/api/v1/sites/123/deploys");
             },
             status: 201,
-            response: {id: 234, state: "processing", required: [index_sha]}
+            response: {id: 234, state: "uploading", required: [index_sha]}
           },
           {
             expectations: function(options) {

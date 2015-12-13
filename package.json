@@ -15,7 +15,8 @@
   "dependencies": {
     "base64-js": ">=0.0.4",
     "glob": ">=3.2.6",
-    "graceful-fs": "^3.0.4"
+    "graceful-fs": "^3.0.4",
+    "when": "^3.7.5"
   },
   "devDependencies": {
     "jasmine-node": ">=1.11.0",
