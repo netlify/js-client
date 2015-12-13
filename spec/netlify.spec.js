@@ -91,7 +91,7 @@ describe("netlify", function() {
         response: {access_token: "1234"}
       },
       apiCall: function() {
-        client.authorizeFromCredentials(function(err, token) {
+        client.authorizeFromCredentials().then(function(token) {
           access_token = token;
         });
       },
@@ -133,7 +133,7 @@ describe("netlify", function() {
         response: {access_token: "1234"}
       },
       apiCall: function() {
-        client.authorizeFromCode("my-code", function(err, token) {
+        client.authorizeFromCode("my-code").then(function(token) {
           access_token = token;
         });
       },
@@ -158,7 +158,7 @@ describe("netlify", function() {
         },
         response: [{id: 1}, {id: 2}, {id: 3}, {id: 4}]
       },
-      apiCall: function() { client.sites(function(err, data) { sites = data; }); },
+      apiCall: function() { client.sites().then(function(data) { sites = data; }); },
       waitsFor: function() { return sites.length; },
       expectations: function() {
         expect(sites.map(function(s) { return s.id; })).toEqual([1,2,3,4]);
@@ -182,7 +182,7 @@ describe("netlify", function() {
         },
         response: [{id: 1}, {id: 2}, {id: 3}, {id: 4}]
       },
-      apiCall: function() { client.sites({page: 2, per_page: 4}, function(err, data) { sites = data; }); },
+      apiCall: function() { client.sites({page: 2, per_page: 4}).then(function(data) { sites = data; }); },
       waitsFor: function() { return sites.length; },
       expectations: function() {
         expect(sites.map(function(s) { return s.id; })).toEqual([1,2,3,4]);
@@ -294,7 +294,7 @@ describe("netlify", function() {
         },
         response: [{id: 1, name: "Form 1"}, {id: 2, name: "Form 2"}]
       },
-      apiCall: function() { client.forms(function(err, result) { forms = result; }); },
+      apiCall: function() { client.forms().then(function(result) { forms = result; }); },
       waitsFor: function() { return forms; },
       expectations: function() {
         expect(forms.map(function(f) { return f.name; })).toEqual(["Form 1", "Form 2"]);
@@ -315,7 +315,7 @@ describe("netlify", function() {
         },
         response: [{id: 1, name: "Form 1"}, {id: 2, name: "Form 2"}]
       },
-      apiCall: function() { site.forms(function(err, result) { forms = result; })},
+      apiCall: function() { site.forms().then(function(result) { forms = result; })},
       waitsFor: function() { return forms; },
       expectations: function() {
         expect(forms.map(function(f) { return f.name })).toEqual(["Form 1", "Form 2"]);
