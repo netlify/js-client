@@ -39,8 +39,7 @@ The first method is the simplest, and works when you don't need to authenticate 
 ```js
 var client = netlify.createClient({client_id: CLIENT_ID, client_secret: CLIENT_SECRET});
 
-client.authorizeFromCredentials(function(err, access_token) {
-  if (err) return console.log(err);
+client.authorizeFromCredentials().then(function(access_token) {
   // Client is now ready to do requests
   // You can store the access_token to avoid authorizing in the future
 });
@@ -60,8 +59,7 @@ var url = client.authorizeUrl();
 // Send the client to the url, they will be redirected back to the redirect_uri
 // Once they are back at your url, grab the code query param and use it to authorize
 
-client.authorizeFromCode(params.code, function(err, access_token) {
-  if (err) return console.log(err);
+client.authorizeFromCode(params.code).then(function(access_token) {
   // Client is now ready to do requests
   // You can store the access_token to avoid authorizing in the future  
 });
@@ -75,8 +73,7 @@ If you're just going to deploy a new version of a site from a script, the module
 ```js
 var netlify = require("netlify");
 
-netlify.deploy({access_token: "some-token", site_id: "some-site", dir: "/path/to/site"}, function(err, deploy) {
-  if (err) { return console.log(err); }
+netlify.deploy({access_token: "some-token", site_id: "some-site", dir: "/path/to/site"}).then(function(deploy) {
   console.log("New deploy is live");
 });
 ```
@@ -87,7 +84,7 @@ Sites
 Getting a list of all sites you have access to:
 
 ```js
-client.sites(function(err, sites) {
+client.sites().then(function(sites) {
   // do work
 });
 ```
@@ -95,7 +92,7 @@ client.sites(function(err, sites) {
 Getting a specific site by id:
 
 ```js
-client.site(id, function(err, site) {
+client.site(id).then(function(site) {
   // do work
 })
 ```
@@ -103,16 +100,21 @@ client.site(id, function(err, site) {
 Creating a new empty site:
 
 ```js
-client.createSite({name: "my-unique-site-name", domain: "example.com", password: "secret"}, function(err, site) {
+client.createSite({
+  name: "my-unique-site-name",
+  domain: "example.com",
+  password: "secret"
+}).then(function(site) {
   console.log(site);
 })
+```
 
 To deploy a site from a dir and wait for the processing of the site to finish:
 
 ```js
-client.createSite({}, function(err, site) {
-  site.createDeploy({dir: "/tmp/my-site"}, function(err, deploy) {
-    deploy.waitForReady(function(deploy) {
+client.createSite({}).then(function(site) {
+  site.createDeploy({dir: "/tmp/my-site"}).then(function(deploy) {
+    deploy.waitForReady().then(function() {
       console.log("Deploy is done: ", deploy);
     });
   });
@@ -122,23 +124,19 @@ client.createSite({}, function(err, site) {
 Creating a new deploy for a site from a zip file:
 
 ```ruby
-client.site(id, function(err, site) {
-  if (err) return console.log("Error finding site %o", err);
-  site.createDeploy({zip: "/tmp/my-site.zip"}, function(err, deploy) {
-    if (err) return console.log("Error updating site %o", err);
-    deploy.waitForReady(function(err, deploy) {
-      if (err) return console.log("Error updating site %o", err);
+client.site(id).then(function(site) {
+  site.createDeploy({zip: "/tmp/my-site.zip"}).then(function(deploy) {
+    deploy.waitForReady().then(function() {
       console.log("Site redeployed");
     });
   });
-})
+});
 ```
 
 Update the name of the site (its subdomain), the custom domain and the notification email for form submissions:
 
 ```js
-site.update({name: "my-site", customDomain: "www.example.com", notificationEmail: "me@example.com", password: "secret"}, function(err, site) {
-  if (err) return console.log("Error updating site %o", err);
+site.update({name: "my-site", customDomain: "www.example.com", notificationEmail: "me@example.com", password: "secret"}).then(function(site) {
   console.log("Updated site");
 });
 ```
@@ -146,8 +144,7 @@ site.update({name: "my-site", customDomain: "www.example.com", notificationEmail
 Deleting a site:
 
 ```js
-site.destroy(function(err) {
-  if (err) return console.log("Error deleting site");
+site.destroy().then(function() {
   console.log("Site deleted");
 });
 ```
@@ -158,11 +155,19 @@ Pagination and Rate Limits
 Any collection returned by the client will have a meta attribute that lets you check pagination and rate limit values.
 
 ```js
-client.sites(function(err, sites) {
+client.sites().then(function(sites) {
   // Pagination has first, next, prev and last
   console.log(sites.meta.pagination);
   // Rate has the rate limit, remaining requests and the unix timestamp when the limit will reset
   console.log(sites.meta.rate);
+});
+```
+
+You can use `page` and `per_page` as options to any of the paginatied collection methods:
+
+```js
+client.sites({page: 2, per_page: 10}).then(function(sites) {
+  console.log("Page 2: ", sites);
 });
 ```
 
@@ -172,7 +177,7 @@ Forms
 Access all forms you have access to:
 
 ```js
-client.forms(function(err, forms) {
+client.forms().then(function(forms) {
   // do work
 })
 ```
@@ -180,9 +185,8 @@ client.forms(function(err, forms) {
 Access forms for a specific site:
 
 ```js
-client.site(id, function(err, site) {
-  if (err) return console.log("Error getting site %o", err);
-  site.forms(function(err, forms) {
+client.site(id).then(function(site) {
+  site.forms().then(function(forms) {
     // do work
   });
 });
@@ -191,8 +195,7 @@ client.site(id, function(err, site) {
 Access a specific form:
 
 ```js
-client.form(id, function(err, form) {
-  if (err) return console.log("Error getting form %o", err);
+client.form(id).then(function(form) {
   // do work
 });
 ```
@@ -200,8 +203,7 @@ client.form(id, function(err, form) {
 Access a list of all form submissions you have access to:
 
 ```js
-client.submissions(function(err, submissions) {
-  if (err) return console.log("Error getting submissions %o", err);
+client.submissions().then(function(submissions) {
   // do work
 });
 ```
@@ -209,22 +211,18 @@ client.submissions(function(err, submissions) {
 Access submissions from a specific site
 
 ```js
-client.site(id, function(err, site) {
-  if (err) return console.log("Error getting site %o", err);
-  site.submissions(function(err, submissions) {
-    if (err) return console.log("Error getting submissions %o", err);
+client.site(id).then(function(site) {
+  site.submissions().then(function(submissions) {
     // do work
-  })
+  });
 });
 ```
 
 Access submissions from a specific form
 
 ```js
-client.form(id, function(err, form) {
-  if (err) return console.log("Error getting form %o", err);
-  form.submissions(function(err, submissions) {
-    if (err) return console.log("Error getting submissions %o", err);
+client.form(id).then(function(form) {
+  form.submissions().then(function(submissions) {
     // do work
   });
 });
@@ -233,8 +231,7 @@ client.form(id, function(err, form) {
 Get a specific submission
 
 ```js
-client.submission(id, function(err, submission) {
-  if (err) return console.log("Error getting submission %o", err);
+client.submission(id).then(function(submission) {
   // do work
 })
 ```
@@ -245,10 +242,8 @@ Files
 Access all files in a site:
 
 ```js
-client.site(id, function(err, site) {
-  if (err) return console.log("Error getting site %o", err);
-  site.files(function(err, files) {
-    if (err) return console.log("Error getting files %o", err);
+client.site(id).then(function(site) {
+  site.files().then(function(files) {
     // do work
   });
 });
@@ -257,20 +252,9 @@ client.site(id, function(err, site) {
 Get a specific file:
 
 ```js
-client.site(id, function(err, site) {
-  if (err) return console.log("Error getting site %o", err);
-  site.file(path, function(err, file) {
-    if (err) return console.log("Error getting file %o", err);
-
-    file.readFile(function(err, data) {
-      if (err) return console.log("Error reading file %o", err);
-      console.log("Got data %o", data);
-    });
-
-    file.writeFile("Hello, World!", function(err, file) {
-      if (err) return console.log("Error writing to file %o", err);
-      console.log("Wrote to file - site will now be processing");
-    });
+client.site(id).then(function(site) {
+  site.file(path).then(function(file) {
+    // do work
   });
 });
 ```
@@ -281,7 +265,7 @@ Deploys
 Access all deploys for a site
 
 ```js
-site.deploys(function(err, deploys) {
+site.deploys().then(function(deploys) {
   // do work
 });
 ```
@@ -289,7 +273,7 @@ site.deploys(function(err, deploys) {
 Access a specific deploy
 
 ```js
-site.deploy(id, function(err, deploy) {
+site.deploy(id).then(function(deploy) {
   // do work
 });
 ```
@@ -297,7 +281,7 @@ site.deploy(id, function(err, deploy) {
 Create a new deploy:
 
 ```js
-site.createDeploy({dir: "/path/to/folder"}, function(err, deploy) {
+site.createDeploy({dir: "/path/to/folder"}).then(function(deploy) {
   console.log(deploy)
 })
 ```
@@ -305,7 +289,7 @@ site.createDeploy({dir: "/path/to/folder"}, function(err, deploy) {
 Create a draft deploy (wont get published after processing):
 
 ```js
-site.createDeploy({dir: "/path/to/folder", draft: true}, function(err, deploy) {
+site.createDeploy({dir: "/path/to/folder", draft: true}).then(function(deploy) {
   console.log(deploy);
 })
 ```
@@ -313,9 +297,8 @@ site.createDeploy({dir: "/path/to/folder", draft: true}, function(err, deploy) {
 Publish a deploy (makes it the current live version of the site)
 
 ```js
-site.deploy(id, function(err, deploy) {
-  if (err) return console.log(err);
-  deploy.publish(function(err, deploy) {
+site.deploy(id).then(function(deploy) {
+  deploy.publish().then(function(deploy) {
     // restored
   });
 });
@@ -328,10 +311,8 @@ Snippets
 Snippets are small code snippets injected into all HTML pages of a site right before the closing head or body tag. To get all snippets for a site:
 
 ```js
-client.site(id, function(err, site) {
-  if (err) return console.log("Error getting site %o", err);
-  site.snippets(function(err, snippets) {
-    if (err) return console.log("Error getting snippets %o", err);
+client.site(id).then(function(site) {
+  site.snippets().then(function(snippets) {
     // do work
   });
 });
@@ -340,10 +321,8 @@ client.site(id, function(err, site) {
 Get a specific snippet
 
 ```js
-client.site(id, function(err, site) {
-  if (err) return console.log("Error getting site %o", err);
-  site.snippet(snippetId, function(err, snippet) {
-    if (err) return console.log("Error getting snippet %o", err);
+client.site(id).then(function(site) {
+  site.snippet(snippetId).then(function(snippet) {
     // do work
   });
 });
@@ -354,16 +333,14 @@ Add a snippet to a site
 You can specify a `general` snippet that will be inserted into all pages, and a `goal` snippet that will be injected into a page following a successful form submission. Each snippet must have a title. You can optionally set the position of both the general and the goal snippet to `head` or `footer` to determine if it gets injected into the head tag or at the end of the page.
 
 ```js
-client.site(id, function(err, site) {
-  if (err) return console.log("Error getting site %o", err);
+client.site(id).then(function(site) {
   site.createSnippet({
     general: "<script>alert('Hello')</script>",
     general_position: "head",
     goal: "<script>alert('Success')</script>",
     goal_position: "footer",
     title: "Alerts"
-  }, function(err, snippet) {
-    if (err) return console.log("Error creating snippet %o", err);
+  }).then(function(snippet) {
     console.log(snippet);
   });
 });
@@ -378,8 +355,7 @@ snippet.update({
   goal: "<script>alert('Success')</script>",
   goal_position: "footer",
   title: "Alerts"
-}, function(err, snippet) {
-  if (err) return console.log("Error creating snippet %o", err);
+}).then(function(snippet) {
   console.log(snippet);
 });
 ```
@@ -387,8 +363,7 @@ snippet.update({
 Delete a snippet
 
 ```js
-snippet.destroy(function(err) {
-  if (err) return console.log("Error deleting snippet");
+snippet.destroy().then(function() {
   console.log("Snippet deleted");
 });
 ```
@@ -401,7 +376,7 @@ The user methods are mainly useful for resellers. Creating, deleting and updatin
 Getting a list of users
 
 ```js
-client.users(function(err, users) {
+client.users().then(function(users) {
   // do work
 });
 ```
@@ -409,7 +384,7 @@ client.users(function(err, users) {
 Getting a specific user
 
 ```js
-client.user(id, function(err, user) {
+client.user(id).then(function(user) {
   // do work
 });
 ```
@@ -417,8 +392,7 @@ client.user(id, function(err, user) {
 Creating a new user (`email` is required, `uid` is optional. Both must be unique)
 
 ```js
-client.createUser({email: "user@example.com", uid: "12345"}, function(err, user) {
-  if (err) return console("Error creating user");
+client.createUser({email: "user@example.com", uid: "12345"}).then(function(user) {
   console.log(user);
 });
 ```
@@ -426,10 +400,8 @@ client.createUser({email: "user@example.com", uid: "12345"}, function(err, user)
 Updating a user
 
 ```js
-client.user(id, function(err, user) {
-  if (err) return console.log("Error getting user");
-  user.update({email: "user@example.com", uid: "12345"}, function(err, user) {
-    if (err) return console("Error updating user");
+client.user(id).then(function(user) {
+  user.update({email: "user@example.com", uid: "12345"}).then(function(user) {
     console.log(user);
   });
 });
@@ -438,10 +410,9 @@ client.user(id, function(err, user) {
 Deleting a user
 
 ```js
-client.user(id, function(err, user) {
-  if (err) return console.log("Error getting user");
-  user.destroy(function(err) {
-    if (err) return console("Error deleting");
+client.user(id).then(function(user) {
+  user.destroy().then(function() {
+    console.log("User deleted");
   });
 });
 ```
@@ -449,10 +420,8 @@ client.user(id, function(err, user) {
 Getting sites belonging to a user
 
 ```js
-client.user(id, function(err, user) {
-  if (err) return console.log("Error getting user");
-  user.sites(function(err, sites) {
-    if (err) return console("Error getting sites");
+client.user(id).then(function(user) {
+  user.sites().then(function(sites) {
     console.log(sites);
   });
 });
@@ -466,7 +435,7 @@ Resellers can create and manage DNS Zones through the Netlify API.
 Getting a list of DNS Zones:
 
 ```js
-client.dnsZones(function(err, zones) {
+client.dnsZones().then(function(zones) {
   console.log(zones);
 });
 ```
@@ -474,7 +443,7 @@ client.dnsZones(function(err, zones) {
 Getting a specific DNS zone:
 
 ```js
-client.dnsZone(id, function(err, zone) {
+client.dnsZone(id).then(function(zone) {
   console.log(zone);
 });
 ```
@@ -482,7 +451,7 @@ client.dnsZone(id, function(err, zone) {
 Creating a new zone
 
 ```js
-client.createDnsZone({name: "example.com"}, function(err, zone) {
+client.createDnsZone({name: "example.com"}).then(function(zone) {
   console.log(zone);
 });
 ```
@@ -490,9 +459,8 @@ client.createDnsZone({name: "example.com"}, function(err, zone) {
 Deleting a zone
 
 ```js
-client.dnsZone(id, function(err, zone) {
-  if (err) return console.log(err);
-  zone.destroy(function(err) {
+client.dnsZone(id).then(function(zone) {
+  zone.destroy().then(function() {
     // Deleted
   });
 });
@@ -501,7 +469,7 @@ client.dnsZone(id, function(err, zone) {
 Getting records for a zone
 
 ```js
-zone.records(function(err, records) {
+zone.records().then(function(records) {
   console.log(records);
 });
 ```
@@ -509,7 +477,7 @@ zone.records(function(err, records) {
 Getting a specific record
 
 ```js
-zone.record(id, function(err, record) {
+zone.record(id).then(function(record) {
   console.log(record);
 });
 ```
@@ -522,7 +490,7 @@ zone.createRecord({
   type: "CNAME",
   value: "netlify.com",
   ttl: 3600
-}, function(err, record) {
+}).then(function(record) {
   console.log(record);
 });
 ```
@@ -530,7 +498,7 @@ zone.createRecord({
 Deleting a record
 
 ```js
-record.destroy(function(err) {
+record.destroy().then(function() {
   // deleted
 });
 ```
@@ -543,7 +511,7 @@ Resellers can use the node client to create and revoke access tokens on behalf o
 Creating an access token:
 
 ```js
-client.createAccessToken({user: {email: "test@example.com", uid: "1234"}}, function(err, accessToken) {
+client.createAccessToken({user: {email: "test@example.com", uid: "1234"}}).then(function(accessToken) {
   // accessToken.access_token
 });
 ```
@@ -553,8 +521,8 @@ The user must have either an email or a uid (or both) as a unique identifier. If
 Deleting an access token:
 
 ```js
-client.accessToken("token-string", function(err, accessToken) {
-  accessToken.destroy(function(err) {
+client.accessToken("token-string").then(function(accessToken) {
+  accessToken.destroy().then(function() {
     console.log("Access token revoked");
   });
 });
