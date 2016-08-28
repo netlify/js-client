@@ -2,7 +2,7 @@
   "author": "Netlify",
   "name": "netlify",
   "description": "Netlify API client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "bugs": {
     "url": "https://github.com/netlify/netlify-js/issues"
   },
@@ -16,6 +16,7 @@
     "base64-js": ">=0.0.4",
     "glob": ">=3.2.6",
     "graceful-fs": "^3.0.4",
+    "semaphore": "^1.0.5",
     "when": "^3.7.5"
   },
   "devDependencies": {
