@@ -152,7 +152,7 @@ site.destroy().then(function() {
 Pagination and Rate Limits
 ==========================
 
-Any collection returned by the client will have a meta attribute that lets you check pagination and rate limit values.
+Any collection returned by the client will have a meta attribute that lets you check pagination and rate limit values:
 
 ```js
 client.sites().then(function(sites) {
@@ -208,7 +208,7 @@ client.submissions().then(function(submissions) {
 });
 ```
 
-Access submissions from a specific site
+Access submissions from a specific site:
 
 ```js
 client.site(id).then(function(site) {
@@ -218,7 +218,7 @@ client.site(id).then(function(site) {
 });
 ```
 
-Access submissions from a specific form
+Access submissions from a specific form:
 
 ```js
 client.form(id).then(function(form) {
@@ -228,7 +228,7 @@ client.form(id).then(function(form) {
 });
 ```
 
-Get a specific submission
+Get a specific submission:
 
 ```js
 client.submission(id).then(function(submission) {
@@ -262,7 +262,7 @@ client.site(id).then(function(site) {
 Deploys
 =======
 
-Access all deploys for a site
+Access all deploys for a site:
 
 ```js
 site.deploys().then(function(deploys) {
@@ -270,7 +270,7 @@ site.deploys().then(function(deploys) {
 });
 ```
 
-Access a specific deploy
+Access a specific deploy:
 
 ```js
 site.deploy(id).then(function(deploy) {
@@ -294,7 +294,7 @@ site.createDeploy({dir: "/path/to/folder", draft: true}).then(function(deploy) {
 })
 ```
 
-Publish a deploy (makes it the current live version of the site)
+Publish a deploy (makes it the current live version of the site):
 
 ```js
 site.deploy(id).then(function(deploy) {
@@ -318,7 +318,7 @@ client.site(id).then(function(site) {
 });
 ```
 
-Get a specific snippet
+Get a specific snippet:
 
 ```js
 client.site(id).then(function(site) {
@@ -346,7 +346,7 @@ client.site(id).then(function(site) {
 });
 ```
 
-Update a snippet
+Update a snippet:
 
 ```js
 snippet.update({
@@ -360,7 +360,7 @@ snippet.update({
 });
 ```
 
-Delete a snippet
+Delete a snippet:
 
 ```js
 snippet.destroy().then(function() {
@@ -373,7 +373,7 @@ Users
 
 The user methods are mainly useful for resellers. Creating, deleting and updating users are limited to resellers.
 
-Getting a list of users
+Getting a list of users:
 
 ```js
 client.users().then(function(users) {
@@ -381,7 +381,7 @@ client.users().then(function(users) {
 });
 ```
 
-Getting a specific user
+Getting a specific user:
 
 ```js
 client.user(id).then(function(user) {
@@ -389,7 +389,7 @@ client.user(id).then(function(user) {
 });
 ```
 
-Creating a new user (`email` is required, `uid` is optional. Both must be unique)
+Creating a new user (`email` is required, `uid` is optional. Both must be unique):
 
 ```js
 client.createUser({email: "user@example.com", uid: "12345"}).then(function(user) {
@@ -397,7 +397,7 @@ client.createUser({email: "user@example.com", uid: "12345"}).then(function(user)
 });
 ```
 
-Updating a user
+Updating a user:
 
 ```js
 client.user(id).then(function(user) {
@@ -407,7 +407,7 @@ client.user(id).then(function(user) {
 });
 ```
 
-Deleting a user
+Deleting a user:
 
 ```js
 client.user(id).then(function(user) {
@@ -417,7 +417,7 @@ client.user(id).then(function(user) {
 });
 ```
 
-Getting sites belonging to a user
+Getting sites belonging to a user:
 
 ```js
 client.user(id).then(function(user) {
@@ -448,7 +448,7 @@ client.dnsZone(id).then(function(zone) {
 });
 ```
 
-Creating a new zone
+Creating a new zone:
 
 ```js
 client.createDnsZone({name: "example.com"}).then(function(zone) {
@@ -456,7 +456,7 @@ client.createDnsZone({name: "example.com"}).then(function(zone) {
 });
 ```
 
-Deleting a zone
+Deleting a zone:
 
 ```js
 client.dnsZone(id).then(function(zone) {
@@ -466,7 +466,7 @@ client.dnsZone(id).then(function(zone) {
 });
 ```
 
-Getting records for a zone
+Getting records for a zone:
 
 ```js
 zone.records().then(function(records) {
@@ -474,7 +474,7 @@ zone.records().then(function(records) {
 });
 ```
 
-Getting a specific record
+Getting a specific record:
 
 ```js
 zone.record(id).then(function(record) {
@@ -482,7 +482,7 @@ zone.record(id).then(function(record) {
 });
 ```
 
-Adding a new record (supported types: A, CNAME, TXT, MX)
+Adding a new record (supported types: A, CNAME, TXT, MX):
 
 ```js
 zone.createRecord({
@@ -495,7 +495,7 @@ zone.createRecord({
 });
 ```
 
-Deleting a record
+Deleting a record:
 
 ```js
 record.destroy().then(function() {
