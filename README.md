@@ -141,6 +141,14 @@ site.update({name: "my-site", customDomain: "www.example.com", notificationEmail
 });
 ```
 
+Provision SSL for a custom domain. The site must have a custom domain with DNS records configured to point to netlify’s infrastructure.
+
+```js
+site.provisionSSL().then(function() {
+  console.log("SSL Provisioned");
+});
+```
+
 Deleting a site:
 
 ```js

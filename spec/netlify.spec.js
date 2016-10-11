@@ -501,6 +501,31 @@ describe("netlify", function() {
     });
   });
 
+  it('should provision a LetsEncrypt SSL cert for custom domain', function() {
+    var client  = netlify.createClient({access_token: "1234", http: http}),
+        site    = new netlify.Client.models.Site(client, {id: "123", name: "test"}),
+        done    = false;
+
+    testApiCall({
+      http: {
+        expectations: function(options) {
+          expect(options.method).toEqual("post");
+          expect(options.path).toEqual("/api/v1/sites/123/ssl");
+        },
+        response: null
+      },
+      apiCall: function() {
+        site.provisionSSL().then(function() {
+          done = true;
+        });
+      },
+      waitsFor: function() { return done; },
+      expectations: function() {
+        expect(done).toEqual(true);
+      }
+    });
+  })
+
   // Node specific methods
   if (typeof(window) === "undefined") {
     var crypto = require('crypto'),
