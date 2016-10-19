@@ -2,7 +2,7 @@
   "author": "Netlify",
   "name": "netlify",
   "description": "Netlify API client",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "bugs": {
     "url": "https://github.com/netlify/node-client/issues"
   },
