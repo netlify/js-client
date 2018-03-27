@@ -1,3 +1,5 @@
+**NOTE:  This codebase is deprecated.  Please use our current API client for new development: https://github.com/netlify/open-api/**
+
 Netlify Node Client
 ======================
 
