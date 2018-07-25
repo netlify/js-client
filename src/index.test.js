@@ -47,17 +47,13 @@ test.serial('can make requests with a body', async t => {
 
   await server.listen(port)
 
-  const response = await client.createHookBySiteId(
-    {
+  const response = await client.createHookBySiteId({
+    site_id: 'Site123',
+    body: {
       some: 'bodyParams',
       another: 'one'
-    },
-    {
-      qs: {
-        site_id: 'Site123'
-      }
     }
-  )
+  })
   const json = await response.json()
   t.is(response.status, 200)
   t.deepEqual(json, { foo: 'bar' })
