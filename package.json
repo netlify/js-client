@@ -35,6 +35,7 @@
     "micro-api-client": "^3.2.3",
     "node-fetch": "^2.2.0",
     "qs": "^6.5.2",
+    "r2": "^2.0.1",
     "request": "^2.87.0"
   },
   "devDependencies": {
@@ -46,6 +47,7 @@
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-prettier": "^2.6.1",
     "prettier": "^1.13.7",
+    "tape": "^4.9.1",
     "util.promisify": "^1.0.0"
   },
   "optionalDependencies": {},

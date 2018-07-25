@@ -1,12 +1,6 @@
 const get = require('lodash.get')
 const qs = require('qs')
-if (!process.browser) {
-  // polyfill fetch
-  global.fetch = require('node-fetch')
-  global.Headers = global.fetch.Headers
-}
-const API = require('micro-api-client').default
-const client = new API()
+const r2 = require('r2')
 
 module.exports = method => {
   return async function(...args) {
@@ -48,8 +42,7 @@ module.exports = method => {
     }
 
     opts.headers = Object.assign({}, this.defaultHeaders, opts.headers)
-    if (body) opts.body = JSON.stringify(body)
-
-    return client.request(path, opts)
+    if (body) opts.json = body
+    return await r2[method.verb](path, opts).response
   }
 }

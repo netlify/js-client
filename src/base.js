@@ -15,8 +15,8 @@ class NetlifyApiBase {
       opts
     )
     this.defaultHeaders = {
-      'User-agent': opts.userAgent
-      // accept: 'application/json'
+      'User-agent': opts.userAgent,
+      accept: 'application/json'
     }
     this.scheme = opts.scheme
     this.host = opts.host
