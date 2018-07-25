@@ -1,7 +1,8 @@
-const test = require('tape')
+const test = require('ava')
 const http = require('http')
 const promisify = require('util').promisify
 const NetlifyAPI = require('./index')
+const body = promisify(require('body'))
 
 const createServer = handler => {
   const server = http.createServer(handler)
@@ -21,17 +22,64 @@ const client = new NetlifyAPI('1234', {
   clientId: '1234'
 })
 
-test('can make basic requests', async t => {
+test.serial('can make basic requests', async t => {
   const server = createServer((req, res) => {
-    t.equal(req.url, '/v1/oauth/tickets?client_id=1234', 'url')
-    t.equal(req.headers.authorization, 'Bearer 1234')
-    console.log(req.headers)
-    res.end('{"foo":"bar"}')
+    t.is(req.url, '/v1/oauth/tickets?client_id=1234')
+    res.end('{"foo": "bar"}')
   })
 
   await server.listen(port)
 
   const response = await client.createTicket()
-  const json = await response.json
-  t.end()
+  const json = await response.json()
+  t.is(response.status, 200)
+  t.deepEqual(json, { foo: 'bar' })
+
+  await server.close()
+})
+
+test.serial('can make requests with a body', async t => {
+  const server = createServer(async (req, res) => {
+    t.is(req.url, '/v1/hooks?site_id=Site123')
+    t.is(await body(req), '{"some":"bodyParams","another":"one"}')
+    res.end('{"foo": "bar"}')
+  })
+
+  await server.listen(port)
+
+  const response = await client.createHookBySiteId(
+    {
+      some: 'bodyParams',
+      another: 'one'
+    },
+    {
+      qs: {
+        site_id: 'Site123'
+      }
+    }
+  )
+  const json = await response.json()
+  t.is(response.status, 200)
+  t.deepEqual(json, { foo: 'bar' })
+
+  await server.close()
+})
+
+test.serial('basic api exists', async t => {
+  t.is(client.basePath, `http://localhost:1123/v1`, 'basePath getter works')
+  t.is(client.accessToken, '1234', 'accessToken is set')
+  t.deepEqual(
+    client.defaultHeaders,
+    {
+      Authorization: 'Bearer 1234',
+      'User-agent': 'Netlify node-client',
+      accept: 'application/json'
+    },
+    'Default headers are set'
+  )
+  client.accessToken = undefined
+  t.falsy(client.accessToken, 'deleting access token works fine')
+  client.accessToken = 5678
+  t.is(client.accessToken, '5678', 'accessToken is set')
+  t.is(client.defaultHeaders.Authorization, 'Bearer 5678', 'Bearer token is updated correctly')
 })
