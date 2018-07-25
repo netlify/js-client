@@ -1,6 +1,6 @@
 const test = require('ava')
 const http = require('http')
-const promisify = require('util').promisify
+const promisify = require('util.promisify')
 const NetlifyAPI = require('./index')
 const body = promisify(require('body'))
 
