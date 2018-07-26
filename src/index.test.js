@@ -30,10 +30,9 @@ test.serial('can make basic requests', async t => {
 
   await server.listen(port)
 
-  const response = await client.createTicket()
-  const json = await response.json()
-  t.is(response.status, 200)
-  t.deepEqual(json, { foo: 'bar' })
+  const body = await client.createTicket()
+  t.is(body.status, 200)
+  t.deepEqual(body, { foo: 'bar' })
 
   await server.close()
 })
@@ -54,9 +53,8 @@ test.serial('can make requests with a body', async t => {
       another: 'one'
     }
   })
-  const json = await response.json()
   t.is(response.status, 200)
-  t.deepEqual(json, { foo: 'bar' })
+  t.deepEqual(response, { foo: 'bar' })
 
   await server.close()
 })

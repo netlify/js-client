@@ -1,8 +1,4 @@
-const fs = require('fs')
-const path = require('path')
-const yaml = require('js-yaml')
-const swaggerYaml = fs.readFileSync(path.join(__dirname, 'swagger.yml'), 'utf8')
-const dfn = yaml.safeLoad(swaggerYaml)
+const dfn = require('@netlify/open-api')
 const { sortParams, mergeParams } = require('./util')
 const methods = []
 

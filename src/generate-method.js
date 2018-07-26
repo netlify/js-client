@@ -22,7 +22,7 @@ module.exports = method => {
     Object.values(method.parameters.path).forEach(param => {
       const val = params[param.name] || params[camelCase(param.name)]
       if (existy(val)) {
-        path.replace(`{${param.name}}`, val)
+        path = path.replace(`{${param.name}}`, val)
       } else if (param.required) {
         throw new Error(`Missing required param ${param.name}`)
       }
@@ -34,18 +34,44 @@ module.exports = method => {
       if (existy(val)) {
         if (!qs) qs = {}
         qs[param.name] = val
+      } else if (param.required) {
+        throw new Error(`Missing required param ${param.name}`)
       }
     })
     if (qs) path = path += `?${queryString.stringify(qs)}`
 
     let body
+
     if (params.body) {
       body = params.body
+      Object.values(method.parameters.body).forEach(param => {
+        const type = get(param, 'schema.format')
+        if (type === 'binary') {
+          opts.headers['Content-Type'] = 'application/octet-stream'
+        }
+      })
     }
-    delete params.body
 
     opts.headers = Object.assign({}, this.defaultHeaders, opts.headers)
+
     if (body) opts.json = body
-    return await r2[method.verb](path, opts).response
+    const req = await r2[method.verb](path, opts)
+    const response = await req.response
+
+    if (response.status >= 400) {
+      const err = new Error(response.statusText)
+      err.status = response.status
+      err.response = response
+      err.path = path
+      err.opts = opts
+      throw err
+    }
+    const status = {
+      status: response.status,
+      statusText: response.statusText
+    }
+    const json = await req.json
+    Object.setPrototypeOf(json, status)
+    return json
   }
 }
