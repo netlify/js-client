@@ -1,4 +1,5 @@
 const get = require('lodash.get')
+const set = require('lodash.set')
 const queryString = require('qs')
 const r2 = require('r2')
 const camelCase = require('lodash.camelcase')
@@ -18,7 +19,7 @@ module.exports = method => {
     )
 
     let path = this.basePath + method.path
-
+    // Path parameters
     Object.values(method.parameters.path).forEach(param => {
       const val = params[param.name] || params[camelCase(param.name)]
       if (existy(val)) {
@@ -27,7 +28,7 @@ module.exports = method => {
         throw new Error(`Missing required param ${param.name}`)
       }
     })
-
+    // qs parameters
     let qs
     Object.values(method.parameters.query).forEach(param => {
       const val = params[param.name] || params[camelCase(param.name)]
@@ -39,22 +40,37 @@ module.exports = method => {
       }
     })
     if (qs) path = path += `?${queryString.stringify(qs)}`
-
+    // body parameters
     let body
-
+    let bodyType = 'json'
     if (params.body) {
       body = params.body
       Object.values(method.parameters.body).forEach(param => {
         const type = get(param, 'schema.format')
         if (type === 'binary') {
-          opts.headers['Content-Type'] = 'application/octet-stream'
+          bodyType = 'binary'
         }
       })
     }
 
-    opts.headers = Object.assign({}, this.defaultHeaders, opts.headers)
+    const discoveredHeaders = {}
+    if (body) {
+      switch (bodyType) {
+        case 'binary': {
+          opts.body = body
+          set(discoveredHeaders, 'Content-Type', 'application/octet-stream')
+          break
+        }
+        case 'json':
+        default: {
+          opts.json = body
+          break
+        }
+      }
+    }
 
-    if (body) opts.json = body
+    opts.headers = Object.assign({}, this.defaultHeaders, discoveredHeaders, opts.headers)
+
     const req = await r2[method.verb](path, opts)
     const response = await req.response
 
@@ -66,6 +82,7 @@ module.exports = method => {
       err.opts = opts
       throw err
     }
+    // Put the status on the prototype to prevent it from serializing
     const status = {
       status: response.status,
       statusText: response.statusText

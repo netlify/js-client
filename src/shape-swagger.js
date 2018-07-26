@@ -25,5 +25,4 @@ Object.entries(dfn.paths).forEach(([apiPath, verbs]) => {
   })
 })
 
-exports.dfn = dfn
 exports.methods = methods
