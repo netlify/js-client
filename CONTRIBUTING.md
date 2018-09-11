@@ -8,15 +8,9 @@ please read the [code of conduct](CODE_OF_CONDUCT.md).
 > Install NPM on your system: https://docs.npmjs.com/getting-started/installing-node
 
 ```sh
-$ git clone https://github.com/netlify/node-client
-$ cd node-client
+$ git clone https://github.com/netlify/js-client netlify-js-client
+$ cd netlify-js-client
 $ npm install
-```
-
-## Building
-
-```sh
-$ npm build
 ```
 
 ## Testing
