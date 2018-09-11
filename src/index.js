@@ -78,6 +78,7 @@ class NetlifyAPI {
   }
 
   async deploy(siteId, buildDir, functionsDir, tomlPath, opts) {
+    // optimistically fail when missing an access token
     if (!this.accessToken) throw new Error('Missing access token')
     return await deploy(this, siteId, buildDir, functionsDir, tomlPath, opts)
   }
