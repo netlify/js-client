@@ -40,7 +40,7 @@ A getter that returns the formatted base URL of the endpoint the client is confi
 
 ### Open API Client methods
 
-The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file.  Each method is is named after the `operationId` name of each endpoint action.  **To see list of available operation see the [open-api website](https://open-api.netlify.com/)**.
+The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file.  Each method is is named after the `operationId` name of each endpoint action.  **To see list of available operations see the [open-api website](https://open-api.netlify.com/)**.
 
 Every open-api method has the following signature:
 
