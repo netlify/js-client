@@ -1,4 +1,6 @@
 # netlify/js-client
+[![npm version][npm-img]][npm] [![build status][travis-img]][travis] [![windows build status][av-img]][av]
+[![coverage][coverage-img]][coverage] [![dependencies][david-img]][david] [![downloads][dl-img]][dl]
 
 A Netlify [open-api](https://github.com/netlify/open-api) client that works in the browser and Node.js.
 
@@ -130,3 +132,16 @@ Optional `opts` include:
   parallelUpload: 4 // number of files to upload in parallel
 }
 ```
+
+[npm-img]: https://img.shields.io/npm/v/netlify.svg
+[npm]: https://npmjs.org/package/netlify
+[travis-img]: https://img.shields.io/travis/netlify/js-client/master.svg
+[travis]: https://travis-ci.org/netlify/js-client
+[av-img]: https://ci.appveyor.com/api/projects/status/6lw5yqvl4plm1utb/branch/master?svg=true
+[av]: https://ci.appveyor.com/project/netlify/js-client
+[dl-img]: https://img.shields.io/npm/dm/netlify.svg
+[dl]: https://npmjs.org/package/netlify
+[coverage-img]: https://img.shields.io/coveralls/netlify/js-client/master.svg
+[coverage]: https://coveralls.io/github/netlify/js-client
+[david-img]: https://david-dm.org/netlify/js-client/status.svg
+[david]: https://david-dm.org/netlify/js-client
