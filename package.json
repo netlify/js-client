@@ -1,10 +1,16 @@
 {
-  "author": "Netlify",
+  "author": "Netlify Inc.",
+  "contributors": [
+    "Mathias Biilmann <matt@netlify.com> (https://twitter.com/biilmann)",
+    "David Calavera <david@netlify.com> (https://twitter.com/calavera)",
+    "David Wells <david.wells@netlify.com> (https://davidwells.io/)",
+    "Bret Comnes <bcomnes@gmail.com> (https://bret.io)"
+  ],
   "name": "netlify",
-  "description": "Netlify API client",
+  "description": "Netlify Node.js API client",
   "version": "2.0.0",
   "bugs": {
-    "url": "https://github.com/netlify/node-client/issues"
+    "url": "https://github.com/netlify/js-client/issues"
   },
   "ava": {
     "files": [
@@ -15,43 +21,63 @@
     "failFast": false,
     "failWithoutAssertions": false,
     "tap": false,
-    "compileEnhancements": false
+    "compileEnhancements": false,
+    "babel": false
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/netlify/node-client.git"
+    "url": "https://github.com/netlify/js-client.git"
   },
   "scripts": {
-    "test": "ava --serial --verbose"
+    "build": "run-s build:*",
+    "build:deptree": "depcruise --exclude '^node_modules' --output-type dot src | dot -T svg > site/dist/dependencygraph.svg",
+    "test": "run-s test:*",
+    "test:ava": "nyc --reporter=lcov ava --verbose && nyc report",
+    "test:lint": "eslint src",
+    "test:deps": "dependency-check ./package.json --entry \"src/**/!(*.test).js\" --unused --missing --no-dev --no-peer",
+    "ci": "run-s test build",
+    "watch": "nyc --reporter=lcov ava --watch",
+    "report": "nyc report --reporter=text-lcov | coveralls"
   },
-  "homepage": "https://github.com/netlify/node-client",
+  "homepage": "https://github.com/netlify/js-client",
   "main": "src/index.js",
   "dependencies": {
-    "@netlify/open-api": "^0.1.0",
-    "js-yaml": "^3.12.0",
+    "@netlify/open-api": "^0.3.0",
+    "archiver": "^3.0.0",
+    "debug": "^3.1.0",
+    "flush-write-stream": "^1.0.3",
+    "folder-walker": "^3.1.0",
+    "from2-array": "0.0.4",
+    "hasha": "^3.0.0",
     "lodash.camelcase": "^4.3.0",
     "lodash.flatten": "^4.4.0",
     "lodash.get": "^4.4.2",
-    "lodash.isempty": "^4.4.0",
     "lodash.set": "^4.3.2",
-    "micro-api-client": "^3.2.3",
     "node-fetch": "^2.2.0",
+    "p-map": "^1.2.0",
+    "p-wait-for": "^2.0.0",
+    "parallel-transform": "^1.1.0",
+    "pump": "^3.0.0",
     "qs": "^6.5.2",
-    "r2": "^2.0.1",
-    "request": "^2.87.0"
+    "tempy": "^0.2.1",
+    "through2-filter": "^3.0.0",
+    "through2-map": "^3.0.0",
+    "util.promisify-all": "^1.0.2",
+    "util.promisify": "^1.0.0"
   },
   "devDependencies": {
     "ava": "1.0.0-beta.6",
     "babel-eslint": "^8.2.6",
     "body": "^5.1.0",
+    "dependency-check": "^3.2.0",
     "eslint": "^4.19.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-import": "^2.13.0",
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-prettier": "^2.6.1",
+    "npm-run-all": "^4.1.3",
     "prettier": "^1.13.7",
-    "tape": "^4.9.1",
-    "util.promisify": "^1.0.0"
+    "tape": "^4.9.1"
   },
   "optionalDependencies": {},
   "engines": {

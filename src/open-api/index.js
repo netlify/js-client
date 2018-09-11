@@ -1,24 +1,27 @@
 const get = require('lodash.get')
 const set = require('lodash.set')
 const queryString = require('qs')
-const r2 = require('r2')
+const fetch = require('node-fetch')
+const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
 
 function existy(val) {
   return val != null
 }
 
-module.exports = method => {
+exports.methods = require('./shape-swagger')
+
+// open-api 2.0
+exports.generateMethod = method => {
+  //
+  // Warning: Expects `this`. These methods expect to live on the client prototype
+  //
   return async function(params, opts) {
     opts = Object.assign({}, opts)
-    params = Object.assign(
-      {
-        client_id: this.clientId
-      },
-      params
-    )
+    params = Object.assign({}, this.globalParams, params)
 
     let path = this.basePath + method.path
+
     // Path parameters
     Object.values(method.parameters.path).forEach(param => {
       const val = params[param.name] || params[camelCase(param.name)]
@@ -28,6 +31,7 @@ module.exports = method => {
         throw new Error(`Missing required param ${param.name}`)
       }
     })
+
     // qs parameters
     let qs
     Object.values(method.parameters.query).forEach(param => {
@@ -40,6 +44,7 @@ module.exports = method => {
       }
     })
     if (qs) path = path += `?${queryString.stringify(qs)}`
+
     // body parameters
     let body
     let bodyType = 'json'
@@ -63,31 +68,51 @@ module.exports = method => {
         }
         case 'json':
         default: {
-          opts.json = body
+          opts.body = JSON.stringify(body)
+          set(discoveredHeaders, 'Content-Type', 'application/json')
           break
         }
       }
     }
 
-    opts.headers = Object.assign({}, this.defaultHeaders, discoveredHeaders, opts.headers)
+    opts.headers = new Headers(Object.assign({}, this.defaultHeaders, discoveredHeaders, opts.headers))
+    opts.method = method.verb.toUpperCase()
 
-    const req = await r2[method.verb](path, opts)
-    const response = await req.response
+    const response = await fetch(path, opts)
 
-    if (response.status >= 400) {
+    if (!response.ok) {
       const err = new Error(response.statusText)
       err.status = response.status
+      err.statusText = response.statusText
       err.response = response
       err.path = path
       err.opts = opts
+      const text = await response.text()
+      try {
+        err.body = JSON.parse(text)
+      } catch (e) {
+        err.body = text
+      }
       throw err
     }
-    // Put the status on the prototype to prevent it from serializing
+
     const status = {
       status: response.status,
-      statusText: response.statusText
+      statusText: response.statusText,
+      ok: response.ok
     }
-    const json = await req.json
+
+    const text = await response.text()
+    let json
+    try {
+      json = JSON.parse(text)
+    } catch (e) {
+      json = { body: text }
+    }
+
+    // Provide access to request status info as properties, without it serializing, including arrays
+    // A weird idea, with nice API ergonomics
+    Object.setPrototypeOf(status, Object.getPrototypeOf(json))
     Object.setPrototypeOf(json, status)
     return json
   }
