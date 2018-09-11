@@ -114,7 +114,7 @@ Optional `opts` include:
 
 See the [authenticating](https://www.netlify.com/docs/api/#authenticating) docs for more context.
 
-#### `promise(deploy) = client.deploy(siteId, buildDir, functionsDir, tomlPath, [opts])`
+#### `promise(deploy) = client.deploy(siteId, buildDir, [opts])`
 
 **Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy), a `functionsDir` (a folder with functions in it), a `tomlPath` (a path to a tomlFile you are deploying against) to create a new manual site deploy.  This creates a new deploy for the `siteId`, scans the build and functions folder and begins an upload of changed files.  Including a `tomlPath` will let you include any redirect rules.
 
@@ -127,6 +127,8 @@ Optional `opts` include:
 
 ```js
 {
+  functionsDir: null, // path to a folder of functions to deploy
+  tomlPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
   deployTimeout: 1.2e6, // 20 mins
   parallelHash: 100, // number of parallel hashing calls
   parallelUpload: 4 // number of files to upload in parallel

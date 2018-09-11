@@ -57,7 +57,7 @@ class NetlifyAPI {
     )
 
     const { id } = ticket
-    let authorizedTicket
+    let authorizedTicket // ticket capture
     const api = this
 
     const checkTicket = async () => {
@@ -77,10 +77,10 @@ class NetlifyAPI {
     return accessToken.access_token
   }
 
-  async deploy(siteId, buildDir, functionsDir, tomlPath, opts) {
+  async deploy(siteId, buildDir, opts) {
     // optimistically fail when missing an access token
     if (!this.accessToken) throw new Error('Missing access token')
-    return await deploy(this, siteId, buildDir, functionsDir, tomlPath, opts)
+    return await deploy(this, siteId, buildDir, opts)
   }
 }
 

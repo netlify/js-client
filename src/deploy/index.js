@@ -29,6 +29,8 @@ module.exports = async (api, siteId, dir, opts) => {
     opts
   )
 
+  const { fnDir, tomlPath } = opts
+
   opts.statusCb({
     type: 'hashing',
     msg: `Hashing files...`,
