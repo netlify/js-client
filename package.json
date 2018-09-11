@@ -30,6 +30,7 @@
   "dependencies": {
     "@netlify/open-api": "^0.4.1",
     "archiver": "^3.0.0",
+    "clean-deep": "^3.0.2",
     "debug": "^4.0.0",
     "flush-write-stream": "^1.0.3",
     "folder-walker": "^3.2.0",

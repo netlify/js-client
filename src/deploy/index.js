@@ -2,13 +2,16 @@ const debug = require('debug')('netlify-cli:deploy')
 const uploadFiles = require('./upload-files')
 const hashFiles = require('./hash-files')
 const hashFns = require('./hash-fns')
+const cleanDeep = require('clean-deep')
 
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
-module.exports = async (api, siteId, dir, fnDir, tomlPath, opts) => {
+module.exports = async (api, siteId, dir, opts) => {
   // TODO Implement progress cb
   opts = Object.assign(
     {
+      fnDir: null,
+      tomlPath: null,
       draft: false,
       deployTimeout: 1.2e6, // local deploy timeout: 20 mins
       concurrentHash: 100, // concurrent file hash calls
@@ -52,7 +55,7 @@ module.exports = async (api, siteId, dir, fnDir, tomlPath, opts) => {
     phase: 'start'
   })
 
-  let deploy = await api.createSiteDeploy({ siteId, body: { files, functions, draft: opts.draft } })
+  let deploy = await api.createSiteDeploy({ siteId, body: cleanDeep({ files, functions, draft: opts.draft }) })
   const { id: deployId, required: requiredFiles, required_functions: requiredFns } = deploy
 
   debug(`deploy id: ${deployId}`)
