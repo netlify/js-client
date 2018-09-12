@@ -4,6 +4,7 @@ const queryString = require('qs')
 const fetch = require('node-fetch')
 const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
+const { JSONHTTPError, TextHTTPError, HTTPError, getPagination } = require('micro-api-client')
 
 function existy(val) {
   return val != null
@@ -78,42 +79,28 @@ exports.generateMethod = method => {
     opts.headers = new Headers(Object.assign({}, this.defaultHeaders, discoveredHeaders, opts.headers))
     opts.method = method.verb.toUpperCase()
 
+    // TODO: Use micro-api-client when it supports node-fetch
     const response = await fetch(path, opts)
+    const contentType = response.headers.get('Content-Type')
 
-    if (!response.ok) {
-      const err = new Error(response.statusText)
-      err.status = response.status
-      err.statusText = response.statusText
-      err.response = response
-      err.path = path
-      err.opts = opts
-      const text = await response.text()
+    if (contentType && contentType.match(/json/)) {
       try {
-        err.body = JSON.parse(text)
+        const json = await response.json()
+        if (!response.ok) {
+          throw new JSONHTTPError(response, json)
+        }
+        const pagination = getPagination(response)
+        return pagination ? { pagination, items: json } : json
       } catch (e) {
-        err.body = text
+        throw new HTTPError(response)
       }
-      throw err
-    }
-
-    const status = {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
     }
 
     const text = await response.text()
-    let json
-    try {
-      json = JSON.parse(text)
-    } catch (e) {
-      json = { body: text }
+    if (!response.ok) {
+      throw new TextHTTPError(response, text)
     }
 
-    // Provide access to request status info as properties, without it serializing, including arrays
-    // A weird idea, with nice API ergonomics
-    Object.setPrototypeOf(status, Object.getPrototypeOf(json))
-    Object.setPrototypeOf(json, status)
-    return json
+    return text
   }
 }

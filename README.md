@@ -87,13 +87,15 @@ All methods are conveniently consumed with async/await:
 async function getSomeData () {
   // Calls may fail!
   try {
-    const resposnse = await client.operationId({})
+    const resposnse = await client.getSites()
     return response
   } catch (e) {
     // handle error
   }
 }
 ```
+
+If the request response includes `json` in the `contentType` header, fetch will deserialize the JSON body.  Otherwise the `text` of the response is returned.
 
 ### Convenience Methods
 

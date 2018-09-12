@@ -7,15 +7,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
-      "program": "${file}"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Run AVA test serially",
+      "name": "Run active AVA test",
       "program": "${workspaceRoot}/node_modules/ava/profile.js",
-      "args": ["src/index.test.js", "--serial"]
+      "args": ["${file}", "--serial"]
     }
   ]
 }

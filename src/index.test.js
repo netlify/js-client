@@ -4,7 +4,7 @@ const promisify = require('util.promisify')
 const NetlifyAPI = require('./index')
 const body = promisify(require('body'))
 const fromString = require('from2-string')
-const Headers = require('node-fetch').Headers
+const { TextHTTPError } = require('micro-api-client')
 
 const createServer = handler => {
   const s = http.createServer(handler)
@@ -29,13 +29,13 @@ test.serial('can make basic requests', async t => {
   try {
     server = createServer((req, res) => {
       t.is(req.url, '/v1/oauth/tickets?client_id=1234')
+      res.setHeader('Content-Type', 'application/json')
       res.end('{"foo": "bar"}')
     })
 
     await server.listen(port)
 
     const body = await client.createTicket()
-    t.is(body.status, 200)
     t.deepEqual(body, { foo: 'bar' })
   } catch (e) {
     t.fail(e)
@@ -49,6 +49,7 @@ test.serial('can make requests with a body', async t => {
     server = createServer(async (req, res) => {
       t.is(req.url, '/v1/hooks?site_id=Site123')
       t.is(await body(req), '{"some":"bodyParams","another":"one"}')
+      res.setHeader('Content-Type', 'application/json')
       res.end('{"foo": "bar"}')
     })
 
@@ -61,7 +62,6 @@ test.serial('can make requests with a body', async t => {
         another: 'one'
       }
     })
-    t.is(response.status, 200)
     t.deepEqual(response, { foo: 'bar' })
   } catch (e) {
     t.fail(e)
@@ -88,7 +88,7 @@ test.serial('path parameter assignment', async t => {
       }
     )
     const response = await client.createHookBySiteId({ siteId: 'Site123' })
-    t.deepEqual(response, { body: '' }, 'Testing other path branch')
+    t.is(response, '', 'Testing other path branch')
   } catch (e) {
     t.fail(e)
   }
@@ -108,22 +108,10 @@ test.serial('handles errors from API', async t => {
 
     const error = await t.throwsAsync(client.createHookBySiteId({ siteId: 'Site123' }))
     t.is(error.status, 404, 'status code is captures on error')
-    t.is(error.statusText, 'Test not found', 'status text is captures on error')
-    t.truthy(error.response, 'Error has response object')
-    t.truthy(error.path, 'Error has response object')
-    t.deepEqual(
-      error.opts,
-
-      {
-        method: 'POST',
-        headers: new Headers({
-          Authorization: 'Bearer 1234',
-          'User-agent': 'netlify/js-client',
-          accept: 'application/json'
-        })
-      },
-      'Opts look correct'
-    )
+    t.is(error.message, 'Test not found', 'status text is captures on error')
+    t.is(error.data, '', 'has an empty data field')
+    t.true(error instanceof TextHTTPError, 'Is instance of TextHTTPError')
+    t.truthy(error.stack, 'Error has stacktrace')
   } catch (e) {
     t.fail(e)
   }
@@ -156,6 +144,7 @@ test.serial('binary uploads', async t => {
       t.is(await body(req), 'hello world')
       res.statusCode = 200
       res.statusMessage = 'OK'
+      res.setHeader('Content-Type', 'application/json')
       res.end('{"ok": true}')
     })
 
@@ -169,7 +158,6 @@ test.serial('binary uploads', async t => {
     })
 
     t.deepEqual(response, { ok: true })
-    t.is(response.status, 200)
   } catch (e) {
     t.fail(e)
   }
@@ -201,6 +189,7 @@ test.serial('access token can poll', async t => {
       okayToResponse = true
     }, 100)
     server = createServer(async (req, res) => {
+      res.setHeader('Content-Type', 'application/json')
       if (req.url == '/v1/oauth/tickets/ticket-id') {
         if (!okayToResponse) {
           res.end('{}')
