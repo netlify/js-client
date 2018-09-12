@@ -78,13 +78,15 @@ class NetlifyAPI {
   }
 
   async deploy(siteId, buildDir, opts) {
-    // optimistically fail when missing an access token
     if (!this.accessToken) throw new Error('Missing access token')
+    // the deploy function is swapped in the package.json browser field for different environments
+    // See https://github.com/defunctzombie/package-browser-field-spec
     return await deploy(this, siteId, buildDir, opts)
   }
 }
 
 methods.forEach(method => {
+  // Generate open-api methods
   /* {param1, param2, body, ... }, [opts] */
   NetlifyAPI.prototype[method.operationId] = generateMethod(method)
 })
