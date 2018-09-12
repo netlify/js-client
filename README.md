@@ -118,12 +118,12 @@ See the [authenticating](https://www.netlify.com/docs/api/#authenticating) docs 
 
 #### `promise(deploy) = client.deploy(siteId, buildDir, [opts])`
 
-**Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy), a `functionsDir` (a folder with functions in it), a `tomlPath` (a path to a tomlFile you are deploying against) to create a new manual site deploy.  This creates a new deploy for the `siteId`, scans the build and functions folder and begins an upload of changed files.  Including a `tomlPath` will let you include any redirect rules.
+**Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
 
-The following arguments can be null:
+The following paths can be passed in the options:
 
-- `tomlPath`
-- `functionsDir`
+- `tomlPath` (a `netlify.toml` file that includes redirect rules for the deploy)
+- `functionsDir` (a folder with lambda functions to deploy)
 
 Optional `opts` include:
 
