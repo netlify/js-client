@@ -68,16 +68,11 @@ Optional `opts` can include any property you want passed to `node-fetch`.  The `
 ```js
 // example opts
 {
-  headers
+  headers: { // Default headers
+    'User-agent': 'netlify-js-client',
+    accept: 'application/json'
+  }
   // any other properties for node-fetch
-}
-```
-
-```js
-// default headers
-{
-  'User-agent': 'netlify-js-client',
-  accept: 'application/json'
 }
 ```
 
@@ -103,7 +98,7 @@ Some methods have been added in addition to the open API methods that make certa
 
 #### `promise(accessToken) = client.getAccessToken(ticket, [opts])`
 
-Pass in a [`ticket`](open-api.netlify.com#model-ticket) and get back an `accessToken`.  Call this with the response from a `client.createTicket({ client_id })` call.  Automatically sets the `accessToken` to `this.accessToken` and returns `accessToken` for the consumer to save for later.
+Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an `accessToken`.  Call this with the response from a `client.createTicket({ client_id })` call.  Automatically sets the `accessToken` to `this.accessToken` and returns `accessToken` for the consumer to save for later.
 
 Optional `opts` include:
 
