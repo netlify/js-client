@@ -126,10 +126,20 @@ Optional `opts` include:
 {
   functionsDir: null, // path to a folder of functions to deploy
   tomlPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
+  draft: false, // draft deploy or production deploy
   deployTimeout: 1.2e6, // 20 mins
   parallelHash: 100, // number of parallel hashing calls
-  parallelUpload: 4 // number of files to upload in parallel
-}
+  parallelUpload: 4, // number of files to upload in parallel
+  filter: filename => { /* return false to filter a file from the deploy */ }
+  statusCb: statusObj => {
+    // a callback function to receive status events
+    /* statusObj: {
+            type: name-of-step
+            msg: msg to print
+            phase: [start, progress, stop]
+        } */
+  }
+ }
 ```
 
 [npm-img]: https://img.shields.io/npm/v/netlify.svg
