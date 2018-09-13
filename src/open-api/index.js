@@ -4,7 +4,7 @@ const queryString = require('qs')
 const fetch = require('node-fetch')
 const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
-const { JSONHTTPError, TextHTTPError, HTTPError, getPagination } = require('micro-api-client')
+const { JSONHTTPError, TextHTTPError, HTTPError } = require('micro-api-client')
 
 function existy(val) {
   return val != null
@@ -81,6 +81,7 @@ exports.generateMethod = method => {
 
     // TODO: Use micro-api-client when it supports node-fetch
     const response = await fetch(path, opts)
+
     const contentType = response.headers.get('Content-Type')
 
     if (contentType && contentType.match(/json/)) {
@@ -89,8 +90,10 @@ exports.generateMethod = method => {
         if (!response.ok) {
           throw new JSONHTTPError(response, json)
         }
-        const pagination = getPagination(response)
-        return pagination ? { pagination, items: json } : json
+        // TODO: Support pagination
+        // const pagination = getPagination(response)
+        // return pagination ? { pagination, items: json } : json
+        return json
       } catch (e) {
         throw new HTTPError(response)
       }
