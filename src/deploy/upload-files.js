@@ -1,6 +1,5 @@
 const pMap = require('p-map')
 const fs = require('fs')
-const debug = require('debug')('netlify:deploy:file-uploader')
 
 module.exports = uploadFiles
 async function uploadFiles(api, deployId, uploadList, { concurrentUpload, statusCb }) {
@@ -13,7 +12,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
   const uploadFile = async fileObj => {
     const { normalizedPath, assetType, runtime } = fileObj
     const readStream = fs.createReadStream(fileObj.filepath)
-    debug(`uploading ${normalizedPath}`)
+
     statusCb({
       type: 'upload',
       msg: `Uploading ${normalizedPath}...`,
@@ -45,7 +44,6 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
       }
     }
 
-    debug(`done uploading ${normalizedPath} (${assetType}`)
     statusCb({
       type: 'upload',
       msg: `Finished uploading ${normalizedPath}`,

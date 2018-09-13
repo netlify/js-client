@@ -1,7 +1,6 @@
 const path = require('path')
 const pWaitFor = require('p-wait-for')
 const flatten = require('lodash.flatten')
-const debug = require('debug')('netlify-cli:deploy:util')
 
 function existy(x) {
   return x != null
@@ -46,7 +45,6 @@ async function waitForDeploy(api, deployId, timeout) {
 
   async function loadDeploy() {
     const d = await api.getDeploy({ deployId })
-    debug(`deploy state: ${d.state}`)
     if (d.state === 'ready') {
       deploy = d
       return true
