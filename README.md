@@ -111,6 +111,20 @@ Optional `opts` include:
 
 See the [authenticating](https://www.netlify.com/docs/api/#authenticating) docs for more context.
 
+```js
+// example:
+async function login () {
+  const ticket = await api.createTicket({
+    clientId: CLIENT_ID
+  })
+  // Open browser for authentication
+  await openBrowser(`https://app.netlify.com/authorize?response_type=ticket&ticket=${ticket.id}`)
+  const accessToken = await api.getAccessToken(ticket)
+  // API is also set up to use the returned access token as a side effect 
+  return accessToken
+}
+```
+
 #### `promise(deploy) = client.deploy(siteId, buildDir, [opts])`
 
 **Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
