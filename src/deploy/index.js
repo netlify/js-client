@@ -1,4 +1,3 @@
-const debug = require('debug')('netlify-cli:deploy')
 const uploadFiles = require('./upload-files')
 const hashFiles = require('./hash-files')
 const hashFns = require('./hash-fns')
@@ -29,9 +28,9 @@ module.exports = async (api, siteId, dir, opts) => {
     opts
   )
 
-  const { fnDir, tomlPath } = opts
+  const { fnDir, tomlPath, statusCb } = opts
 
-  opts.statusCb({
+  statusCb({
     type: 'hashing',
     msg: `Hashing files...`,
     phase: 'start'
@@ -42,16 +41,13 @@ module.exports = async (api, siteId, dir, opts) => {
     hashFns(fnDir, opts)
   ])
 
-  opts.statusCb({
+  statusCb({
     type: 'hashing',
     msg: `Finished hashing ${Object.keys(files).length} files and ${Object.keys(functions).length} functions`,
     phase: 'stop'
   })
 
-  debug(`Hashed ${Object.keys(files).length} files`)
-  debug(`Hashed ${Object.keys(functions).length} functions`)
-
-  opts.statusCb({
+  statusCb({
     type: 'create-deploy',
     msg: 'CDN diffing files...',
     phase: 'start'
@@ -60,10 +56,7 @@ module.exports = async (api, siteId, dir, opts) => {
   let deploy = await api.createSiteDeploy({ siteId, body: cleanDeep({ files, functions, draft: opts.draft }) })
   const { id: deployId, required: requiredFiles, required_functions: requiredFns } = deploy
 
-  debug(`deploy id: ${deployId}`)
-  debug(`deploy requested ${requiredFiles.length} site files`)
-  debug(`deploy requested ${requiredFns.length} function files`)
-  opts.statusCb({
+  statusCb({
     type: 'create-deploy',
     msg: `CDN requesting ${requiredFiles.length} files and ${requiredFns.length} functions`,
     phase: 'stop'
@@ -71,19 +64,16 @@ module.exports = async (api, siteId, dir, opts) => {
 
   const uploadList = getUploadList(requiredFiles, filesShaMap).concat(getUploadList(requiredFns, fnShaMap))
 
-  debug(`Deploy requested ${uploadList.length} files`)
   await uploadFiles(api, deployId, uploadList, opts)
-  debug(`Done uploading files.`)
 
-  debug(`Polling deploy...`)
-  opts.statusCb({
+  statusCb({
     type: 'wait-for-deploy',
     msg: 'Waiting for deploy to go live...',
     phase: 'start'
   })
   deploy = await waitForDeploy(api, deployId, opts.deployTimeout)
-  debug(`Deploy complete`)
-  opts.statusCb({
+
+  statusCb({
     type: 'wait-for-deploy',
     msg: opts.draft ? 'Draft deploy is live!' : 'Deploy is live!',
     phase: 'stop'
