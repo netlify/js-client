@@ -152,6 +152,8 @@ Optional `opts` include:
             msg: msg to print
             phase: [start, progress, stop]
         } */
+    // See https://github.com/netlify/cli/blob/v2.0.0-beta.3/src/commands/deploy.js#L161-L195
+    // for an example of how this can be used.
   }
  }
 ```
