@@ -85,18 +85,19 @@ exports.generateMethod = method => {
     const contentType = response.headers.get('Content-Type')
 
     if (contentType && contentType.match(/json/)) {
+      let json
       try {
-        const json = await response.json()
-        if (!response.ok) {
-          throw new JSONHTTPError(response, json)
-        }
-        // TODO: Support pagination
-        // const pagination = getPagination(response)
-        // return pagination ? { pagination, items: json } : json
-        return json
+        json = await response.json()
       } catch (e) {
-        throw new HTTPError(response)
+        throw new JSONHTTPError(response, json)
       }
+      if (!response.ok) {
+        throw new JSONHTTPError(response, json)
+      }
+      // TODO: Support pagination
+      // const pagination = getPagination(response)
+      // return pagination ? { pagination, items: json } : json
+      return json
     }
 
     const text = await response.text()
