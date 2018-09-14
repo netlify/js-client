@@ -4,7 +4,7 @@ const queryString = require('qs')
 const fetch = require('node-fetch')
 const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
-const { JSONHTTPError, TextHTTPError, HTTPError } = require('micro-api-client')
+const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
 
 function existy(val) {
   return val != null
@@ -85,12 +85,7 @@ exports.generateMethod = method => {
     const contentType = response.headers.get('Content-Type')
 
     if (contentType && contentType.match(/json/)) {
-      let json
-      try {
-        json = await response.json()
-      } catch (e) {
-        throw new JSONHTTPError(response, json)
-      }
+      const json = await response.json()
       if (!response.ok) {
         throw new JSONHTTPError(response, json)
       }
