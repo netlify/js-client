@@ -43,7 +43,9 @@ module.exports = async (api, siteId, dir, opts) => {
 
   statusCb({
     type: 'hashing',
-    msg: `Finished hashing ${Object.keys(files).length} files and ${Object.keys(functions).length} functions`,
+    msg:
+      `Finished hashing ${Object.keys(files).length} files` +
+      (fnDir ? ` and ${Object.keys(functions).length} functions` : ''),
     phase: 'stop'
   })
 
@@ -53,12 +55,16 @@ module.exports = async (api, siteId, dir, opts) => {
     phase: 'start'
   })
 
-  let deploy = await api.createSiteDeploy({ siteId, body: cleanDeep({ files, functions, draft: opts.draft }) })
+  const deployBody = cleanDeep({ files, functions, draft: opts.draft })
+
+  let deploy = await api.createSiteDeploy({ siteId, body: deployBody })
   const { id: deployId, required: requiredFiles, required_functions: requiredFns } = deploy
 
   statusCb({
     type: 'create-deploy',
-    msg: `CDN requesting ${requiredFiles.length} files and ${requiredFns.length} functions`,
+    msg:
+      `CDN requesting ${requiredFiles.length} files` +
+      (Array.isArray(requiredFns) ? ` and ${requiredFns.length} functions` : ''),
     phase: 'stop'
   })
 

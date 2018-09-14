@@ -55,7 +55,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
   const results = await pMap(uploadList, uploadFile, { concurrency: concurrentUpload })
   statusCb({
     type: 'upload',
-    msg: `Finished uploading ${uploadList.length} files`,
+    msg: `Finished uploading ${uploadList.length} assets`,
     phase: 'stop'
   })
   return results
