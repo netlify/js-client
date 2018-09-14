@@ -128,6 +128,7 @@ async function login () {
 #### `promise(deploy) = client.deploy(siteId, buildDir, [opts])`
 
 **Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
+Sometimes need to write to a `tmpDir`.
 
 The following paths can be passed in the options:
 
@@ -145,6 +146,7 @@ Optional `opts` include:
   parallelHash: 100, // number of parallel hashing calls
   parallelUpload: 4, // number of files to upload in parallel
   filter: filename => { /* return false to filter a file from the deploy */ }
+  tmlDir: tempy.directory(), // a temporary directory to zip loose files into
   statusCb: statusObj => {
     // a callback function to receive status events
     /* statusObj: {

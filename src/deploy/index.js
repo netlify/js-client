@@ -2,6 +2,7 @@ const uploadFiles = require('./upload-files')
 const hashFiles = require('./hash-files')
 const hashFns = require('./hash-fns')
 const cleanDeep = require('clean-deep')
+const tempy = require('tempy')
 
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
@@ -12,6 +13,7 @@ module.exports = async (api, siteId, dir, opts) => {
       fnDir: null,
       tomlPath: null,
       draft: false,
+      tmpDir: tempy.directory(),
       deployTimeout: 1.2e6, // local deploy timeout: 20 mins
       concurrentHash: 100, // concurrent file hash calls
       concurrentUpload: 4, // Number of concurrent uploads

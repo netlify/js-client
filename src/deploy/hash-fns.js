@@ -3,7 +3,6 @@ const promisify = require('util.promisify')
 const pump = promisify(require('pump'))
 const fs = promisifyAll(require('fs'))
 const fromArray = require('from2-array')
-const tempy = require('tempy')
 
 const { hasherCtor, manifestCollectorCtor, fnStatCtor, fnFilterCtor } = require('./hasher-segments')
 
@@ -14,7 +13,7 @@ async function hashFns(dir, opts) {
       concurrentHash: 100,
       assetType: 'function',
       hashAlgorithm: 'sha256',
-      tmpDir: tempy.directory(),
+      // tmpDir,
       statusCb: () => {}
     },
     opts
@@ -22,6 +21,7 @@ async function hashFns(dir, opts) {
   // early out if the functions dir is omitted
   if (!dir) return { functions: {}, shaMap: {} }
   if (!opts.filter) throw new Error('Missing required filter function')
+  if (!opts.tmpDir) throw new Error('Missing tmpDir directory for zipping files')
 
   const fileList = await fs.readdir(dir).then(files => files.filter(opts.filter))
   const fileStream = fromArray.obj(fileList)
