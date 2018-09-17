@@ -4,10 +4,10 @@ const { defaultFilter } = require('./util')
 const path = require('path')
 
 test('hashes files in a folder', async t => {
-  const { files, filesShaMap } = await hashFiles(__dirname, path.resolve(__dirname, './fixtures/netlify.toml'), {
+  const { files, filesShaMap } = await hashFiles(__dirname, path.resolve(__dirname, '../../fixtures/netlify.toml'), {
     filter: defaultFilter
   })
-
+  t.truthy(files['netlify.toml'], 'includes the netlify.toml file')
   Object.keys(files).forEach(path => t.truthy(path, 'each file has a path'))
   t.truthy(filesShaMap, 'filesShaMap is returned')
   Object.values(filesShaMap).forEach(fileObjArray =>
