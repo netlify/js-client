@@ -9,13 +9,13 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
     msg: `Uploading ${uploadList.length} files`,
     phase: 'start'
   })
-  const uploadFile = async fileObj => {
+  const uploadFile = async (fileObj, index) => {
     const { normalizedPath, assetType, runtime } = fileObj
     const readStream = fs.createReadStream(fileObj.filepath)
 
     statusCb({
       type: 'upload',
-      msg: `Uploading ${normalizedPath}...`,
+      msg: `(${index}/${uploadList.length}) Uploading ${normalizedPath}...`,
       phase: 'progress'
     })
     let response
@@ -44,11 +44,6 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
       }
     }
 
-    statusCb({
-      type: 'upload',
-      msg: `Finished uploading ${normalizedPath}`,
-      phase: 'progress'
-    })
     return response
   }
 
