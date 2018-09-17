@@ -12,6 +12,7 @@ module.exports = async (api, siteId, dir, opts) => {
       fnDir: null,
       tomlPath: null,
       draft: false,
+      message: undefined, // API calls this the 'title'
       tmpDir: tempy.directory(),
       deployTimeout: 1.2e6, // local deploy timeout: 20 mins
       concurrentHash: 100, // concurrent file hash calls
@@ -29,7 +30,7 @@ module.exports = async (api, siteId, dir, opts) => {
     opts
   )
 
-  const { fnDir, tomlPath, statusCb } = opts
+  const { fnDir, tomlPath, statusCb, message: title } = opts
 
   statusCb({
     type: 'hashing',
@@ -56,9 +57,17 @@ module.exports = async (api, siteId, dir, opts) => {
     phase: 'start'
   })
 
-  const deployBody = cleanDeep({ files, functions, draft: opts.draft })
+  const deployParams = cleanDeep({
+    siteId,
+    title,
+    body: {
+      files,
+      functions,
+      draft: opts.draft
+    }
+  })
 
-  let deploy = await api.createSiteDeploy({ siteId, body: deployBody })
+  let deploy = await api.createSiteDeploy(deployParams)
   const { id: deployId, required: requiredFiles, required_functions: requiredFns } = deploy
 
   statusCb({

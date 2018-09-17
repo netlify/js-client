@@ -142,6 +142,7 @@ Optional `opts` include:
   functionsDir: null, // path to a folder of functions to deploy
   tomlPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
   draft: false, // draft deploy or production deploy
+  message: undefined, // a short message to associate with the deploy
   deployTimeout: 1.2e6, // 20 mins
   parallelHash: 100, // number of parallel hashing calls
   parallelUpload: 4, // number of files to upload in parallel
