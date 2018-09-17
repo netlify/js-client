@@ -16,14 +16,15 @@ module.exports = async (api, siteId, dir, opts) => {
       tmpDir: tempy.directory(),
       deployTimeout: 1.2e6, // local deploy timeout: 20 mins
       concurrentHash: 100, // concurrent file hash calls
-      concurrentUpload: 4, // Number of concurrent uploads
+      concurrentUpload: 15, // Number of concurrent uploads
       filter: defaultFilter,
       statusCb: statusObj => {
         /* default to noop */
         /* statusObj: {
             type: name-of-step
             msg: msg to print
-            phase: [start, progress, stop]
+            phase: [start, progress, stop],
+            spinner: a spinner from cli-spinners package
         } */
       }
     },
