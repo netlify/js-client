@@ -7,10 +7,12 @@ const deploy = require('./deploy')
 
 class NetlifyAPI {
   constructor(accessToken, opts) {
+    // variadic arguments
     if (typeof accessToken === 'object') {
       opts = accessToken
       accessToken = null
     }
+    // default opts
     opts = Object.assign(
       {
         userAgent: 'netlify/js-client',

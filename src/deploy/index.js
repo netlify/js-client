@@ -7,7 +7,6 @@ const tempy = require('tempy')
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
 module.exports = async (api, siteId, dir, opts) => {
-  // TODO Implement progress cb
   opts = Object.assign(
     {
       fnDir: null,
