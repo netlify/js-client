@@ -84,6 +84,7 @@ exports.generateMethod = method => {
     try {
       response = await fetch(path, opts)
     } catch (e) {
+      /* istanbul ignore next */
       e.name = 'FetchError'
       e.url = path
       e.data = Object.assign({}, opts)
