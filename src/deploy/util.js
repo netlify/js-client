@@ -22,10 +22,13 @@ exports.defaultFilter = filename => {
 
 // normalize windows paths to unix paths
 exports.normalizePath = relname => {
+  if (relname.includes('#') || relname.includes('?')) {
+    throw new Error(`Invalid filename ${relname}. Deployed filenames cannot contain # or ? characters`)
+  }
   return (
     relname
       .split(path.sep)
-      // .map(segment => encodeURIComponent(segment)) // TODO Messes up for paths with @ in them
+      // .map(segment => encodeURI(segment)) // TODO I'm fairly certain we shouldn't encodeURI here, thats only for the file upload step
       .join('/')
   )
 }
