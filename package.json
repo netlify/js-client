@@ -41,7 +41,7 @@
     "lodash.set": "^4.3.2",
     "micro-api-client": "^3.3.0",
     "node-fetch": "^2.2.0",
-    "p-map": "^1.2.0",
+    "p-map": "^2.0.0",
     "p-wait-for": "^2.0.0",
     "parallel-transform": "^1.1.0",
     "pump": "^3.0.0",
