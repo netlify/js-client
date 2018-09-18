@@ -9,6 +9,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
     msg: `Uploading ${uploadList.length} files`,
     phase: 'start'
   })
+
   const uploadFile = async (fileObj, index) => {
     const { normalizedPath, assetType, runtime } = fileObj
     const readStream = fs.createReadStream(fileObj.filepath)
@@ -24,7 +25,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
         response = await api.uploadDeployFile({
           body: readStream,
           deployId,
-          path: normalizedPath
+          path: encodeURI(normalizedPath)
         })
         break
       }
@@ -32,7 +33,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
         response = await api.uploadDeployFunction({
           body: readStream,
           deployId,
-          name: normalizedPath,
+          name: encodeURI(normalizedPath),
           runtime
         })
         break
