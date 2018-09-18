@@ -80,7 +80,16 @@ exports.generateMethod = method => {
     opts.method = method.verb.toUpperCase()
 
     // TODO: Use micro-api-client when it supports node-fetch
-    const response = await fetch(path, opts)
+    let response
+    try {
+      response = await fetch(path, opts)
+    } catch (e) {
+      e.name = 'FetchError'
+      e.url = path
+      e.data = Object.assign({}, opts)
+      delete e.data.Authorization
+      throw e
+    }
 
     const contentType = response.headers.get('Content-Type')
 
