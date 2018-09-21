@@ -19,7 +19,8 @@ module.exports = async (api, siteId, dir, opts) => {
       concurrentHash: 100, // concurrent file hash calls
       concurrentUpload: 15, // Number of concurrent uploads
       filter: defaultFilter,
-      syncFileLimit: 7000,
+      syncFileLimit: 7000, // number of files
+      maxRetry: 5, // number of times to retry an upload
       statusCb: statusObj => {
         /* default to noop */
         /* statusObj: {

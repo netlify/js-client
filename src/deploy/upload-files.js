@@ -1,9 +1,10 @@
 const pMap = require('p-map')
 const fs = require('fs')
+const backoff = require('backoff')
 
 module.exports = uploadFiles
-async function uploadFiles(api, deployId, uploadList, { concurrentUpload, statusCb }) {
-  if (!concurrentUpload || !statusCb) throw new Error('Missing required option concurrentUpload')
+async function uploadFiles(api, deployId, uploadList, { concurrentUpload, statusCb, maxRetry }) {
+  if (!concurrentUpload || !statusCb || !maxRetry) throw new Error('Missing required option concurrentUpload')
   statusCb({
     type: 'upload',
     msg: `Uploading ${uploadList.length} files`,
@@ -22,20 +23,28 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
     let response
     switch (assetType) {
       case 'file': {
-        response = await api.uploadDeployFile({
-          body: readStream,
-          deployId,
-          path: encodeURI(normalizedPath)
-        })
+        response = await retryUpload(
+          () =>
+            api.uploadDeployFile({
+              body: readStream,
+              deployId,
+              path: encodeURI(normalizedPath)
+            }),
+          maxRetry
+        )
         break
       }
       case 'function': {
-        response = await api.uploadDeployFunction({
-          body: readStream,
-          deployId,
-          name: encodeURI(normalizedPath),
-          runtime
-        })
+        response = await await retryUpload(
+          () =>
+            api.uploadDeployFunction({
+              body: readStream,
+              deployId,
+              name: encodeURI(normalizedPath),
+              runtime
+            }),
+          maxRetry
+        )
         break
       }
       default: {
@@ -55,4 +64,44 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
     phase: 'stop'
   })
   return results
+}
+
+function retryUpload(uploadFn, maxRetry) {
+  return new Promise((resolve, reject) => {
+    const fibonacciBackoff = backoff.fibonacci({
+      randomisationFactor: 0.5,
+      initialDelay: 100,
+      maxDelay: 10000
+    })
+    fibonacciBackoff.failAfter(maxRetry)
+
+    fibonacciBackoff.on('backoff', (number, delay) => {
+      // Do something when backoff starts, e.g. show to the
+      // user the delay before next reconnection attempt.
+      console.log(number + ' ' + delay + 'ms')
+    })
+
+    fibonacciBackoff.on('ready', tryUpload)
+
+    fibonacciBackoff.on('fail', () => {
+      // Do something when the maximum number of backoffs is
+      // reached, e.g. ask the user to check its connection.
+      console.log('fail')
+    })
+
+    function tryUpload(number, delay) {
+      uploadFn()
+        .then(results => resolve(results))
+        .catch(e => {
+          if (e.name === 'FetchError') {
+            console.log(e)
+            fibonacciBackoff.backoff()
+          } else {
+            return reject(e)
+          }
+        })
+    }
+
+    tryUpload(0, 0)
+  })
 }

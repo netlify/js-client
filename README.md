@@ -146,6 +146,7 @@ Optional `opts` include:
   deployTimeout: 1.2e6, // 20 mins
   parallelHash: 100, // number of parallel hashing calls
   parallelUpload: 4, // number of files to upload in parallel
+  maxRetry: 5, // number of times to try on failed file uploads
   filter: filename => { /* return false to filter a file from the deploy */ },
   tmpDir: tempy.directory(), // a temporary directory to zip loose files into
   statusCb: statusObj => {
