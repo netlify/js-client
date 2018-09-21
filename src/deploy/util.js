@@ -35,7 +35,7 @@ exports.normalizePath = relname => {
 
 exports.waitForDiff = waitForDiff
 // poll an async deployId until its done diffing
-async function waitForDiff(api, deployId, timeout) {
+async function waitForDiff(api, deployId, siteId, timeout) {
   let deploy // capture ready deploy during poll
 
   await pWaitFor(loadDeploy, {
@@ -47,14 +47,17 @@ async function waitForDiff(api, deployId, timeout) {
   return deploy
 
   async function loadDeploy() {
-    const d = await api.getDeploy({ deployId })
+    const d = await api.getSiteDeploy({ siteId, deployId })
+
     switch (d.state) {
+      // https://github.com/netlify/bitballoon/blob/master/app/models/deploy.rb#L21-L33
       case 'error': {
         const deployError = new Error(`Deploy ${deployId} had an error`)
         deployError.deploy = d
         throw deployError
       }
       case 'prepared':
+      case 'uploading':
       case 'uploaded':
       case 'ready': {
         deploy = d
@@ -70,7 +73,7 @@ async function waitForDiff(api, deployId, timeout) {
 
 // Poll a deployId until its ready
 exports.waitForDeploy = waitForDeploy
-async function waitForDeploy(api, deployId, timeout) {
+async function waitForDeploy(api, deployId, siteId, timeout) {
   let deploy // capture ready deploy during poll
 
   await pWaitFor(loadDeploy, {
@@ -82,8 +85,9 @@ async function waitForDeploy(api, deployId, timeout) {
   return deploy
 
   async function loadDeploy() {
-    const d = await api.getDeploy({ deployId })
+    const d = await api.getSiteDeploy({ siteId, deployId })
     switch (d.state) {
+      // https://github.com/netlify/bitballoon/blob/master/app/models/deploy.rb#L21-L33
       case 'error': {
         const deployError = new Error(`Deploy ${deployId} had an error`)
         deployError.deploy = d

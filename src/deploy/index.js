@@ -72,7 +72,7 @@ module.exports = async (api, siteId, dir, opts) => {
   })
 
   let deploy = await api.createSiteDeploy(deployParams)
-  deploy = await waitForDiff(api, deploy.id, opts.deployTimeout)
+  if (deployParams.body.async) deploy = await waitForDiff(api, deploy.id, siteId, opts.deployTimeout)
 
   const { id: deployId, required: requiredFiles, required_functions: requiredFns } = deploy
 
@@ -93,7 +93,7 @@ module.exports = async (api, siteId, dir, opts) => {
     msg: 'Waiting for deploy to go live...',
     phase: 'start'
   })
-  deploy = await waitForDeploy(api, deployId, opts.deployTimeout)
+  deploy = await waitForDeploy(api, deployId, siteId, opts.deployTimeout)
 
   statusCb({
     type: 'wait-for-deploy',
