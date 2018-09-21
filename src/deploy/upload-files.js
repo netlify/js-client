@@ -68,6 +68,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
 
 function retryUpload(uploadFn, maxRetry) {
   return new Promise((resolve, reject) => {
+    let lastError
     const fibonacciBackoff = backoff.fibonacci({
       randomisationFactor: 0.5,
       initialDelay: 100,
@@ -78,21 +79,19 @@ function retryUpload(uploadFn, maxRetry) {
     fibonacciBackoff.on('backoff', (number, delay) => {
       // Do something when backoff starts, e.g. show to the
       // user the delay before next reconnection attempt.
-      console.log(number + ' ' + delay + 'ms')
     })
 
     fibonacciBackoff.on('ready', tryUpload)
 
     fibonacciBackoff.on('fail', () => {
-      // Do something when the maximum number of backoffs is
-      // reached, e.g. ask the user to check its connection.
-      console.log('fail')
+      reject(lastError)
     })
 
     function tryUpload(number, delay) {
       uploadFn()
         .then(results => resolve(results))
         .catch(e => {
+          lastError = e
           if (e.name === 'FetchError') {
             console.log(e)
             fibonacciBackoff.backoff()
