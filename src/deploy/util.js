@@ -33,6 +33,41 @@ exports.normalizePath = relname => {
   )
 }
 
+exports.waitForDiff = waitForDiff
+// poll an async deployId until its done diffing
+async function waitForDiff(api, deployId, timeout) {
+  let deploy // capture ready deploy during poll
+
+  await pWaitFor(loadDeploy, {
+    interval: 1000,
+    timeout,
+    message: 'Timeout while waiting for deploy'
+  })
+
+  return deploy
+
+  async function loadDeploy() {
+    const d = await api.getDeploy({ deployId })
+    switch (d.state) {
+      case 'error': {
+        const deployError = new Error(`Deploy ${deployId} had an error`)
+        deployError.deploy = d
+        throw deployError
+      }
+      case 'prepared':
+      case 'uploaded':
+      case 'ready': {
+        deploy = d
+        return true
+      }
+      case 'preparing':
+      default: {
+        return false
+      }
+    }
+  }
+}
+
 // Poll a deployId until its ready
 exports.waitForDeploy = waitForDeploy
 async function waitForDeploy(api, deployId, timeout) {
@@ -48,11 +83,23 @@ async function waitForDeploy(api, deployId, timeout) {
 
   async function loadDeploy() {
     const d = await api.getDeploy({ deployId })
-    if (d.state === 'ready') {
-      deploy = d
-      return true
-    } else {
-      return false
+    switch (d.state) {
+      case 'error': {
+        const deployError = new Error(`Deploy ${deployId} had an error`)
+        deployError.deploy = d
+        throw deployError
+      }
+      case 'ready': {
+        deploy = d
+        return true
+      }
+      case 'preparing':
+      case 'prepared':
+      case 'uploaded':
+      case 'uploading':
+      default: {
+        return false
+      }
     }
   }
 }
@@ -77,3 +124,5 @@ exports.isExe = stat => {
 
   return Boolean(mode & 0o0001 || (mode & 0o0010 && isGroup) || (mode & 0o0100 && isUser))
 }
+
+exports.retry = async (fn, errHandler, opts) => {}

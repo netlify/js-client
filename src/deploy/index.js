@@ -3,6 +3,7 @@ const hashFiles = require('./hash-files')
 const hashFns = require('./hash-fns')
 const cleanDeep = require('clean-deep')
 const tempy = require('tempy')
+const { waitForDiff } = require('./util')
 
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
@@ -18,6 +19,7 @@ module.exports = async (api, siteId, dir, opts) => {
       concurrentHash: 100, // concurrent file hash calls
       concurrentUpload: 15, // Number of concurrent uploads
       filter: defaultFilter,
+      syncFileLimit: 7000,
       statusCb: statusObj => {
         /* default to noop */
         /* statusObj: {
@@ -64,11 +66,14 @@ module.exports = async (api, siteId, dir, opts) => {
     body: {
       files,
       functions,
+      async: Object.keys(files).length > opts.syncFileLimit,
       draft: opts.draft
     }
   })
 
   let deploy = await api.createSiteDeploy(deployParams)
+  deploy = await waitForDiff(api, deploy.id, opts.deployTimeout)
+
   const { id: deployId, required: requiredFiles, required_functions: requiredFns } = deploy
 
   statusCb({
