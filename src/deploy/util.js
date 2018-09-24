@@ -33,9 +33,9 @@ exports.normalizePath = relname => {
   )
 }
 
-// Poll a deployId until its ready
-exports.waitForDeploy = waitForDeploy
-async function waitForDeploy(api, deployId, timeout) {
+exports.waitForDiff = waitForDiff
+// poll an async deployId until its done diffing
+async function waitForDiff(api, deployId, siteId, timeout) {
   let deploy // capture ready deploy during poll
 
   await pWaitFor(loadDeploy, {
@@ -47,12 +47,63 @@ async function waitForDeploy(api, deployId, timeout) {
   return deploy
 
   async function loadDeploy() {
-    const d = await api.getDeploy({ deployId })
-    if (d.state === 'ready') {
-      deploy = d
-      return true
-    } else {
-      return false
+    const d = await api.getSiteDeploy({ siteId, deployId })
+
+    switch (d.state) {
+      // https://github.com/netlify/bitballoon/blob/master/app/models/deploy.rb#L21-L33
+      case 'error': {
+        const deployError = new Error(`Deploy ${deployId} had an error`)
+        deployError.deploy = d
+        throw deployError
+      }
+      case 'prepared':
+      case 'uploading':
+      case 'uploaded':
+      case 'ready': {
+        deploy = d
+        return true
+      }
+      case 'preparing':
+      default: {
+        return false
+      }
+    }
+  }
+}
+
+// Poll a deployId until its ready
+exports.waitForDeploy = waitForDeploy
+async function waitForDeploy(api, deployId, siteId, timeout) {
+  let deploy // capture ready deploy during poll
+
+  await pWaitFor(loadDeploy, {
+    interval: 1000,
+    timeout,
+    message: 'Timeout while waiting for deploy'
+  })
+
+  return deploy
+
+  async function loadDeploy() {
+    const d = await api.getSiteDeploy({ siteId, deployId })
+    switch (d.state) {
+      // https://github.com/netlify/bitballoon/blob/master/app/models/deploy.rb#L21-L33
+      case 'error': {
+        const deployError = new Error(`Deploy ${deployId} had an error`)
+        deployError.deploy = d
+        throw deployError
+      }
+      case 'ready': {
+        deploy = d
+        return true
+      }
+      case 'preparing':
+      case 'prepared':
+      case 'uploaded':
+      case 'uploading':
+      default: {
+        return false
+      }
     }
   }
 }
@@ -77,3 +128,5 @@ exports.isExe = stat => {
 
   return Boolean(mode & 0o0001 || (mode & 0o0010 && isGroup) || (mode & 0o0100 && isUser))
 }
+
+exports.retry = async (fn, errHandler, opts) => {}
