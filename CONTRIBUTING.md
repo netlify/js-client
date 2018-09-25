@@ -44,6 +44,7 @@ Projects that depend heavily on this client that should be taken into considerat
 
 ```console
 # Make changes
+# Update README docs if they have changed.
 # Update the changelog
 $ npm version [major|minor|patch]
 $ git push && git push --tags
