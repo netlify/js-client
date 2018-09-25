@@ -28,13 +28,14 @@ Create a new instance of the Netlify API client with the provided `accessToken`.
   scheme: 'https',
   host: 'api.netlify.com',
   pathPrefix: '/api/v1',
-  globalParams: {} // parameters you want available for every request
+  globalParams: {} // parameters you want available for every request.
+  // Global params are only sent of the open-api spec specifies the provided params.
 }
 ```
 
 ### `client.accessToken`
 
-A setter/getter that returns the `accessToken` that the client is configured to use.  You can set this after the class is instantiated, and all subsequent calls will use the newly set `accessToken`.
+A setter/getter that returns the `accessToken` that the client is configured to use. You can set this after the class is instantiated, and all subsequent calls will use the newly set `accessToken`.
 
 ### `client.basePath`
 
@@ -42,15 +43,17 @@ A getter that returns the formatted base URL of the endpoint the client is confi
 
 ### Open API Client methods
 
-The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file.  Each method is is named after the `operationId` name of each endpoint action.  **To see list of available operations see the [open-api website](https://open-api.netlify.com/)**.
+The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file. Each method is is named after the `operationId` name of each endpoint action. **To see list of available operations see the [open-api website](https://open-api.netlify.com/)**.
 
 Every open-api method has the following signature:
 
 #### `promise(response) = client.operationId([params], [opts])`
 
-Perform a call to the given endpoint corresponding with the `operationId`.  Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached.  Rejects if the `status` > 400.  Successful response objects have `status` and `statusText` properties on their prototype.
+Perform a call to the given endpoint corresponding with the `operationId`. Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached. Rejects if the `status` > 400. Successful response objects have `status` and `statusText` properties on their prototype.
 
-`params` is an object that includes any of the required or optional endpoint parameters.  `params.body` should be an object which gets serialized to JSON automatically.  If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream.
+- `params` is an object that includes any of the required or optional endpoint parameters.  
+- `params.body` should be an object which gets serialized to JSON automatically.  
+- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream.
 
 ```js
 // example params
@@ -63,7 +66,7 @@ Perform a call to the given endpoint corresponding with the `operationId`.  Retu
 }
 ```
 
-Optional `opts` can include any property you want passed to `node-fetch`.  The `headers` property is merged with some `defaultHeaders`.
+Optional `opts` can include any property you want passed to `node-fetch`. The `headers` property is merged with some `defaultHeaders`.
 
 ```js
 // example opts
@@ -82,23 +85,25 @@ All methods are conveniently consumed with async/await:
 async function getSomeData () {
   // Calls may fail!
   try {
-    const resposnse = await client.getSites()
-    return response
+    return await client.getSiteDeploy({
+      siteId: '1234abcd',
+      deploy_id: '4567'
+    })
   } catch (e) {
     // handle error
   }
 }
 ```
 
-If the request response includes `json` in the `contentType` header, fetch will deserialize the JSON body.  Otherwise the `text` of the response is returned.
+If the request response includes `json` in the `contentType` header, fetch will deserialize the JSON body. Otherwise the `text` of the response is returned.
 
-### Convenience Methods
+### API Flow Methods
 
 Some methods have been added in addition to the open API methods that make certain actions simpler to perform.
 
 #### `promise(accessToken) = client.getAccessToken(ticket, [opts])`
 
-Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an `accessToken`.  Call this with the response from a `client.createTicket({ client_id })` call.  Automatically sets the `accessToken` to `this.accessToken` and returns `accessToken` for the consumer to save for later.
+Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an `accessToken`. Call this with the response from a `client.createTicket({ client_id })` call. Automatically sets the `accessToken` to `this.accessToken` and returns `accessToken` for the consumer to save for later.
 
 Optional `opts` include:
 
@@ -121,18 +126,18 @@ async function login () {
   await openBrowser(`https://app.netlify.com/authorize?response_type=ticket&ticket=${ticket.id}`)
   const accessToken = await api.getAccessToken(ticket)
   // API is also set up to use the returned access token as a side effect 
-  return accessToken
+  return accessToken // Save this for later so you can quickly set up an authenticated client
 }
 ```
 
 #### `promise(deploy) = client.deploy(siteId, buildDir, [opts])`
 
 **Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
-Sometimes need to write to a `tmpDir`.
+Sometimes this method needs to write to a `tmpDir`.  By default `tmpDir` is the default system default.
 
 The following paths can be passed in the options:
 
-- `tomlPath` (a `netlify.toml` file that includes redirect rules for the deploy)
+- `configPath` (path to a `netlify.toml` file that includes redirect rules for the deploy, etc.)
 - `functionsDir` (a folder with lambda functions to deploy)
 
 Optional `opts` include:
@@ -140,15 +145,15 @@ Optional `opts` include:
 ```js
 {
   functionsDir: null, // path to a folder of functions to deploy
-  tomlPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
+  configPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
   draft: false, // draft deploy or production deploy
   message: undefined, // a short message to associate with the deploy
   deployTimeout: 1.2e6, // 20 mins
   parallelHash: 100, // number of parallel hashing calls
-  parallelUpload: 4, // number of files to upload in parallel
+  parallelUpload: 15, // number of files to upload in parallel
   maxRetry: 5, // number of times to try on failed file uploads
-  filter: filename => { /* return false to filter a file from the deploy */ },
-  tmpDir: tempy.directory(), // a temporary directory to zip loose files into
+  filter: filepath => { /* return false to filter a file  from the deploy */ },
+  tmpDir: tempy.directory(), // a temporary directory to zip functions into
   statusCb: statusObj => {
     // a callback function to receive status events
     /* statusObj: {

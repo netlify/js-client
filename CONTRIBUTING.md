@@ -1,33 +1,52 @@
 # CONTRIBUTING
 
-Contributions are always welcome, no matter how large or small. Before contributing,
-please read the [code of conduct](CODE_OF_CONDUCT.md).
+Contributions are always welcome, no matter how large or small. Before contributing, please read the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Setup
 
-> Install NPM on your system: https://docs.npmjs.com/getting-started/installing-node
+> Install Node.js + npm on your system: https://nodejs.org/en/download/
 
 ```sh
 $ git clone https://github.com/netlify/js-client netlify-js-client
 $ cd netlify-js-client
 $ npm install
+$ npm test
 ```
+
+You can also use yarn.
 
 ## Testing
 
-```sh
-$ jasmine-node spec
+This repo uses [ava](https://github.com/avajs/ava) for testing. Any files in the `src` directory that have a `.test.js` file extension are automatically detected and run as tests.
+
+We also test for a few other things:
+
+- Dependencies (used an unused)
+- Linting
+- Test coverage
+- Must work with Windows + Unix environments.
+
+## Architecture
+
+We target Node.js LTS and stable environments, and aim for basic modern browser support when possible. In order to facilitate simple contributions, we avoided any kind of build steps.
+
+If you need to add new API routes, please add them to the [open-api](https://github.com/netlify/open-api) repo. This client will automatically inherent the new routes from that module.
+
+Projects that depend heavily on this client that should be taken into consideration when making changes:
+
+- [netlify/cli](https://github.com/netlify/cli)
+
+## Releasing
+
+```console
+# Make changes
+# Update README docs if they have changed.
+# Update the changelog
+$ npm version [major|minor|patch]
+$ git push && git push --tags
+# Create a github release with the changelog contents 
+$ npm publish
 ```
-
-## Pull Requests
-
-We actively welcome your pull requests.
-
-1. Fork the repo and create your branch from `master`.
-2. If you've added code that should be tested, add tests.
-3. If you've changed APIs, update the documentation.
-4. Ensure the test suite passes.
-5. Make sure your code lints.
 
 ## License
 

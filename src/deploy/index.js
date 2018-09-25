@@ -11,7 +11,7 @@ module.exports = async (api, siteId, dir, opts) => {
   opts = Object.assign(
     {
       fnDir: null,
-      tomlPath: null,
+      configPath: null,
       draft: false,
       message: undefined, // API calls this the 'title'
       tmpDir: tempy.directory(),
@@ -34,7 +34,7 @@ module.exports = async (api, siteId, dir, opts) => {
     opts
   )
 
-  const { fnDir, tomlPath, statusCb, message: title } = opts
+  const { fnDir, configPath, statusCb, message: title } = opts
 
   statusCb({
     type: 'hashing',
@@ -43,7 +43,7 @@ module.exports = async (api, siteId, dir, opts) => {
   })
 
   const [{ files, filesShaMap }, { functions, fnShaMap }] = await Promise.all([
-    hashFiles(dir, tomlPath, opts),
+    hashFiles(dir, configPath, opts),
     hashFns(fnDir, opts)
   ])
 
