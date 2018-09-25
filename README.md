@@ -35,8 +35,7 @@ Create a new instance of the Netlify API client with the provided `accessToken`.
 
 ### `client.accessToken`
 
-A setter/getter that returns the `accessToken` that the client is configured to use.
-You can set this after the class is instantiated, and all subsequent calls will use the newly set `accessToken`.
+A setter/getter that returns the `accessToken` that the client is configured to use. You can set this after the class is instantiated, and all subsequent calls will use the newly set `accessToken`.
 
 ### `client.basePath`
 
@@ -44,22 +43,17 @@ A getter that returns the formatted base URL of the endpoint the client is confi
 
 ### Open API Client methods
 
-The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file.
-Each method is is named after the `operationId` name of each endpoint action.
-**To see list of available operations see the [open-api website](https://open-api.netlify.com/)**.
+The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file. Each method is is named after the `operationId` name of each endpoint action. **To see list of available operations see the [open-api website](https://open-api.netlify.com/)**.
 
 Every open-api method has the following signature:
 
 #### `promise(response) = client.operationId([params], [opts])`
 
-Perform a call to the given endpoint corresponding with the `operationId`.
-Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached.
-Rejects if the `status` > 400.  
-Successful response objects have `status` and `statusText` properties on their prototype.
+Perform a call to the given endpoint corresponding with the `operationId`. Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached. Rejects if the `status` > 400. Successful response objects have `status` and `statusText` properties on their prototype.
 
-`params` is an object that includes any of the required or optional endpoint parameters.  
-`params.body` should be an object which gets serialized to JSON automatically.  
-If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream.
+- `params` is an object that includes any of the required or optional endpoint parameters.  
+- `params.body` should be an object which gets serialized to JSON automatically.  
+- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream.
 
 ```js
 // example params
@@ -72,8 +66,7 @@ If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream
 }
 ```
 
-Optional `opts` can include any property you want passed to `node-fetch`.  
-The `headers` property is merged with some `defaultHeaders`.
+Optional `opts` can include any property you want passed to `node-fetch`. The `headers` property is merged with some `defaultHeaders`.
 
 ```js
 // example opts
@@ -102,8 +95,7 @@ async function getSomeData () {
 }
 ```
 
-If the request response includes `json` in the `contentType` header, fetch will deserialize the JSON body.  
-Otherwise the `text` of the response is returned.
+If the request response includes `json` in the `contentType` header, fetch will deserialize the JSON body. Otherwise the `text` of the response is returned.
 
 ### API Flow Methods
 
@@ -111,9 +103,7 @@ Some methods have been added in addition to the open API methods that make certa
 
 #### `promise(accessToken) = client.getAccessToken(ticket, [opts])`
 
-Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an `accessToken`.  
-Call this with the response from a `client.createTicket({ client_id })` call.  
-Automatically sets the `accessToken` to `this.accessToken` and returns `accessToken` for the consumer to save for later.
+Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an `accessToken`. Call this with the response from a `client.createTicket({ client_id })` call. Automatically sets the `accessToken` to `this.accessToken` and returns `accessToken` for the consumer to save for later.
 
 Optional `opts` include:
 
