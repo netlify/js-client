@@ -133,7 +133,7 @@ async function login () {
 #### `promise(deploy) = client.deploy(siteId, buildDir, [opts])`
 
 **Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
-Sometimes this method needs to write to a `tmpDir`.  By default `tmpDir` is the default system default.
+Sometimes this method needs to write to a `tmpDir`.  By default `tmpDir` is a folder in the system temporary directory.
 
 The following paths can be passed in the options:
 
