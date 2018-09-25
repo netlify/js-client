@@ -19,11 +19,11 @@ You can also use yarn.
 
 This repo uses [ava](https://github.com/avajs/ava) for testing. Any files in the `src` directory that have a `.test.js` file extension are automatically detected and run as tests.
 
-We also test for a few other variables:
+We also test for a few other things:
 
 - Dependencies (used an unused)
 - Linting
-- Coverage
+- Test coverage
 - Must work with Windows + Unix environments.
 
 ## Architecture
