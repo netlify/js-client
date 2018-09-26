@@ -167,6 +167,14 @@ Optional `opts` include:
  }
 ```
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more info on how to make contributions to this project.
+
+## License
+
+MIT. See [LICENSE](LICENSE) for more details.
+
 [npm-img]: https://img.shields.io/npm/v/netlify.svg
 [npm]: https://npmjs.org/package/netlify
 [travis-img]: https://img.shields.io/travis/netlify/js-client/master.svg
