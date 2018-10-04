@@ -30,7 +30,6 @@
     "Bret Comnes <bcomnes@gmail.com> (https://bret.io)"
   ],
   "dependencies": {
-    "@babel/runtime": "^7.1.2",
     "@netlify/open-api": "^0.4.1",
     "archiver": "^3.0.0",
     "backoff": "^2.5.0",
@@ -60,6 +59,7 @@
     "@babel/core": "^7.1.2",
     "@babel/plugin-transform-runtime": "^7.1.0",
     "@babel/preset-env": "^7.1.0",
+    "@babel/runtime": "^7.1.2",
     "ava": "1.0.0-beta.7",
     "babel-eslint": "^9.0.0",
     "babel-loader": "^8.0.4",
