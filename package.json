@@ -20,6 +20,10 @@
   "browser": {
     "./src/deploy/index.js": "./src/deploy/index.browser.js"
   },
+  "files": [
+    "src",
+    "dist"
+  ],
   "bugs": {
     "url": "https://github.com/netlify/js-client/issues"
   },
