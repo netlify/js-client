@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.0 - 2018-10-11
+* Add a UMD build and unpkg support. Thank you @leonardodino!
+
 ## 2.0.1 - 2018-09-25
 * A whole new Netlify Node.js API client! 🎉
 * Client code was extracted from our forthcoming [2.0.0 CLI](https://www.netlify.com/blog/2018/09/10/netlify-cli-2.0-now-in-beta-/) release.
