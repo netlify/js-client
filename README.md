@@ -167,6 +167,10 @@ Optional `opts` include:
  }
 ```
 
+## UMD Builds
+
+A UMD build is provided for your convenience, however browser support is still experimental.  Contributions to improve browser support are welcome.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more info on how to make contributions to this project.
