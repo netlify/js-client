@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.2.0 - 2018-10-12
+* Bump [@netlifyopen-api@0.5.0](https://github.com/netlify/open-api/releases/tag/v0.5.0)
+  * Add `.getAccount` method
+
 ## 2.1.0 - 2018-10-11
 * Add a UMD build and unpkg support. Thank you @leonardodino!
 
