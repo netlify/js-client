@@ -92,11 +92,14 @@ function retryUpload(uploadFn, maxRetry) {
         .then(results => resolve(results))
         .catch(e => {
           lastError = e
-          if (e.name === 'FetchError') {
-            console.log(e)
-            fibonacciBackoff.backoff()
-          } else {
-            return reject(e)
+          switch (true) {
+            case e.status === 408: // request timeout
+            case e.name === 'FetchError': {
+              return fibonacciBackoff.backoff()
+            }
+            default: {
+              return reject(e)
+            }
           }
         })
     }
