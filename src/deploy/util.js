@@ -115,18 +115,4 @@ function getUploadList(required, shaMap) {
   return flatten(required.map(sha => shaMap[sha]))
 }
 
-// given a Stat object, return if its executable or not
-// https://github.com/jokeyrhyme/is-executable.js without the io
-exports.isExe = stat => {
-  const { mode, gid, uid } = stat
-  if (process.platform === 'win32') {
-    return true
-  }
-
-  const isGroup = gid ? process.getgid && gid === process.getgid() : true
-  const isUser = uid ? process.getuid && uid === process.getuid() : true
-
-  return Boolean(mode & 0o0001 || (mode & 0o0010 && isGroup) || (mode & 0o0100 && isUser))
-}
-
 exports.retry = async (fn, errHandler, opts) => {}
