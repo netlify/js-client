@@ -59,7 +59,8 @@
     "through2-filter": "^3.0.0",
     "through2-map": "^3.0.0",
     "util.promisify": "^1.0.0",
-    "util.promisify-all": "^1.0.2"
+    "util.promisify-all": "^1.0.2",
+    "zip-it-and-ship-it": "ssh+git://git@github.com:netlify/zip-it-and-ship-it.git"
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",
