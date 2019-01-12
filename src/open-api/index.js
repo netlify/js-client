@@ -1,6 +1,7 @@
 const get = require('lodash.get')
 const set = require('lodash.set')
 const queryString = require('qs')
+const http = require('http')
 const fetch = require('node-fetch')
 const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
@@ -80,16 +81,26 @@ exports.generateMethod = method => {
     opts.method = method.verb.toUpperCase()
 
     // TODO: Use micro-api-client when it supports node-fetch
-    let response
-    try {
-      response = await fetch(path, opts)
-    } catch (e) {
-      /* istanbul ignore next */
-      e.name = 'FetchError'
-      e.url = path
-      e.data = Object.assign({}, opts)
-      delete e.data.Authorization
-      throw e
+
+    async function makeRequest() {
+      let response
+      try {
+        response = await fetch(path, opts)
+      } catch (e) {
+        /* istanbul ignore next */
+        e.name = 'FetchError'
+        e.url = path
+        e.data = Object.assign({}, opts)
+        delete e.data.Authorization
+        throw e
+      }
+      return response
+    }
+
+    const response = await makeRequest()
+
+    if (http.STATUS_CODES[response.statusCode] === 'Too Many Requests') {
+      // https://github.com/netlify/open-api/blob/master/go/porcelain/http/http.go
     }
 
     const contentType = response.headers.get('Content-Type')

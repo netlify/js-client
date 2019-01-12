@@ -18,7 +18,8 @@ class NetlifyAPI {
         userAgent: 'netlify/js-client',
         scheme: dfn.schemes[0],
         host: dfn.host,
-        pathPrefix: dfn.basePath
+        pathPrefix: dfn.basePath,
+        attempts: 10
       },
       opts
     )
