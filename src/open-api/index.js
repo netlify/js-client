@@ -114,6 +114,7 @@ exports.generateMethod = method => {
           try {
             const resetTime =
               response.headers.get('X-RateLimit-Reset') && Number.parseInt(response.headers.get('X-RateLimit-Reset'))
+            if (!existy(resetTime)) throw new Error('Header missing reset time')
             await sleep(resetTime - Date.now())
           } catch (e) {
             await sleep(5000) // Default to 5 seconds if the header is borked
@@ -123,6 +124,7 @@ exports.generateMethod = method => {
     }
 
     const response = await retryIfRatelimit()
+
     const contentType = response.headers.get('Content-Type')
 
     if (contentType && contentType.match(/json/)) {
