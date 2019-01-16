@@ -11,6 +11,10 @@ function existy(val) {
   return val != null
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 exports.methods = require('./shape-swagger')
 
 // open-api 2.0
@@ -80,13 +84,14 @@ exports.generateMethod = method => {
     opts.headers = new Headers(Object.assign({}, this.defaultHeaders, discoveredHeaders, opts.headers))
     opts.method = method.verb.toUpperCase()
 
-    // TODO: Use micro-api-client when it supports node-fetch
+    // TODO: Consider using micro-api-client when it supports node-fetch
 
     async function makeRequest() {
       let response
       try {
         response = await fetch(path, opts)
       } catch (e) {
+        // TODO: clean up this error path
         /* istanbul ignore next */
         e.name = 'FetchError'
         e.url = path
@@ -97,12 +102,27 @@ exports.generateMethod = method => {
       return response
     }
 
-    const response = await makeRequest()
-
-    if (http.STATUS_CODES[response.statusCode] === 'Too Many Requests') {
+    async function retryIfRatelimit() {
       // https://github.com/netlify/open-api/blob/master/go/porcelain/http/http.go
+      const MAX_RETRY = 5
+
+      for (let index = 0; index <= MAX_RETRY; index++) {
+        const response = await makeRequest()
+        if (http.STATUS_CODES[response.statusCode] !== 'Too Many Requests' || index === MAX_RETRY) {
+          return response
+        } else {
+          try {
+            const resetTime =
+              response.headers.get('X-RateLimit-Reset') && Number.parseInt(response.headers.get('X-RateLimit-Reset'))
+            await sleep(resetTime - Date.now())
+          } catch (e) {
+            await sleep(5000) // Default to 5 seconds if the header is borked
+          }
+        }
+      }
     }
 
+    const response = await retryIfRatelimit()
     const contentType = response.headers.get('Content-Type')
 
     if (contentType && contentType.match(/json/)) {
