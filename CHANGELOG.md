@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.2.3 - 2018-11-06
+* Handle rate limiting errors and retry at requested time.
+
 ## 2.2.1 - 2018-11-06
 * Handle timeout errors when uploading files and retry upload.
 
