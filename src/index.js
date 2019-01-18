@@ -4,6 +4,7 @@ const dfn = require('@netlify/open-api')
 const { methods, generateMethod } = require('./open-api')
 const pWaitFor = require('p-wait-for')
 const deploy = require('./deploy')
+const debug = require('debug')('netlify')
 
 class NetlifyAPI {
   constructor(accessToken, opts) {
@@ -18,20 +19,26 @@ class NetlifyAPI {
         userAgent: 'netlify/js-client',
         scheme: dfn.schemes[0],
         host: dfn.host,
-        pathPrefix: dfn.basePath,
-        attempts: 10
+        pathPrefix: dfn.basePath
       },
       opts
     )
+    debug('options: %O', opts)
+
     this.defaultHeaders = {
       'User-agent': opts.userAgent,
       accept: 'application/json'
     }
+
     this.scheme = opts.scheme
     this.host = opts.host
     this.pathPrefix = opts.pathPrefix
     this.globalParams = Object.assign({}, opts.globalParams)
-    if (accessToken) this.accessToken = accessToken
+
+    if (accessToken) {
+      debug('Setting access token')
+      this.accessToken = accessToken
+    }
   }
 
   get accessToken() {
@@ -58,14 +65,20 @@ class NetlifyAPI {
       },
       opts
     )
+    debug('getAccessToken options: %O', opts)
 
-    const { id } = ticket
-    let authorizedTicket // ticket capture
     const api = this
 
+    const { id } = ticket
+
+    let authorizedTicket // ticket capture
     const checkTicket = async () => {
+      debug('checking ticket')
       const t = await api.showTicket({ ticketId: id })
-      if (t.authorized) authorizedTicket = t
+      if (t.authorized) {
+        debug('received authorized ticket')
+        authorizedTicket = t
+      }
       return !!t.authorized
     }
 
@@ -75,9 +88,17 @@ class NetlifyAPI {
       message: 'Timeout while waiting for ticket grant'
     })
 
-    const accessToken = await api.exchangeTicket({ ticketId: authorizedTicket.id })
-    this.accessToken = accessToken.access_token
-    return accessToken.access_token
+    const accessTokenResponse = await api.exchangeTicket({ ticketId: authorizedTicket.id })
+    // See https://open-api.netlify.com/#/default/exchangeTicket for shape
+    this.accessToken = accessTokenResponse.access_token
+    debug('access token details: %O', {
+      id: accessTokenResponse.id,
+      user_id: accessTokenResponse.id,
+      user_email: accessTokenResponse.id,
+      created_at: accessTokenResponse.id
+    })
+
+    return accessTokenResponse.access_token
   }
 
   async deploy(siteId, buildDir, opts) {

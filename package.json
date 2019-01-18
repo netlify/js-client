@@ -38,6 +38,7 @@
     "archiver": "^3.0.0",
     "backoff": "^2.5.0",
     "clean-deep": "^3.0.2",
+    "debug": "^4.1.1",
     "flush-write-stream": "^1.0.3",
     "folder-walker": "^3.2.0",
     "from2-array": "0.0.4",

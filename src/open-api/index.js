@@ -6,6 +6,7 @@ const fetch = require('node-fetch')
 const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
 const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
+const debug = require('debug')('netlify:open-api')
 
 function existy(val) {
   return val != null
@@ -27,12 +28,14 @@ exports.generateMethod = method => {
     params = Object.assign({}, this.globalParams, params)
 
     let path = this.basePath + method.path
+    debug(`path template: ${path}`)
 
     // Path parameters
     Object.values(method.parameters.path).forEach(param => {
       const val = params[param.name] || params[camelCase(param.name)]
       if (existy(val)) {
         path = path.replace(`{${param.name}}`, val)
+        debug(`replacing {${param.name}} with ${val}`)
       } else if (param.required) {
         throw new Error(`Missing required param ${param.name}`)
       }
@@ -49,7 +52,10 @@ exports.generateMethod = method => {
         throw new Error(`Missing required param ${param.name}`)
       }
     })
-    if (qs) path = path += `?${queryString.stringify(qs)}`
+    if (qs) {
+      debug(`qs: %O`, qs)
+      path = path += `?${queryString.stringify(qs)}`
+    }
 
     // body parameters
     let body
@@ -63,35 +69,40 @@ exports.generateMethod = method => {
         }
       })
     }
+    debug(`bodyType: ${bodyType}`)
 
-    const discoveredHeaders = {}
+    const specialHeaders = {}
     if (body) {
       switch (bodyType) {
         case 'binary': {
           opts.body = body
-          set(discoveredHeaders, 'Content-Type', 'application/octet-stream')
+          set(specialHeaders, 'Content-Type', 'application/octet-stream')
           break
         }
         case 'json':
         default: {
           opts.body = JSON.stringify(body)
-          set(discoveredHeaders, 'Content-Type', 'application/json')
+          set(specialHeaders, 'Content-Type', 'application/json')
           break
         }
       }
     }
+    debug(`specialHeaders: ${specialHeaders}`)
 
-    opts.headers = new Headers(Object.assign({}, this.defaultHeaders, discoveredHeaders, opts.headers))
+    opts.headers = new Headers(Object.assign({}, this.defaultHeaders, specialHeaders, opts.headers))
     opts.method = method.verb.toUpperCase()
+    debug(`method: ${method}`)
 
     // TODO: Consider using micro-api-client when it supports node-fetch
 
     async function makeRequest() {
       let response
       try {
+        debug(`requesting ${path}`)
         response = await fetch(path, opts)
       } catch (e) {
         // TODO: clean up this error path
+        debug(`fetch error`)
         /* istanbul ignore next */
         e.name = 'FetchError'
         e.url = path
@@ -103,31 +114,45 @@ exports.generateMethod = method => {
     }
 
     async function retryIfRatelimit() {
+      // Adapted from:
       // https://github.com/netlify/open-api/blob/master/go/porcelain/http/http.go
+
       const MAX_RETRY = 5
+      const DEFAULT_RETRY_DELAY = 5000 //ms
 
       for (let index = 0; index <= MAX_RETRY; index++) {
         const response = await makeRequest()
         if (http.STATUS_CODES[response.statusCode] !== 'Too Many Requests' || index === MAX_RETRY) {
           return response
         } else {
+          debug(`Rate limited, retrying`)
           try {
             const resetTime =
               response.headers.get('X-RateLimit-Reset') && Number.parseInt(response.headers.get('X-RateLimit-Reset'))
-            if (!existy(resetTime)) throw new Error('Header missing reset time')
-            await sleep(resetTime - Date.now())
+            if (!existy(resetTime)) {
+              debug('Issue with X-RateLimit-Reset header: %O', response.headers.get('X-RateLimit-Reset'))
+              throw new Error('Header missing reset time')
+            }
+            debug(`resetTime: ${resetTime}`)
+            const sleepTime = resetTime - Date.now()
+            debug(`sleeping for ${sleepTime}ms`)
+            await sleep(sleepTime)
           } catch (e) {
-            await sleep(5000) // Default to 5 seconds if the header is borked
+            debug(`sleeping for ${DEFAULT_RETRY_DELAY}ms`)
+            await sleep(DEFAULT_RETRY_DELAY) // Default to 5 seconds if the header is borked
           }
         }
       }
     }
 
     const response = await retryIfRatelimit()
+    debug(`fetch done`)
 
     const contentType = response.headers.get('Content-Type')
+    debug(`response contentType: ${contentType}`)
 
     if (contentType && contentType.match(/json/)) {
+      debug('parsing json')
       const json = await response.json()
       if (!response.ok) {
         throw new JSONHTTPError(response, json)
@@ -138,6 +163,7 @@ exports.generateMethod = method => {
       return json
     }
 
+    debug('parsing text')
     const text = await response.text()
     if (!response.ok) {
       throw new TextHTTPError(response, text)
