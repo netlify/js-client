@@ -7,14 +7,7 @@ const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
 const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
 const debug = require('debug')('netlify:open-api')
-
-function existy(val) {
-  return val != null
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
+const { existy, sleep } = require('./util')
 
 exports.methods = require('./shape-swagger')
 
@@ -87,11 +80,11 @@ exports.generateMethod = method => {
         }
       }
     }
-    debug(`specialHeaders: ${specialHeaders}`)
+    debug('specialHeaders: %O', specialHeaders)
 
     opts.headers = new Headers(Object.assign({}, this.defaultHeaders, specialHeaders, opts.headers))
     opts.method = method.verb.toUpperCase()
-    debug(`method: ${method}`)
+    debug(`method: ${opts.method}`)
 
     // TODO: Consider using micro-api-client when it supports node-fetch
 
@@ -122,15 +115,16 @@ exports.generateMethod = method => {
 
       for (let index = 0; index <= MAX_RETRY; index++) {
         const response = await makeRequest()
-        if (http.STATUS_CODES[response.statusCode] !== 'Too Many Requests' || index === MAX_RETRY) {
+        if (http.STATUS_CODES[response.status] !== 'Too Many Requests' || index === MAX_RETRY) {
           return response
         } else {
           debug(`Rate limited, retrying`)
           try {
-            const resetTime =
-              response.headers.get('X-RateLimit-Reset') && Number.parseInt(response.headers.get('X-RateLimit-Reset'))
+            const rateLimitReset = response.headers.get('X-RateLimit-Reset')
+            debug('rateLimitReset: %O', rateLimitReset)
+            const resetTime = Number.parseInt(rateLimitReset)
             if (!existy(resetTime)) {
-              debug('Issue with X-RateLimit-Reset header: %O', response.headers.get('X-RateLimit-Reset'))
+              debug('Issue getting resetTime: %O', resetTime)
               throw new Error('Header missing reset time')
             }
             debug(`resetTime: ${resetTime}`)
