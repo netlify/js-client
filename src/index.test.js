@@ -5,6 +5,7 @@ const NetlifyAPI = require('./index')
 const body = promisify(require('body'))
 const fromString = require('from2-string')
 const { TextHTTPError } = require('micro-api-client')
+const { existy } = require('./open-api/util')
 
 const createServer = handler => {
   const s = http.createServer(handler)
@@ -218,6 +219,61 @@ test.serial('access token can poll', async t => {
     const accessToken = await client.getAccessToken({ id: 'ticket-id' }, { poll: 50, timeout: 5000 })
 
     t.is(accessToken, 'open-sesame')
+  } catch (e) {
+    t.fail(e)
+  }
+
+  await server.close()
+})
+
+test.serial('test rate-limiting', async t => {
+  function randomInt(low, high) {
+    return Math.floor(Math.random() * high) + low
+  }
+
+  const testPayload = {
+    msg: 'good dog carl'
+  }
+
+  let server
+  let retryAt
+
+  function requestRateLimit(res, retryAt) {
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('X-RateLimit-Reset', retryAt)
+    res.statusCode = 429 // 'Too Many Requests'
+    res.end(
+      JSON.stringify({
+        retryAt
+      })
+    )
+  }
+
+  try {
+    server = createServer(async (req, res) => {
+      if (!existy(retryAt)) {
+        retryAt = Date.now() + randomInt(1000, 5000) //ms
+
+        requestRateLimit(res, retryAt)
+      } else {
+        const rateLimitFinished = Date.now() >= retryAt
+
+        if (rateLimitFinished) {
+          t.pass('The client made a request at or after the rate limit deadline')
+          res.setHeader('Content-Type', 'application/json')
+          res.statusCode = 200
+          res.end(JSON.stringify(testPayload))
+        } else {
+          t.fail('API client retried before server asked it too')
+          requestRateLimit(res, retryAt)
+        }
+      }
+    })
+
+    await server.listen(port)
+
+    const response = await client.listAccountsForUser()
+    t.deepEqual(response, testPayload)
   } catch (e) {
     t.fail(e)
   }
