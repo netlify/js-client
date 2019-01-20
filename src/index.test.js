@@ -5,7 +5,7 @@ const NetlifyAPI = require('./index')
 const body = promisify(require('body'))
 const fromString = require('from2-string')
 const { TextHTTPError } = require('micro-api-client')
-const { existy } = require('./open-api/util')
+const { existy, unixNow } = require('./open-api/util')
 
 const createServer = handler => {
   const s = http.createServer(handler)
@@ -252,11 +252,12 @@ test.serial('test rate-limiting', async t => {
   try {
     server = createServer(async (req, res) => {
       if (!existy(retryAt)) {
-        retryAt = Date.now() + randomInt(1000, 5000) //ms
+        retryAt = unixNow() + randomInt(1, 5) //ms
 
         requestRateLimit(res, retryAt)
       } else {
-        const rateLimitFinished = Date.now() >= retryAt
+        const now = unixNow()
+        const rateLimitFinished = now >= retryAt
 
         if (rateLimitFinished) {
           t.pass('The client made a request at or after the rate limit deadline')

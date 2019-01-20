@@ -7,7 +7,8 @@ const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
 const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
 const debug = require('debug')('netlify:open-api')
-const { existy, sleep } = require('./util')
+const { existy, sleep, unixNow } = require('./util')
+const isStream = require('is-stream')
 
 exports.methods = require('./shape-swagger')
 
@@ -92,7 +93,15 @@ exports.generateMethod = method => {
       let response
       try {
         debug(`requesting ${path}`)
-        response = await fetch(path, opts)
+
+        if (isStream(opts.body) && opts.body.closed) {
+          throw new Error('Body readable stream is already used.  Try passing a stream ctor instead')
+        }
+
+        // Pass in a function for readable stream ctors
+        const fetchOpts = typeof opts.body === 'function' ? Object.assign({}, opts, { body: opts.body() }) : opts
+
+        response = await fetch(path, fetchOpts)
       } catch (e) {
         // TODO: clean up this error path
         debug(`fetch error`)
@@ -128,7 +137,9 @@ exports.generateMethod = method => {
               throw new Error('Header missing reset time')
             }
             debug(`resetTime: ${resetTime}`)
-            const sleepTime = resetTime - Date.now()
+            const now = unixNow()
+            debug(`unixNow(): ${now}`)
+            const sleepTime = (resetTime - now < 0 ? 0 : resetTime - now) * 1000
             debug(`sleeping for ${sleepTime}ms`)
             await sleep(sleepTime)
           } catch (e) {

@@ -51,9 +51,9 @@ Every open-api method has the following signature:
 
 Perform a call to the given endpoint corresponding with the `operationId`. Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached. Rejects if the `status` > 400. Successful response objects have `status` and `statusText` properties on their prototype.
 
-- `params` is an object that includes any of the required or optional endpoint parameters.  
-- `params.body` should be an object which gets serialized to JSON automatically.  
-- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream.
+- `params` is an object that includes any of the required or optional endpoint parameters.
+- `params.body` should be an object which gets serialized to JSON automatically.
+- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream or stream ctor (e.g. `() => fs.createReadStream('./foo')`).  A Stream ctor function is required to support rate limit retry.
 
 ```js
 // example params
@@ -125,7 +125,7 @@ async function login () {
   // Open browser for authentication
   await openBrowser(`https://app.netlify.com/authorize?response_type=ticket&ticket=${ticket.id}`)
   const accessToken = await api.getAccessToken(ticket)
-  // API is also set up to use the returned access token as a side effect 
+  // API is also set up to use the returned access token as a side effect
   return accessToken // Save this for later so you can quickly set up an authenticated client
 }
 ```
