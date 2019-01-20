@@ -14,7 +14,7 @@ async function hashFns(dir, opts) {
       assetType: 'function',
       hashAlgorithm: 'sha256',
       // tmpDir,
-      statusCb: () => {}
+      statusCb: () => { }
     },
     opts
   )
@@ -36,7 +36,7 @@ async function hashFns(dir, opts) {
   const manifestCollector = manifestCollectorCtor(functions, fnShaMap, opts)
 
   // TODO: Zip up functions, hash then send.
-  // This is totally wrong wright now.
+  // This is totally wrong right now.
   // See https://github.com/netlify/open-api/blob/master/go/porcelain/deploy.go#L544
 
   await pump(fileStream, fnStat, fnFilter, hasher, manifestCollector)
