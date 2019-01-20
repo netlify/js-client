@@ -8,6 +8,7 @@ const camelCase = require('lodash.camelcase')
 const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
 const debug = require('debug')('netlify:open-api')
 const { existy, sleep, unixNow } = require('./util')
+const isStream = require('is-stream')
 
 exports.methods = require('./shape-swagger')
 
@@ -92,6 +93,10 @@ exports.generateMethod = method => {
       let response
       try {
         debug(`requesting ${path}`)
+
+        if (isStream(opts.body) && opts.body.closed) {
+          throw new Error('Body readable stream is already used.  Try passing a stream ctor instead')
+        }
 
         // Pass in a function for readable stream ctors
         const fetchOpts = typeof opts.body === 'function' ? Object.assign({}, opts, { body: opts.body() }) : opts
