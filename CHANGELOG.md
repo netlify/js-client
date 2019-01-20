@@ -2,7 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 2.2.2 - 2018-11-06
+## 2.2.3 - 2019-01-18
+* Fix a time parsing bug in the rate limit backoff code.
+* Support stream ctor functions in the request body.
+
+## 2.2.2 - 2019-01-18
 * Handle rate limiting errors and retry at requested time.
 
 ## 2.2.1 - 2018-11-06
