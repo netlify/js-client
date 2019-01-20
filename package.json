@@ -1,7 +1,7 @@
 {
   "name": "netlify",
   "description": "Netlify Node.js API client",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "author": "Netlify Inc.",
   "ava": {
     "files": [
