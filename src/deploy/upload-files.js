@@ -13,7 +13,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
 
   const uploadFile = async (fileObj, index) => {
     const { normalizedPath, assetType, runtime } = fileObj
-    const readStream = fs.createReadStream(fileObj.filepath)
+    const readStreamCtor = () => fs.createReadStream(fileObj.filepath)
 
     statusCb({
       type: 'upload',
@@ -26,7 +26,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
         response = await retryUpload(
           () =>
             api.uploadDeployFile({
-              body: readStream,
+              body: readStreamCtor,
               deployId,
               path: encodeURI(normalizedPath)
             }),
@@ -38,7 +38,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
         response = await await retryUpload(
           () =>
             api.uploadDeployFunction({
-              body: readStream,
+              body: readStreamCtor,
               deployId,
               name: encodeURI(normalizedPath),
               runtime

@@ -92,7 +92,11 @@ exports.generateMethod = method => {
       let response
       try {
         debug(`requesting ${path}`)
-        response = await fetch(path, opts)
+
+        // Pass in a function for readable stream ctors
+        const fetchOpts = typeof opts.body === 'function' ? Object.assign({}, opts, { body: opts.body() }) : opts
+
+        response = await fetch(path, fetchOpts)
       } catch (e) {
         // TODO: clean up this error path
         debug(`fetch error`)
