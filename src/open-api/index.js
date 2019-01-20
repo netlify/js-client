@@ -7,7 +7,7 @@ const Headers = fetch.Headers
 const camelCase = require('lodash.camelcase')
 const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
 const debug = require('debug')('netlify:open-api')
-const { existy, sleep } = require('./util')
+const { existy, sleep, unixNow } = require('./util')
 
 exports.methods = require('./shape-swagger')
 
@@ -132,7 +132,9 @@ exports.generateMethod = method => {
               throw new Error('Header missing reset time')
             }
             debug(`resetTime: ${resetTime}`)
-            const sleepTime = resetTime - Date.now()
+            const now = unixNow()
+            debug(`unixNow(): ${now}`)
+            const sleepTime = (resetTime - now < 0 ? 0 : resetTime - now) * 1000
             debug(`sleeping for ${sleepTime}ms`)
             await sleep(sleepTime)
           } catch (e) {
