@@ -122,14 +122,14 @@ exports.generateMethod = method => {
       const MAX_RETRY = 10
       const DEFAULT_RETRY_DELAY = 5000 //ms
 
+      let last_retry_delay = DEFAULT_RETRY_DELAY
       for (let index = 0; index <= MAX_RETRY; index++) {
         debug('Rate limit attempt ' + index + ' for ' + path)
         const response = await makeRequest()
-        if (index === MAX_RETRY) throw new Error('Rate limit retry exhausted, aborting ')
-        if (http.STATUS_CODES[response.status] !== 'Too Many Requests') {
+        if (http.STATUS_CODES[response.status] !== 'Too Many Requests' || index === MAX_RETRY) {
+          if (index === MAX_RETRY) debug(`Rate limit retry exhausted, aborting request...`)
           return response
         } else {
-          debug(`Rate limited, retrying`)
           try {
             const rateLimitReset = response.headers.get('X-RateLimit-Reset')
             const resetTime = Number.parseInt(rateLimitReset)
@@ -138,12 +138,12 @@ exports.generateMethod = method => {
               throw new Error('Header missing reset time')
             }
             const now = unixNow()
-            const sleepTime = ((resetTime - now < 0 ? 0 : resetTime - now) + 1) * 1000 // minimum 1 second
-            debug(`sleeping for ${sleepTime}ms`)
-            await sleep(sleepTime)
+            last_retry_delay = ((resetTime - now < 0 ? 0 : resetTime - now) + 1) * 1000 // minimum 1 second
+            debug(`sleeping for ${last_retry_delay}ms`)
+            await sleep(last_retry_delay)
           } catch (e) {
-            debug(`sleeping for ${DEFAULT_RETRY_DELAY}ms`)
-            await sleep(DEFAULT_RETRY_DELAY) // Default to 5 seconds if the header is borked
+            debug(`sleeping for ${last_retry_delay}ms`)
+            await sleep(last_retry_delay)
           }
         }
       }
