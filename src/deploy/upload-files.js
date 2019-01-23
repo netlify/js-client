@@ -98,7 +98,7 @@ function retryUpload(uploadFn, maxRetry) {
             case e.name === 'FetchError': {
               debug(`Upload failed... retrying`)
               const msg = e.json || e.data
-              if (msg) debug('O%', msg)
+              if (msg) debug('%o', msg)
               return fibonacciBackoff.backoff()
             }
             default: {
