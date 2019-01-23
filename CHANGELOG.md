@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.2.4 - 2019-01-22
+* Fix additional file upload failure modes
+
 ## 2.2.3 - 2019-01-18
 * Fix a time parsing bug in the rate limit backoff code.
 * Support stream ctor functions in the request body.
