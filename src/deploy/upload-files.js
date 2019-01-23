@@ -1,6 +1,7 @@
 const pMap = require('p-map')
 const fs = require('fs')
 const backoff = require('backoff')
+const debug = require('debug')('netlify:deploy')
 
 module.exports = uploadFiles
 async function uploadFiles(api, deployId, uploadList, { concurrentUpload, statusCb, maxRetry }) {
@@ -71,8 +72,8 @@ function retryUpload(uploadFn, maxRetry) {
     let lastError
     const fibonacciBackoff = backoff.fibonacci({
       randomisationFactor: 0.5,
-      initialDelay: 100,
-      maxDelay: 10000
+      initialDelay: 5000,
+      maxDelay: 90000
     })
     fibonacciBackoff.failAfter(maxRetry)
 
@@ -93,8 +94,11 @@ function retryUpload(uploadFn, maxRetry) {
         .catch(e => {
           lastError = e
           switch (true) {
-            case e.status === 408: // request timeout
+            case e.status >= 400: // observed errors: 408, 401 (4** swallowed), 502
             case e.name === 'FetchError': {
+              debug(`Upload failed... retrying`)
+              const msg = e.json || e.data
+              if (msg) debug('O%', msg)
               return fibonacciBackoff.backoff()
             }
             default: {
