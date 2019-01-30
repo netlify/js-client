@@ -6,7 +6,7 @@ const hasha = require('hasha')
 const path = require('path')
 const fs = require('fs')
 const map = require('through2-map').obj
-const zipIt = require('zip-it-and-ship-it')
+const zipIt = require('@netlify/zip-it-and-ship-it')
 
 // a parallel transform stream segment ctor that hashes fileObj's created by folder-walker
 exports.hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
