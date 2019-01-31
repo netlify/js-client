@@ -42,7 +42,7 @@ class NetlifyAPI {
   }
 
   get accessToken() {
-    return (get(this, 'defaultHeaders.Authorization') || '').replace('Bearer ', '')
+    return (get(this, 'defaultHeaders.Authorization') || '').replace('Bearer ', '') || null
   }
 
   set accessToken(token) {
