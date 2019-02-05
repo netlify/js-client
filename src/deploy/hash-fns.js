@@ -4,7 +4,7 @@ const pump = promisify(require('pump'))
 const fs = promisifyAll(require('fs'))
 const fromArray = require('from2-array')
 
-const { hasherCtor, manifestCollectorCtor, fnStatCtor, fnFilterCtor } = require('./hasher-segments')
+const { hasherCtor, manifestCollectorCtor, fnStatCtor } = require('./hasher-segments')
 
 module.exports = hashFns
 async function hashFns(dir, opts) {
@@ -14,7 +14,7 @@ async function hashFns(dir, opts) {
       assetType: 'function',
       hashAlgorithm: 'sha256',
       // tmpDir,
-      statusCb: () => { }
+      statusCb: () => {}
     },
     opts
   )
@@ -27,7 +27,6 @@ async function hashFns(dir, opts) {
   const fileStream = fromArray.obj(fileList)
 
   const fnStat = fnStatCtor({ root: dir, concurrentStat: opts.concurrentHash, tmpDir: opts.tmpDir })
-  const fnFilter = fnFilterCtor()
   const hasher = hasherCtor(opts)
 
   // Written to by manifestCollector
@@ -35,7 +34,7 @@ async function hashFns(dir, opts) {
   const fnShaMap = {} //hash: [fileObj, fileObj, fileObj]
   const manifestCollector = manifestCollectorCtor(functions, fnShaMap, opts)
 
-  await pump(fileStream, fnStat, fnFilter, hasher, manifestCollector)
+  await pump(fileStream, fnStat, hasher, manifestCollector)
 
   return { functions, fnShaMap }
 }
