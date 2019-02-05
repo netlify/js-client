@@ -3,10 +3,7 @@ const objWriter = require('flush-write-stream').obj
 const { normalizePath } = require('./util')
 const transform = require('parallel-transform')
 const hasha = require('hasha')
-const path = require('path')
-const fs = require('fs')
 const map = require('through2-map').obj
-const zipIt = require('@netlify/zip-it-and-ship-it')
 
 // a parallel transform stream segment ctor that hashes fileObj's created by folder-walker
 exports.hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
@@ -61,40 +58,3 @@ exports.fnFilterCtor = objFilterCtor(fileObj => {
   // filter additional files out of our fn pipeline
   return fileObj && fileObj.type === 'file' && !!fileObj.runtime
 })
-
-// parallel stream ctor similar to folder-walker but specialized for netlify functions
-// Stream in names of files that may be functions, and this will stat the file and return a fileObj
-exports.fnStatCtor = ({ root, concurrentStat, tmpDir }) => {
-  if (!concurrentStat || !root || !tmpDir) throw new Error('Missing required opts')
-  return transform(concurrentStat, { objectMode: true }, (name, cb) => {
-    const filepath = path.resolve(path.join(root, name))
-    fs.stat(filepath, (err, stat) => {
-      if (err) return cb(err)
-      zipIt
-        .zipFunction(filepath, tmpDir)
-        .then(functionZip => {
-          if (functionZip === null) {
-            return cb(null, null)
-          }
-
-          const item = {
-            root,
-            filepath: functionZip.path,
-            stat,
-            relname: path.relative(root, filepath),
-            basename: path.basename(name),
-            extname: path.extname(name),
-            type: 'file',
-            assetType: 'function',
-            normalizedPath: path.basename(name, path.extname(name)),
-            runtime: functionZip.runtime
-          }
-
-          cb(null, item)
-        })
-        .catch(err => {
-          cb(err, null)
-        })
-    })
-  })
-}
