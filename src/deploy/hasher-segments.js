@@ -53,8 +53,3 @@ exports.manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
 exports.fileFilterCtor = objFilterCtor(fileObj => {
   return fileObj.type === 'file'
 })
-
-exports.fnFilterCtor = objFilterCtor(fileObj => {
-  // filter additional files out of our fn pipeline
-  return fileObj && fileObj.type === 'file' && !!fileObj.runtime
-})
