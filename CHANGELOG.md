@@ -2,8 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.3.0 - 2019-02-06
+* Improve function deployments with [@netlify/zip-it-and-ship-it](https://github.com/netlify/zip-it-and-ship-it) ([#34](https://github.com/netlify/js-client/pull/34))
+  * Functions can now have their own `node_modules` folder, separate from your top-level sites.
+
 ## 2.2.5 - 2019-01-31
-* Fix rare bug when importing `netlify` with webpack.  This fixes library compatibility with `netlify-lambda`. (#35)[https://github.com/netlify/js-client/pull/35]
+* Fix rare bug when importing `netlify` with webpack.  This fixes library compatibility with `netlify-lambda`. ([#35](https://github.com/netlify/js-client/pull/35))
 
 ## 2.2.4 - 2019-01-22
 * Fix additional file upload failure modes
