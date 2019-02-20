@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.3.1 - 2019-02-19
+* Update deps
+* Update zip-it-and-ship-it to a working copyx
+
 ## 2.3.0 - 2019-02-06
 * Improve function deployments with [@netlify/zip-it-and-ship-it](https://github.com/netlify/zip-it-and-ship-it) ([#34](https://github.com/netlify/js-client/pull/34))
   * Functions can now have their own `node_modules` folder, separate from your top-level sites.
