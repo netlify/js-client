@@ -1,0 +1,7 @@
+*.md
+.github
+fixtures
+coverage
+.nyc_output
+webpack.config.js
+.*
