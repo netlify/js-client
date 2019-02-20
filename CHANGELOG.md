@@ -2,9 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.4.0 - 2019-02-20
+* Update @netlify/open-api to 0.9.0
+
 ## 2.3.1 - 2019-02-19
 * Update deps
-* Update zip-it-and-ship-it to a working copyx
+* Update zip-it-and-ship-it to a working version
 
 ## 2.3.0 - 2019-02-06
 * Improve function deployments with [@netlify/zip-it-and-ship-it](https://github.com/netlify/zip-it-and-ship-it) ([#34](https://github.com/netlify/js-client/pull/34))
