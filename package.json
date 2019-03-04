@@ -54,7 +54,7 @@
     "through2-filter": "^3.0.0",
     "through2-map": "^3.0.0",
     "util.promisify": "^1.0.0",
-    "@netlify/zip-it-and-ship-it": "^0.2.1"
+    "@netlify/zip-it-and-ship-it": "^0.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",
