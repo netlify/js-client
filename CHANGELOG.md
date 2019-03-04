@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.4.1 - 2019-03-04
+* Update zip-it-and-ship-it to ^0.2.3
+
 ## 2.4.0 - 2019-02-20
 * Update @netlify/open-api to 0.9.0
 
