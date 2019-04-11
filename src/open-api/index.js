@@ -5,7 +5,7 @@ const http = require('http')
 const fetch = require('node-fetch').default || require('node-fetch') // Webpack will sometimes export default exports in different places
 const Headers = require('node-fetch').Headers
 const camelCase = require('lodash.camelcase')
-const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
+const { JSONHTTPError, TextHTTPError, getPagination } = require('micro-api-client')
 const debug = require('debug')('netlify:open-api')
 const { existy, sleep, unixNow } = require('./util')
 const isStream = require('is-stream')
@@ -87,8 +87,6 @@ exports.generateMethod = method => {
     opts.method = method.verb.toUpperCase()
     debug(`method: ${opts.method}`)
 
-    // TODO: Consider using micro-api-client when it supports node-fetch
-
     async function makeRequest() {
       let response
       try {
@@ -161,10 +159,8 @@ exports.generateMethod = method => {
       if (!response.ok) {
         throw new JSONHTTPError(response, json)
       }
-      // TODO: Support pagination
-      // const pagination = getPagination(response)
-      // return pagination ? { pagination, items: json } : json
-      return json
+      const pagination = getPagination(response)
+      return pagination ? { pagination, items: json } : json
     }
 
     debug('parsing text')
