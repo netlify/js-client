@@ -3,6 +3,8 @@ const hashFiles = require('./hash-files')
 const hashFns = require('./hash-fns')
 const cleanDeep = require('clean-deep')
 const tempy = require('tempy')
+const promisify = require('util.promisify')
+const rimraf = promisify(require('rimraf'))
 const { waitForDiff } = require('./util')
 
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
@@ -101,6 +103,8 @@ module.exports = async (api, siteId, dir, opts) => {
     msg: opts.draft ? 'Draft deploy is live!' : 'Deploy is live!',
     phase: 'stop'
   })
+
+  await rimraf(opts.tmpDir)
 
   const deployManifest = {
     deployId,
