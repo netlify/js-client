@@ -160,7 +160,8 @@ exports.generateMethod = method => {
         throw new JSONHTTPError(response, json)
       }
       const pagination = getPagination(response)
-      return pagination ? { pagination, items: json } : json
+      if (existy(pagination)) json.pagination = pagination
+      return json
     }
 
     debug('parsing text')
