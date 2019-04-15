@@ -12,6 +12,29 @@ const client = new NetlifyAPI('1234myAccessToken')
 const sites = await client.listSites()
 ```
 
+## Using Open API methods
+
+```
+const NetlifyAPI = require('netlify')
+const client = new NetlifyAPI('1234myAccessToken')
+
+// Fetch sites
+const sites = await client.listSites()
+
+// Create a site. Notice `body` here for sending OpenAPI body
+const site = await netlify.createSite({
+  body: {
+    name: `my-awesome-site`
+    // ... https://open-api.netlify.com/#/default/createSite
+  }
+})
+
+// Delete site. Notice `site_id` is a path parameter https://open-api.netlify.com/#/default/deleteSite
+await netlify.deleteSite({
+  site_id: siteId
+})
+```
+
 ## API
 
 ### `client = new NetlifyAPI([accessToken], [opts])`
