@@ -14,7 +14,7 @@ const sites = await client.listSites()
 
 ## Using Open API methods
 
-```
+```js
 const NetlifyAPI = require('netlify')
 const client = new NetlifyAPI('1234myAccessToken')
 
