@@ -72,10 +72,10 @@ Every open-api method has the following signature:
 
 #### `promise(response) = client.operationId([params], [opts])`
 
-Perform a call to the given endpoint corresponding with the `operationId`. Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached. Rejects if the `status` > 400. Successful response objects have `status` and `statusText` properties on their prototype.
+Perform a call to the given endpoint corresponding with the `operationId`. Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached. Rejects if the `status` > 400.
 
 - `params` is an object that includes any of the required or optional endpoint parameters.
-- `params.body` should be an object which gets serialized to JSON automatically.
+- `params.body` should be an object which gets serialized to JSON automatically.  Any object can live here but refer to the open-api specification for allowed fields in a particular request body.
 - If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream or stream ctor (e.g. `() => fs.createReadStream('./foo')`).  A Stream ctor function is required to support rate limit retry.
 
 ```js
