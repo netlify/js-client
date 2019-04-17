@@ -31,6 +31,7 @@
   ],
   "dependencies": {
     "@netlify/open-api": "^0.9.0",
+    "@netlify/zip-it-and-ship-it": "^0.3.0",
     "backoff": "^2.5.0",
     "clean-deep": "^3.0.2",
     "debug": "^4.1.1",
@@ -54,8 +55,7 @@
     "tempy": "^0.2.1",
     "through2-filter": "^3.0.0",
     "through2-map": "^3.0.0",
-    "util.promisify": "^1.0.0",
-    "@netlify/zip-it-and-ship-it": "^0.2.3"
+    "util.promisify": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",
