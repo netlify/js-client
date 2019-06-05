@@ -21,7 +21,7 @@ async function createAddon(settings, netlifyApiToken) {
   const data = await response.json()
 
   if (response.status === 422) {
-    throw new Error(`${JSON.stringify(data.error)}`)
+    throw new Error(data.error)
   }
 
   return data
@@ -40,7 +40,7 @@ async function getAddons(siteId, netlifyApiToken) {
   const data = await response.json()
 
   if (response.status === 422) {
-    throw new Error(`${JSON.stringify(data.error)}`)
+    throw new Error(data.error)
   }
 
   return data
@@ -60,7 +60,7 @@ async function deleteAddon(settings, netlifyApiToken) {
 
   if (response.status === 422) {
     const data = await response.json()
-    throw new Error(`${JSON.stringify(data.error)}`)
+    throw new Error(data.error)
   }
 
   return response
@@ -85,7 +85,7 @@ async function updateAddon(settings, netlifyApiToken) {
   const data = await response.json()
 
   if (response.status === 422) {
-    throw new Error(`${JSON.stringify(data.error)}`)
+    throw new Error(data.error)
   }
 
   return response
