@@ -58,6 +58,10 @@ async function deleteAddon(settings, netlifyApiToken) {
     }
   })
 
+  if (response.status === 422) {
+    throw new Error(`Error ${JSON.stringify(data)}`)
+  }
+
   return response
 }
 
@@ -76,6 +80,10 @@ async function updateAddon(settings, netlifyApiToken) {
       config: config
     }),
   })
+
+  if (response.status === 422) {
+    throw new Error(`Error ${JSON.stringify(data)}`)
+  }
 
   return response
 }
