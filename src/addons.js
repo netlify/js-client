@@ -82,9 +82,8 @@ async function updateAddon(settings, netlifyApiToken) {
     }),
   })
 
-  const data = await response.json()
-
   if (response.status === 422) {
+    const data = await response.json()
     throw new Error(data.error)
   }
 
