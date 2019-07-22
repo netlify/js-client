@@ -5,7 +5,6 @@ const fetch = require('node-fetch')
 
 async function createAddon(settings, netlifyApiToken) {
   const { siteId, addon, config } = settings
-  console.log('Creating addon')
   const url = `https://api.netlify.com/api/v1/sites/${siteId}/services/${addon}/instances`
   const response = await fetch(url, {
     method: 'POST',
@@ -48,7 +47,6 @@ async function getAddons(siteId, netlifyApiToken) {
 
 async function deleteAddon(settings, netlifyApiToken) {
   const { siteId, addon, instanceId } = settings
-  console.log('Deleting addon')
   const url = `https://api.netlify.com/api/v1/sites/${siteId}/services/${addon}/instances/${instanceId}`
   const response = await fetch(url, {
     method: 'DELETE',
@@ -68,7 +66,6 @@ async function deleteAddon(settings, netlifyApiToken) {
 
 async function updateAddon(settings, netlifyApiToken) {
   const { siteId, addon, config, instanceId } = settings
-  console.log('Updating addon', addon)
   const url = `https://api.netlify.com/api/v1/sites/${siteId}/services/${addon}/instances/${instanceId}`
 
   const response = await fetch(url, {
