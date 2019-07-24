@@ -116,3 +116,5 @@ methods.forEach(method => {
 })
 
 module.exports = NetlifyAPI
+
+module.exports.methods = methods
