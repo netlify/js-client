@@ -1,7 +1,8 @@
 const test = require('ava')
+const tempy = require('tempy')
+
 const hashFns = require('./hash-fns')
 const { defaultFilter } = require('./util')
-const tempy = require('tempy')
 
 test('hashes files in a folder', async t => {
   const { functions, fnShaMap } = await hashFns(__dirname, { filter: defaultFilter, tmpDir: tempy.directory() })

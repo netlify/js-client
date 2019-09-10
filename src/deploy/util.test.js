@@ -1,4 +1,5 @@
 const test = require('ava')
+
 const { normalizePath } = require('./util')
 
 test('normalizes relative file paths', t => {

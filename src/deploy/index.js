@@ -1,12 +1,13 @@
-const uploadFiles = require('./upload-files')
-const hashFiles = require('./hash-files')
-const hashFns = require('./hash-fns')
+const { promisify } = require('util')
+
 const cleanDeep = require('clean-deep')
 const tempy = require('tempy')
-const { promisify } = require('util')
 const rimraf = promisify(require('rimraf'))
-const { waitForDiff } = require('./util')
 
+const hashFns = require('./hash-fns')
+const hashFiles = require('./hash-files')
+const uploadFiles = require('./upload-files')
+const { waitForDiff } = require('./util')
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
 module.exports = async (api, siteId, dir, opts) => {

@@ -1,6 +1,8 @@
 const { promisify } = require('util')
+
 const walker = require('folder-walker')
 const pump = promisify(require('pump'))
+
 const { hasherCtor, manifestCollectorCtor, fileFilterCtor, fileNormalizerCtor } = require('./hasher-segments')
 
 module.exports = hashFiles

@@ -1,10 +1,11 @@
 const set = require('lodash.set')
 const get = require('lodash.get')
 const dfn = require('@netlify/open-api')
-const { methods, generateMethod } = require('./open-api')
 const pWaitFor = require('p-wait-for')
-const deploy = require('./deploy')
 const debug = require('debug')('netlify')
+
+const { methods, generateMethod } = require('./open-api')
+const deploy = require('./deploy')
 
 class NetlifyAPI {
   constructor(accessToken, opts) {

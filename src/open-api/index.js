@@ -1,14 +1,16 @@
+const http = require('http')
+
 const get = require('lodash.get')
 const set = require('lodash.set')
 const queryString = require('qs')
-const http = require('http')
 const fetch = require('node-fetch').default || require('node-fetch') // Webpack will sometimes export default exports in different places
 const Headers = require('node-fetch').Headers
 const camelCase = require('lodash.camelcase')
 const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
 const debug = require('debug')('netlify:open-api')
-const { existy, sleep, unixNow } = require('./util')
 const isStream = require('is-stream')
+
+const { existy, sleep, unixNow } = require('./util')
 
 exports.methods = require('./shape-swagger')
 
