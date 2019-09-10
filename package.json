@@ -54,8 +54,7 @@
     "rimraf": "^2.6.3",
     "tempy": "^0.2.1",
     "through2-filter": "^3.0.0",
-    "through2-map": "^3.0.0",
-    "util.promisify": "^1.0.0"
+    "through2-map": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",
