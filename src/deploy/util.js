@@ -3,13 +3,9 @@ const path = require('path')
 const pWaitFor = require('p-wait-for')
 const flatten = require('lodash.flatten')
 
-function existy(x) {
-  return x != null
-}
-
 // Default filter when scanning for files
 exports.defaultFilter = filename => {
-  if (!existy(filename)) return false
+  if (filename == null) return false
   const n = path.basename(filename)
   switch (true) {
     case n === 'node_modules':
