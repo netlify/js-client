@@ -14,7 +14,7 @@ async function createAddon(settings, netlifyApiToken) {
     },
     body: JSON.stringify({
       config: config
-    }),
+    })
   })
 
   const data = await response.json()
@@ -76,7 +76,7 @@ async function updateAddon(settings, netlifyApiToken) {
     },
     body: JSON.stringify({
       config: config
-    }),
+    })
   })
 
   if (response.status === 422) {

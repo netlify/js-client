@@ -1,4 +1,5 @@
 # netlify/js-client
+
 [![npm version][npm-img]][npm] [![build status][travis-img]][travis] [![windows build status][av-img]][av]
 [![coverage][coverage-img]][coverage] [![dependencies][david-img]][david] [![downloads][dl-img]][dl]
 
@@ -41,7 +42,7 @@ await netlify.deleteSite({
 
 Create a new instance of the Netlify API client with the provided `accessToken`.
 
-`accessToken` is optional.  Without it, you can't make authorized requests.
+`accessToken` is optional. Without it, you can't make authorized requests.
 
 `opts` includes:
 
@@ -75,8 +76,8 @@ Every open-api method has the following signature:
 Perform a call to the given endpoint corresponding with the `operationId`. Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached. Rejects if the `status` > 400.
 
 - `params` is an object that includes any of the required or optional endpoint parameters.
-- `params.body` should be an object which gets serialized to JSON automatically.  Any object can live here but refer to the open-api specification for allowed fields in a particular request body.
-- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream or stream ctor (e.g. `() => fs.createReadStream('./foo')`).  A Stream ctor function is required to support rate limit retry.
+- `params.body` should be an object which gets serialized to JSON automatically. Any object can live here but refer to the open-api specification for allowed fields in a particular request body.
+- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream or stream ctor (e.g. `() => fs.createReadStream('./foo')`). A Stream ctor function is required to support rate limit retry.
 
 ```js
 // example params
@@ -105,7 +106,7 @@ Optional `opts` can include any property you want passed to `node-fetch`. The `h
 All methods are conveniently consumed with async/await:
 
 ```js
-async function getSomeData () {
+async function getSomeData() {
   // Calls may fail!
   try {
     return await client.getSiteDeploy({
@@ -141,7 +142,7 @@ See the [authenticating](https://www.netlify.com/docs/api/#authenticating) docs 
 
 ```js
 // example:
-async function login () {
+async function login() {
   const ticket = await api.createTicket({
     clientId: CLIENT_ID
   })
@@ -156,7 +157,7 @@ async function login () {
 #### `promise(deploy) = client.deploy(siteId, buildDir, [opts])`
 
 **Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
-Sometimes this method needs to write to a `tmpDir`.  By default `tmpDir` is a folder in the system temporary directory.
+Sometimes this method needs to write to a `tmpDir`. By default `tmpDir` is a folder in the system temporary directory.
 
 The following paths can be passed in the options:
 
@@ -192,7 +193,7 @@ Optional `opts` include:
 
 ## UMD Builds
 
-A UMD build is provided for your convenience, however browser support is still experimental.  Contributions to improve browser support are welcome.
+A UMD build is provided for your convenience, however browser support is still experimental. Contributions to improve browser support are welcome.
 
 ## Contributing
 

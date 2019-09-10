@@ -3,7 +3,7 @@ module.exports = {
   devtool: 'source-map',
   output: {
     library: 'NetlifyClient',
-    libraryTarget: 'umd',
+    libraryTarget: 'umd'
   },
   module: {
     rules: [
@@ -13,11 +13,11 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           query: {
-            presets: [['@babel/preset-env', {modules: 'commonjs'}]],
-            plugins: ['@babel/plugin-transform-runtime'],
-          },
-        },
-      },
-    ],
-  },
+            presets: [['@babel/preset-env', { modules: 'commonjs' }]],
+            plugins: ['@babel/plugin-transform-runtime']
+          }
+        }
+      }
+    ]
+  }
 }

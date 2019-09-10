@@ -103,7 +103,8 @@
     "test": "run-s test:*",
     "test:ava": "nyc --reporter=lcov ava --verbose && nyc report",
     "test:deps": "dependency-check ./package.json --entry \"src/**/!(*.test).js\" --unused --missing --no-dev --no-peer",
-    "test:lint": "eslint src",
+    "test:lint": "eslint --fix 'src/**/*.js' '*.js'",
+    "test:prettier": "prettier --write --loglevel warn 'src/**/*.js' '*.{js,md,yml,json}'",
     "watch": "nyc --reporter=lcov ava --watch",
     "clean": "rimraf dist coverage",
     "version": "auto-changelog -p --template keepachangelog --breaking-pattern breaking && git add CHANGELOG.md"
