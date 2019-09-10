@@ -1,5 +1,4 @@
 const { promisify } = require('util')
-
 const pump = promisify(require('pump'))
 const fromArray = require('from2-array')
 const zipIt = require('@netlify/zip-it-and-ship-it')

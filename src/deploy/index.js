@@ -1,10 +1,9 @@
-const { promisify } = require('util')
-
 const uploadFiles = require('./upload-files')
 const hashFiles = require('./hash-files')
 const hashFns = require('./hash-fns')
 const cleanDeep = require('clean-deep')
 const tempy = require('tempy')
+const { promisify } = require('util')
 const rimraf = promisify(require('rimraf'))
 const { waitForDiff } = require('./util')
 
