@@ -44,7 +44,7 @@ Projects that depend heavily on this client that should be taken into considerat
 # Update the changelog
 $ npm version [major|minor|patch]
 $ git push && git push --tags
-# Create a github release with the changelog contents 
+# Create a github release with the changelog contents
 $ npm publish
 ```
 
