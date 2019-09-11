@@ -2,7 +2,6 @@ const fs = require('fs')
 
 const pMap = require('p-map')
 const backoff = require('backoff')
-const debug = require('debug')('netlify:deploy')
 
 module.exports = uploadFiles
 async function uploadFiles(api, deployId, uploadList, { concurrentUpload, statusCb, maxRetry }) {
@@ -97,9 +96,6 @@ function retryUpload(uploadFn, maxRetry) {
           switch (true) {
             case e.status >= 400: // observed errors: 408, 401 (4** swallowed), 502
             case e.name === 'FetchError': {
-              debug(`Upload failed... retrying`)
-              const msg = e.json || e.data
-              if (msg) debug('%o', msg)
               return fibonacciBackoff.backoff()
             }
             default: {

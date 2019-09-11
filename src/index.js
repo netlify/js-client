@@ -2,14 +2,15 @@ const set = require('lodash.set')
 const get = require('lodash.get')
 const dfn = require('@netlify/open-api')
 const pWaitFor = require('p-wait-for')
-const debug = require('debug')('netlify')
 
-const { generateOperation } = require('./open-api')
+const { addMethods } = require('./methods')
 const { getOperations } = require('./operations')
 const deploy = require('./deploy')
 
 class NetlifyAPI {
   constructor(accessToken, opts) {
+    addMethods(this)
+
     // variadic arguments
     if (typeof accessToken === 'object') {
       opts = accessToken
@@ -22,11 +23,11 @@ class NetlifyAPI {
         scheme: dfn.schemes[0],
         host: dfn.host,
         pathPrefix: dfn.basePath,
-        accessToken
+        accessToken,
+        globalParams: {}
       },
       opts
     )
-    debug('options: %O', opts)
 
     this.defaultHeaders = {
       'User-agent': opts.userAgent,
@@ -36,7 +37,7 @@ class NetlifyAPI {
     this.scheme = opts.scheme
     this.host = opts.host
     this.pathPrefix = opts.pathPrefix
-    this.globalParams = Object.assign({}, opts.globalParams)
+    this.globalParams = opts.globalParams
     this.accessToken = opts.accessToken
   }
 
@@ -57,14 +58,7 @@ class NetlifyAPI {
   }
 
   async getAccessToken(ticket, opts) {
-    opts = Object.assign(
-      {
-        poll: 1000,
-        timeout: 3.6e6
-      },
-      opts
-    )
-    debug('getAccessToken options: %O', opts)
+    opts = Object.assign({ poll: 1000, timeout: 3.6e6 }, opts)
 
     const api = this
 
@@ -72,10 +66,8 @@ class NetlifyAPI {
 
     let authorizedTicket // ticket capture
     const checkTicket = async () => {
-      debug('checking ticket')
       const t = await api.showTicket({ ticketId: id })
       if (t.authorized) {
-        debug('received authorized ticket')
         authorizedTicket = t
       }
       return !!t.authorized
@@ -90,13 +82,6 @@ class NetlifyAPI {
     const accessTokenResponse = await api.exchangeTicket({ ticketId: authorizedTicket.id })
     // See https://open-api.netlify.com/#/default/exchangeTicket for shape
     this.accessToken = accessTokenResponse.access_token
-    debug('access token details: %O', {
-      id: accessTokenResponse.id,
-      user_id: accessTokenResponse.id,
-      user_email: accessTokenResponse.id,
-      created_at: accessTokenResponse.id
-    })
-
     return accessTokenResponse.access_token
   }
 
@@ -108,13 +93,6 @@ class NetlifyAPI {
   }
 }
 
-const operations = getOperations()
-operations.forEach(operation => {
-  // Generate open-api methods
-  /* {param1, param2, body, ... }, [opts] */
-  NetlifyAPI.prototype[operation.operationId] = generateOperation(operation)
-})
-
 module.exports = NetlifyAPI
 
-module.exports.methods = operations
+module.exports.methods = getOperations()
