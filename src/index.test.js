@@ -187,7 +187,7 @@ test('Can specify JSON request body as an object', async t => {
   t.true(scope.isDone())
 })
 
-test.skip('Can specify JSON request body as a function', async t => {
+test('Can specify JSON request body as a function', async t => {
   const body = { test: 'test' }
   const scope = nock(origin)
     .post(`${pathPrefix}/accounts`, body, { 'Content-Type': 'application/json' })
@@ -250,7 +250,7 @@ test('Validates required path parameters', async t => {
     .reply(200)
 
   const client = getClient()
-  await t.throwsAsync(client.updateAccount(), 'Missing required param account_id')
+  await t.throwsAsync(client.updateAccount(), "Missing required path variable 'account_id'")
 
   t.false(scope.isDone())
 })
@@ -262,7 +262,7 @@ test('Validates required query parameters', async t => {
     .reply(200)
 
   const client = getClient()
-  await t.throwsAsync(client.addMemberToAccount({ account_slug }), 'Missing required param email')
+  await t.throwsAsync(client.addMemberToAccount({ account_slug }), "Missing required query variable 'email'")
 
   t.false(scope.isDone())
 })

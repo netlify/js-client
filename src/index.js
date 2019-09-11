@@ -4,12 +4,14 @@ const dfn = require('@netlify/open-api')
 const pWaitFor = require('p-wait-for')
 const debug = require('debug')('netlify')
 
-const { generateOperation } = require('./open-api')
+const { addMethods } = require('./methods')
 const { getOperations } = require('./operations')
 const deploy = require('./deploy')
 
 class NetlifyAPI {
   constructor(accessToken, opts) {
+    addMethods(this)
+
     // variadic arguments
     if (typeof accessToken === 'object') {
       opts = accessToken
@@ -22,7 +24,8 @@ class NetlifyAPI {
         scheme: dfn.schemes[0],
         host: dfn.host,
         pathPrefix: dfn.basePath,
-        accessToken
+        accessToken,
+        globalParams: {}
       },
       opts
     )
@@ -36,7 +39,7 @@ class NetlifyAPI {
     this.scheme = opts.scheme
     this.host = opts.host
     this.pathPrefix = opts.pathPrefix
-    this.globalParams = Object.assign({}, opts.globalParams)
+    this.globalParams = opts.globalParams
     this.accessToken = opts.accessToken
   }
 
@@ -108,13 +111,6 @@ class NetlifyAPI {
   }
 }
 
-const operations = getOperations()
-operations.forEach(operation => {
-  // Generate open-api methods
-  /* {param1, param2, body, ... }, [opts] */
-  NetlifyAPI.prototype[operation.operationId] = generateOperation(operation)
-})
-
 module.exports = NetlifyAPI
 
-module.exports.methods = operations
+module.exports.methods = getOperations()
