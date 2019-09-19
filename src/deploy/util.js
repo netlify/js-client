@@ -106,8 +106,7 @@ async function waitForDeploy(api, deployId, siteId, timeout) {
 }
 
 // Transform the fileShaMap and fnShaMap into a generic shaMap that file-uploader.js can use
-exports.getUploadList = getUploadList
-function getUploadList(required, shaMap) {
+exports.getUploadList = function(required, shaMap) {
   if (!required || !shaMap) return []
   return flatten(required.map(sha => shaMap[sha]))
 }
