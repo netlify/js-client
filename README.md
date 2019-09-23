@@ -23,7 +23,7 @@ const client = new NetlifyAPI('1234myAccessToken')
 const sites = await client.listSites()
 
 // Create a site. Notice `body` here for sending OpenAPI body
-const site = await netlify.createSite({
+const site = await client.createSite({
   body: {
     name: `my-awesome-site`
     // ... https://open-api.netlify.com/#/default/createSite
@@ -31,7 +31,7 @@ const site = await netlify.createSite({
 })
 
 // Delete site. Notice `site_id` is a path parameter https://open-api.netlify.com/#/default/deleteSite
-await netlify.deleteSite({
+await client.deleteSite({
   site_id: siteId
 })
 ```
