@@ -1,5 +1,6 @@
-const pMap = require('p-map')
 const fs = require('fs')
+
+const pMap = require('p-map')
 const backoff = require('backoff')
 const debug = require('debug')('netlify:deploy')
 

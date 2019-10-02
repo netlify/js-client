@@ -1,11 +1,14 @@
-const test = require('ava')
 const http = require('http')
 const { promisify } = require('util')
-const NetlifyAPI = require('./index')
+
+const test = require('ava')
 const body = promisify(require('body'))
 const fromString = require('from2-string')
 const { TextHTTPError } = require('micro-api-client')
+
 const { existy, unixNow } = require('./open-api/util')
+
+const NetlifyAPI = require('./index')
 
 const createServer = handler => {
   const s = http.createServer(handler)

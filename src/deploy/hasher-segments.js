@@ -1,9 +1,10 @@
 const objFilterCtor = require('through2-filter').objCtor
 const objWriter = require('flush-write-stream').obj
-const { normalizePath } = require('./util')
 const transform = require('parallel-transform')
 const hasha = require('hasha')
 const map = require('through2-map').obj
+
+const { normalizePath } = require('./util')
 
 // a parallel transform stream segment ctor that hashes fileObj's created by folder-walker
 exports.hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {

@@ -1,8 +1,9 @@
 const { promisify } = require('util')
+const path = require('path')
+
 const pump = promisify(require('pump'))
 const fromArray = require('from2-array')
 const zipIt = require('@netlify/zip-it-and-ship-it')
-const path = require('path')
 
 const { hasherCtor, manifestCollectorCtor } = require('./hasher-segments')
 

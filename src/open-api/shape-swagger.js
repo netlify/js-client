@@ -1,4 +1,5 @@
 const dfn = require('@netlify/open-api')
+
 const { sortParams, mergeParams } = require('./util')
 const methods = []
 
