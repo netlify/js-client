@@ -207,8 +207,6 @@ MIT. See [LICENSE](LICENSE) for more details.
 [npm]: https://npmjs.org/package/netlify
 [travis-img]: https://img.shields.io/travis/netlify/js-client/master.svg
 [travis]: https://travis-ci.org/netlify/js-client
-[av-img]: https://ci.appveyor.com/api/projects/status/6lw5yqvl4plm1utb/branch/master?svg=true
-[av]: https://ci.appveyor.com/project/netlify/js-client
 [dl-img]: https://img.shields.io/npm/dm/netlify.svg
 [dl]: https://npmjs.org/package/netlify
 [coverage-img]: https://img.shields.io/coveralls/netlify/js-client/master.svg
