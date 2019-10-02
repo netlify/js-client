@@ -132,21 +132,14 @@ exports.generateMethod = method => {
           if (index === MAX_RETRY) debug(`Rate limit retry exhausted, aborting request...`)
           return response
         } else {
-          try {
-            const rateLimitReset = response.headers.get('X-RateLimit-Reset')
+          const rateLimitReset = response.headers.get('X-RateLimit-Reset')
+          if (rateLimitReset) {
             const resetTime = Number.parseInt(rateLimitReset)
-            if (!existy(resetTime)) {
-              debug('Issue getting resetTime: %O', resetTime)
-              throw new Error('Header missing reset time')
-            }
             const now = unixNow()
             last_retry_delay = ((resetTime - now < 0 ? 0 : resetTime - now) + 1) * 1000 // minimum 1 second
-            debug(`sleeping for ${last_retry_delay}ms`)
-            await sleep(last_retry_delay)
-          } catch (e) {
-            debug(`sleeping for ${last_retry_delay}ms`)
-            await sleep(last_retry_delay)
           }
+          debug(`sleeping for ${last_retry_delay}ms`)
+          await sleep(last_retry_delay)
         }
       }
     }
