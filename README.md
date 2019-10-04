@@ -13,7 +13,7 @@ const client = new NetlifyAPI('1234myAccessToken')
 const sites = await client.listSites()
 ```
 
-## Using Open API methods
+## Using Open API operations
 
 ```js
 const NetlifyAPI = require('netlify')
@@ -67,9 +67,9 @@ A getter that returns the formatted base URL of the endpoint the client is confi
 
 ### Open API Client methods
 
-The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file. Each method is is named after the `operationId` name of each endpoint action. **To see list of available operations see the [open-api website](https://open-api.netlify.com/)**.
+The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file. Each method is is named after the `operationId` name of each operation. **To see list of available operations see the [open-api website](https://open-api.netlify.com/)**.
 
-Every open-api method has the following signature:
+Every open-api operation has the following signature:
 
 #### `promise(response) = client.operationId([params], [opts])`
 
@@ -103,7 +103,7 @@ Optional `opts` can include any property you want passed to `node-fetch`. The `h
 }
 ```
 
-All methods are conveniently consumed with async/await:
+All operations are conveniently consumed with async/await:
 
 ```js
 async function getSomeData() {
@@ -123,7 +123,7 @@ If the request response includes `json` in the `contentType` header, fetch will 
 
 ### API Flow Methods
 
-Some methods have been added in addition to the open API methods that make certain actions simpler to perform.
+Some methods have been added in addition to the open API operations that make certain actions simpler to perform.
 
 #### `promise(accessToken) = client.getAccessToken(ticket, [opts])`
 
