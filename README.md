@@ -1,6 +1,6 @@
 # netlify/js-client
 
-[![npm version][npm-img]][npm] [![build status][build-img]][build] [![windows build status][av-img]][av]
+[![npm version][npm-img]][npm] [![build status][build-img]][build]
 [![coverage][coverage-img]][coverage] [![dependencies][david-img]][david] [![downloads][dl-img]][dl]
 
 A Netlify [open-api](https://github.com/netlify/open-api) client that works in the browser and Node.js.
