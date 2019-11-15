@@ -92,7 +92,7 @@
   },
   "scripts": {
     "prepublishOnly": "run-s build && git push && git push --tags && gh-release",
-    "ci": "run-s test coverage build",
+    "ci": "run-s test build",
     "test": "run-s test:*",
     "test:lint": "eslint --fix \"src/**/*.js\" \"*.js\"",
     "test:prettier": "prettier --write --loglevel warn \"src/**/*.js\" \"*.{js,md,yml,json}\"",
