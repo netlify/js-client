@@ -23,6 +23,6 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Tests
-        run: npm run ci
+        run: npm run test-ci
       - name: Codecov test coverage
         run: bash scripts/coverage.sh "${{ secrets.CODECOV_TOKEN }}" "${{ matrix.os }}" "${{ matrix.node }}"
