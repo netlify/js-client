@@ -6,12 +6,10 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest]
         node: [8.3.0, 13]
         exclude:
           - os: macOS-latest
-            node: 8.3.0
-          - os: windows-latest
             node: 8.3.0
       fail-fast: false
     runs-on: ${{ matrix.os }}
