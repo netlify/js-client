@@ -1,6 +1,6 @@
 # netlify/js-client
 
-[![npm version][npm-img]][npm] [![build status][travis-img]][travis] [![windows build status][av-img]][av]
+[![npm version][npm-img]][npm] [![build status][build-img]][build] [![windows build status][av-img]][av]
 [![coverage][coverage-img]][coverage] [![dependencies][david-img]][david] [![downloads][dl-img]][dl]
 
 A Netlify [open-api](https://github.com/netlify/open-api) client that works in the browser and Node.js.
@@ -205,11 +205,11 @@ MIT. See [LICENSE](LICENSE) for more details.
 
 [npm-img]: https://img.shields.io/npm/v/netlify.svg
 [npm]: https://npmjs.org/package/netlify
-[travis-img]: https://img.shields.io/travis/netlify/js-client/master.svg
-[travis]: https://travis-ci.org/netlify/js-client
+[build-img]: https://github.com/netlify/build/workflows/Build/badge.svg
+[build]: https://github.com/netlify/build/actions
 [dl-img]: https://img.shields.io/npm/dm/netlify.svg
 [dl]: https://npmjs.org/package/netlify
-[coverage-img]: https://img.shields.io/coveralls/netlify/js-client/master.svg
-[coverage]: https://coveralls.io/github/netlify/js-client
+[coverage-img]: https://codecov.io/gh/netlify/build/branch/master/graph/badge.svg
+[coverage]: https://codecov.io/gh/netlify/build
 [david-img]: https://david-dm.org/netlify/js-client/status.svg
 [david]: https://david-dm.org/netlify/js-client
