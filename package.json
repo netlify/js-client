@@ -79,8 +79,8 @@
   },
   "homepage": "https://github.com/netlify/js-client",
   "keywords": [
-    "js client",
     "api client",
+    "js client",
     "netlify",
     "node client"
   ],
