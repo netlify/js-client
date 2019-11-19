@@ -10,6 +10,12 @@
     "compileEnhancements": false,
     "babel": false
   },
+  "files": [
+    "src",
+    "dist",
+    "!*.test.js*",
+    "!*~"
+  ],
   "unpkg": "./dist/main.js",
   "umd:main": "./dist/main.js",
   "browser": {
