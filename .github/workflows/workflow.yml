@@ -1,0 +1,28 @@
+name: Build
+on: [push]
+env:
+  CI: 'true'
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        node: [8.3.0, 13]
+        exclude:
+          - os: macOS-latest
+            node: 8.3.0
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v1
+      - name: Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install dependencies
+        run: npm install
+      - name: Tests
+        run: npm run test-ci
+      - name: Codecov test coverage
+        run: bash scripts/coverage.sh "${{ secrets.CODECOV_TOKEN }}" "${{ matrix.os }}" "${{ matrix.node }}"
