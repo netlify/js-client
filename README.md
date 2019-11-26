@@ -3,7 +3,7 @@
 [![npm version][npm-img]][npm] [![build status][build-img]][build]
 [![coverage][coverage-img]][coverage] [![dependencies][david-img]][david] [![downloads][dl-img]][dl]
 
-A Netlify [open-api](https://github.com/netlify/open-api) client that works in the browser and Node.js.
+A Netlify [OpenAPI](https://github.com/netlify/open-api) client that works in the browser and Node.js.
 
 ## Usage
 
@@ -13,7 +13,7 @@ const client = new NetlifyAPI('1234myAccessToken')
 const sites = await client.listSites()
 ```
 
-## Using Open API operations
+## Using OpenAPI operations
 
 ```js
 const NetlifyAPI = require('netlify')
@@ -52,8 +52,9 @@ Create a new instance of the Netlify API client with the provided `accessToken`.
   scheme: 'https',
   host: 'api.netlify.com',
   pathPrefix: '/api/v1',
+  accessToken: '1234myAccessToken',
   globalParams: {} // parameters you want available for every request.
-  // Global params are only sent of the open-api spec specifies the provided params.
+  // Global params are only sent of the OpenAPI spec specifies the provided params.
 }
 ```
 
@@ -65,19 +66,19 @@ A setter/getter that returns the `accessToken` that the client is configured to 
 
 A getter that returns the formatted base URL of the endpoint the client is configured to use.
 
-### Open API Client methods
+### OpenAPI Client methods
 
-The client is dynamically generated from the [open-api](https://github.com/netlify/open-api) definition file. Each method is is named after the `operationId` name of each operation. **To see list of available operations see the [open-api website](https://open-api.netlify.com/)**.
+The client is dynamically generated from the [OpenAPI](https://github.com/netlify/open-api) definition file. Each method is is named after the `operationId` name of each operation. **To see a list of available operations, please see the [OpenAPI website](https://open-api.netlify.com/)**.
 
-Every open-api operation has the following signature:
+Every OpenAPI operation has the following signature:
 
-#### `promise(response) = client.operationId([params], [opts])`
+#### `response = await client.operationId([params], [opts])`
 
-Perform a call to the given endpoint corresponding with the `operationId`. Returns promise that will resolve with the body of the response, or reject with an error with details about the request attached. Rejects if the `status` > 400.
+Performs a call to the given endpoint corresponding with the `operationId`. Returns a promise resolved with the body of the response, or rejected with an error with the details about the request attached. Rejects if the `status` > 400.
 
 - `params` is an object that includes any of the required or optional endpoint parameters.
-- `params.body` should be an object which gets serialized to JSON automatically. Any object can live here but refer to the open-api specification for allowed fields in a particular request body.
-- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream or stream ctor (e.g. `() => fs.createReadStream('./foo')`). A Stream ctor function is required to support rate limit retry.
+- `params.body` should be an object which gets serialized to JSON automatically. Any object can live here but refer to the OpenAPI specification for allowed fields in a particular request body. It can also be a function returning an object.
+- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream or a function returning one (e.g. `() => fs.createReadStream('./foo')`). Using a function is recommended.
 
 ```js
 // example params
@@ -90,7 +91,7 @@ Perform a call to the given endpoint corresponding with the `operationId`. Retur
 }
 ```
 
-Optional `opts` can include any property you want passed to `node-fetch`. The `headers` property is merged with some `defaultHeaders`.
+Optional `opts` can include any property you want passed to [`node-fetch`](https://github.com/bitinn/node-fetch). The `headers` property is merged with some `defaultHeaders`.
 
 ```js
 // example opts
@@ -119,13 +120,13 @@ async function getSomeData() {
 }
 ```
 
-If the request response includes `json` in the `contentType` header, fetch will deserialize the JSON body. Otherwise the `text` of the response is returned.
+If the response includes `json` in the `contentType` header, fetch will deserialize the JSON body. Otherwise the `text` of the response is returned.
 
 ### API Flow Methods
 
 Some methods have been added in addition to the open API operations that make certain actions simpler to perform.
 
-#### `promise(accessToken) = client.getAccessToken(ticket, [opts])`
+#### `accessToken = await client.getAccessToken(ticket, [opts])`
 
 Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an `accessToken`. Call this with the response from a `client.createTicket({ client_id })` call. Automatically sets the `accessToken` to `this.accessToken` and returns `accessToken` for the consumer to save for later.
 
@@ -154,9 +155,9 @@ async function login() {
 }
 ```
 
-#### `promise(deploy) = client.deploy(siteId, buildDir, [opts])`
+#### `deploy = await client.deploy(siteId, buildDir, [opts])`
 
-**Node.js Only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
+**Node.js only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
 Sometimes this method needs to write to a `tmpDir`. By default `tmpDir` is a folder in the system temporary directory.
 
 The following paths can be passed in the options:
