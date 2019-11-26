@@ -44,6 +44,7 @@ Thanks a lot to:
 ### Documentation
 
 - Fix variable name consistency in the `README` (#73)
+- Improve `README` (#82)
 
 ### Dependencies
 
