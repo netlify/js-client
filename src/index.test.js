@@ -1,7 +1,7 @@
 const test = require('ava')
 const nock = require('nock')
 const fromString = require('from2-string')
-const { TextHTTPError } = require('micro-api-client')
+const { TextHTTPError, JSONHTTPError } = require('micro-api-client')
 
 const NetlifyAPI = require('./index')
 
@@ -310,7 +310,7 @@ test('Can parse text responses', async t => {
   t.true(scope.isDone())
 })
 
-test('Handle error JSON responses', async t => {
+test('Handle error empty responses', async t => {
   const account_id = '8'
   const status = 404
   const scope = nock(origin)
@@ -343,6 +343,44 @@ test('Handle error text responses', async t => {
   t.is(error.message, 'Not Found')
   t.is(error.data, expectedResponse)
   t.true(error instanceof TextHTTPError)
+  t.true(error.stack !== undefined)
+  t.true(scope.isDone())
+})
+
+test('Handle error text responses on JSON endpoints', async t => {
+  const account_id = '9'
+  const status = 404
+  const expectedResponse = 'test'
+  const scope = nock(origin)
+    .get(`${pathPrefix}/accounts/${account_id}`)
+    .reply(status, expectedResponse, { 'Content-Type': 'application/json' })
+
+  const client = getClient()
+  const error = await t.throwsAsync(client.getAccount({ account_id }))
+
+  t.is(error.status, status)
+  t.is(error.message, 'Not Found')
+  t.is(error.data, expectedResponse)
+  t.true(error instanceof TextHTTPError)
+  t.true(error.stack !== undefined)
+  t.true(scope.isDone())
+})
+
+test('Handle error JSON responses', async t => {
+  const account_id = '8'
+  const status = 404
+  const errorJson = { error: true }
+  const scope = nock(origin)
+    .get(`${pathPrefix}/accounts/${account_id}`)
+    .reply(status, errorJson)
+
+  const client = getClient()
+  const error = await t.throwsAsync(client.getAccount({ account_id }))
+
+  t.is(error.status, status)
+  t.is(error.message, 'Not Found')
+  t.deepEqual(error.json, errorJson)
+  t.true(error instanceof JSONHTTPError)
   t.true(error.stack !== undefined)
   t.true(scope.isDone())
 })
