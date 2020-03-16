@@ -58,7 +58,7 @@
     "node client"
   ],
   "dependencies": {
-    "@netlify/open-api": "^0.13.0",
+    "@netlify/open-api": "^0.13.2",
     "@netlify/zip-it-and-ship-it": "^0.3.1",
     "backoff": "^2.5.0",
     "clean-deep": "^3.0.2",
