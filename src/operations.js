@@ -1,5 +1,6 @@
 const { paths } = require('@netlify/open-api')
-const omit = require('omit.js')
+
+const { omit } = require('./utils/omit')
 
 // Retrieve all OpenAPI operations
 const getOperations = function() {
