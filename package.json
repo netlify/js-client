@@ -1,7 +1,7 @@
 {
   "name": "netlify",
   "description": "Netlify Node.js API client",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "ava": {
     "files": [
       "src/**/*.test.js"
