@@ -1,7 +1,7 @@
 const path = require('path')
 
-const pWaitFor = require('p-wait-for')
 const flatten = require('lodash.flatten')
+const pWaitFor = require('p-wait-for')
 
 // Default filter when scanning for files
 exports.defaultFilter = filename => {
@@ -111,4 +111,4 @@ exports.getUploadList = function(required, shaMap) {
   return flatten(required.map(sha => shaMap[sha]))
 }
 
-exports.retry = async (fn, errHandler, opts) => {}
+exports.retry = async () => {}

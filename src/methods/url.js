@@ -1,5 +1,5 @@
-const queryString = require('qs')
 const camelCase = require('lodash.camelcase')
+const queryString = require('qs')
 
 // Replace path parameters and query parameters in the URI, using the OpenAPI
 // definition

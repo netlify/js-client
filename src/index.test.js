@@ -1,7 +1,7 @@
 const test = require('ava')
-const nock = require('nock')
 const fromString = require('from2-string')
 const { TextHTTPError, JSONHTTPError } = require('micro-api-client')
+const nock = require('nock')
 
 const NetlifyAPI = require('./index')
 
