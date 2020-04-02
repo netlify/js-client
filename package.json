@@ -33,7 +33,7 @@
     "build": "run-s build:*",
     "build:webpack": "webpack",
     "clean": "rimraf dist coverage",
-    "version": "auto-changelog -p --template keepachangelog --breaking-pattern breaking && git add CHANGELOG.md"
+    "version": "auto-changelog -p --template keepachangelog --breaking-pattern breaking && npm run test:prettier && git add CHANGELOG.md"
   },
   "license": "MIT",
   "author": "Netlify Inc.",

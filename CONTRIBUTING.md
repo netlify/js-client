@@ -39,12 +39,7 @@ Projects that depend heavily on this client that should be taken into considerat
 ## Releasing
 
 ```console
-# Make changes
-# Update README docs if they have changed.
-# Update the changelog
 $ npm version [major|minor|patch]
-$ git push && git push --tags
-# Create a github release with the changelog contents
 $ npm publish
 ```
 
