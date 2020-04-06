@@ -1,7 +1,7 @@
-const objFilterCtor = require('through2-filter').objCtor
 const objWriter = require('flush-write-stream').obj
-const transform = require('parallel-transform')
 const hasha = require('hasha')
+const transform = require('parallel-transform')
+const objFilterCtor = require('through2-filter').objCtor
 const map = require('through2-map').obj
 
 const { normalizePath } = require('./util')

@@ -1,7 +1,7 @@
 const fs = require('fs')
 
-const pMap = require('p-map')
 const backoff = require('backoff')
+const pMap = require('p-map')
 
 module.exports = uploadFiles
 async function uploadFiles(api, deployId, uploadList, { concurrentUpload, statusCb, maxRetry }) {
@@ -77,7 +77,7 @@ function retryUpload(uploadFn, maxRetry) {
     })
     fibonacciBackoff.failAfter(maxRetry)
 
-    fibonacciBackoff.on('backoff', (number, delay) => {
+    fibonacciBackoff.on('backoff', () => {
       // Do something when backoff starts, e.g. show to the
       // user the delay before next reconnection attempt.
     })
@@ -88,7 +88,7 @@ function retryUpload(uploadFn, maxRetry) {
       reject(lastError)
     })
 
-    function tryUpload(number, delay) {
+    function tryUpload() {
       uploadFn()
         .then(results => resolve(results))
         .catch(e => {

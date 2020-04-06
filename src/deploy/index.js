@@ -1,11 +1,11 @@
 const { promisify } = require('util')
 
 const cleanDeep = require('clean-deep')
-const tempy = require('tempy')
 const rimraf = promisify(require('rimraf'))
+const tempy = require('tempy')
 
-const hashFns = require('./hash-fns')
 const hashFiles = require('./hash-files')
+const hashFns = require('./hash-fns')
 const uploadFiles = require('./upload-files')
 const { waitForDiff } = require('./util')
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
@@ -24,7 +24,7 @@ module.exports = async (api, siteId, dir, opts) => {
       filter: defaultFilter,
       syncFileLimit: 7000, // number of files
       maxRetry: 5, // number of times to retry an upload
-      statusCb: statusObj => {
+      statusCb: () => {
         /* default to noop */
         /* statusObj: {
             type: name-of-step
