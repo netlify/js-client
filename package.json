@@ -2,38 +2,34 @@
   "name": "netlify",
   "description": "Netlify Node.js API client",
   "version": "4.0.3",
-  "ava": {
-    "files": [
-      "src/**/*.test.js"
-    ],
-    "compileEnhancements": false,
-    "babel": false
-  },
   "files": [
     "src",
     "dist",
     "!*.test.js*",
     "!*~"
   ],
-  "main": "src/index.js",
+  "main": "./src/index.js",
   "unpkg": "./dist/main.js",
   "umd:main": "./dist/main.js",
   "browser": {
     "./src/deploy/index.js": "./src/deploy/index.browser.js"
   },
   "scripts": {
-    "prepublishOnly": "run-s build && git push && git push --tags && gh-release",
-    "ci": "run-s test build",
-    "test": "run-s test:* test:dev:*",
-    "test-ci": "run-s test:* test:ci:*",
-    "test:lint": "eslint --ignore-path .gitignore --fix --cache --format=codeframe --max-warnings=0 \"src/**/*.js\" \"*.js\"",
-    "test:prettier": "prettier --ignore-path .gitignore --write --loglevel warn \"src/**/*.js\" \"*.{js,md,yml,json}\"",
-    "test:dev:ava": "ava",
-    "test:ci:ava": "nyc -r lcovonly -r text -r json ava",
-    "build": "run-s build:*",
-    "build:webpack": "webpack",
-    "clean": "rimraf dist coverage",
-    "version": "auto-changelog -p --template keepachangelog --breaking-pattern breaking && npm run test:prettier && git add CHANGELOG.md"
+    "prepublishOnly": "npm run build && git push && git push --tags && gh-release",
+    "test": "npm run format && npm run test:dev",
+    "format": "run-s format:*",
+    "format:lint": "eslint --ignore-path .gitignore --fix --cache --format=codeframe --max-warnings=0 \"src/**/*.js\"",
+    "format:prettier": "prettier --ignore-path .gitignore --write --loglevel warn \"src/**/*.js\" \"*.{js,md,yml,json}\"",
+    "test:dev": "ava",
+    "test:ci": "nyc -r lcovonly -r text -r json ava",
+    "update-snapshots": "ava -u",
+    "build": "webpack",
+    "version": "auto-changelog -p --template keepachangelog --breaking-pattern breaking && npm run format:prettier && git add CHANGELOG.md"
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm run format"
+    }
   },
   "license": "MIT",
   "author": "Netlify Inc.",
