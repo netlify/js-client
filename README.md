@@ -53,6 +53,7 @@ Create a new instance of the Netlify API client with the provided `accessToken`.
   host: 'api.netlify.com',
   pathPrefix: '/api/v1',
   accessToken: '1234myAccessToken',
+  agent: undefined, // e.g. HttpsProxyAgent
   globalParams: {} // parameters you want available for every request.
   // Global params are only sent of the OpenAPI spec specifies the provided params.
 }
@@ -190,6 +191,18 @@ Optional `opts` include:
     // for an example of how this can be used.
   }
  }
+```
+
+## Proxy support
+
+**Node.js only**: If this client is used behind a corporate proxy, you can pass an `HttpsProxyAgent` or any other `http.Agent` that can handle your situation as `agent` option:
+
+```js
+const HttpsProxyAgent = require('https-proxy-agent')
+
+const proxyUri = 'http(s)://[user:password@]proxyhost:port'
+const agent = new HttpsProxyAgent(proxyUri)
+const client = new NetlifyAPI('1234myAccessToken', { agent })
 ```
 
 ## UMD Builds

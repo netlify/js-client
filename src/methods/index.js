@@ -43,7 +43,8 @@ const getOpts = function({ verb, parameters }, NetlifyApi, { body }, opts) {
   const optsA = addHttpMethod(verb, opts)
   const optsB = addDefaultHeaders(NetlifyApi, optsA)
   const optsC = addBody(body, parameters, optsB)
-  return optsC
+  const optsD = addAgent(NetlifyApi, optsC)
+  return optsD
 }
 
 // Add the HTTP method based on the OpenAPI definition
@@ -56,6 +57,15 @@ const addDefaultHeaders = function(NetlifyApi, opts) {
   return Object.assign({}, opts, {
     headers: Object.assign({}, NetlifyApi.defaultHeaders, opts.headers)
   })
+}
+
+// Assign fetch agent (like for example HttpsProxyAgent) if there is one
+const addAgent = function(NetlifyApi, opts) {
+  if (NetlifyApi.agent) {
+    return Object.assign({}, opts, { agent: NetlifyApi.agent })
+  } else {
+    return opts
+  }
 }
 
 const makeRequestOrRetry = async function(url, opts) {
