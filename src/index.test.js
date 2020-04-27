@@ -1,3 +1,5 @@
+const http = require('http')
+
 const test = require('ava')
 const fromString = require('from2-string')
 const { TextHTTPError, JSONHTTPError } = require('micro-api-client')
@@ -12,7 +14,13 @@ const pathPrefix = '/api/v10'
 const host = `${domain}:${port}`
 const origin = `${scheme}://${host}`
 const accessToken = 'testAccessToken'
-const agent = { key: 'value' }
+const agent = new http.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 60000,
+  maxSockets: 10,
+  maxFreeSockets: 10,
+  timeout: 60000
+})
 
 const getClient = function(opts = {}) {
   return new NetlifyAPI(opts.accessToken, Object.assign({ scheme, host, pathPrefix }, opts))
