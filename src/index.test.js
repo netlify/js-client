@@ -1,3 +1,5 @@
+const http = require('http')
+
 const test = require('ava')
 const fromString = require('from2-string')
 const { TextHTTPError, JSONHTTPError } = require('micro-api-client')
@@ -12,6 +14,13 @@ const pathPrefix = '/api/v10'
 const host = `${domain}:${port}`
 const origin = `${scheme}://${host}`
 const accessToken = 'testAccessToken'
+const agent = new http.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 60000,
+  maxSockets: 10,
+  maxFreeSockets: 10,
+  timeout: 60000
+})
 
 const getClient = function(opts = {}) {
   return new NetlifyAPI(opts.accessToken, Object.assign({ scheme, host, pathPrefix }, opts))
@@ -23,6 +32,7 @@ test('Default options', async t => {
   t.is(client.host, 'api.netlify.com')
   t.is(client.pathPrefix, '/api/v1')
   t.is(client.accessToken, null)
+  t.is(client.agent, undefined)
   t.deepEqual(client.globalParams, {})
   t.deepEqual(client.defaultHeaders, {
     'User-agent': 'netlify/js-client',
@@ -541,6 +551,33 @@ test('Gives up retrying on API rate limiting after a timeout', async t => {
   t.true(Number.isInteger(error.json.retryAt))
 
   t.false(scope.isDone())
+})
+
+test('Can set (proxy) agent', async t => {
+  const client = getClient({ accessToken, agent })
+  t.is(client.agent, agent)
+})
+
+test('(Proxy) agent is passed as request option', async t => {
+  const account_id = '15'
+  const scope = nock(origin)
+    .get(`${pathPrefix}/accounts/${account_id}`)
+    .reply(200)
+
+  const client = getClient({ accessToken, agent })
+  await client.getAccount({ account_id })
+  t.is(scope.interceptors[0].req.options.agent, agent)
+})
+
+test('(Proxy) agent is not passed as request option if not set', async t => {
+  const account_id = '15'
+  const scope = nock(origin)
+    .get(`${pathPrefix}/accounts/${account_id}`)
+    .reply(200)
+
+  const client = getClient({ accessToken })
+  await client.getAccount({ account_id })
+  t.falsy(scope.interceptors[0].req.options.agent)
 })
 
 const TEST_RATE_LIMIT_DELAY = 5e3

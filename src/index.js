@@ -39,6 +39,7 @@ class NetlifyAPI {
     this.pathPrefix = opts.pathPrefix
     this.globalParams = opts.globalParams
     this.accessToken = opts.accessToken
+    this.agent = opts.agent
   }
 
   get accessToken() {
