@@ -24,10 +24,8 @@ const sites = await client.listSites()
 
 // Create a site. Notice `body` here for sending OpenAPI body
 const site = await client.createSite({
-  body: {
-    name: `my-awesome-site`
-    // ... https://open-api.netlify.com/#/default/createSite
-  }
+  name: `my-awesome-site`
+  // ... https://open-api.netlify.com/#/default/createSite
 })
 
 // Delete site. Notice `site_id` is a path parameter https://open-api.netlify.com/#/default/deleteSite
