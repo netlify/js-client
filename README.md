@@ -164,13 +164,13 @@ Sometimes this method needs to write to a `tmpDir`. By default `tmpDir` is a fol
 The following paths can be passed in the options:
 
 - `configPath` (path to a `netlify.toml` file that includes redirect rules for the deploy, etc.)
-- `functionsDir` (a folder with lambda functions to deploy)
+- `fnDir` (a folder with lambda functions to deploy)
 
 Optional `opts` include:
 
 ```js
 {
-  functionsDir: null, // path to a folder of functions to deploy
+  fnDir: null, // path to a folder of functions to deploy
   configPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
   draft: false, // draft deploy or production deploy
   message: undefined, // a short message to associate with the deploy
