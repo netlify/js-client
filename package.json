@@ -55,7 +55,7 @@
   ],
   "dependencies": {
     "@netlify/open-api": "^0.13.2",
-    "@netlify/zip-it-and-ship-it": "^0.4.0-17",
+    "@netlify/zip-it-and-ship-it": "^0.4.0-18",
     "backoff": "^2.5.0",
     "clean-deep": "^3.3.0",
     "filter-obj": "^2.0.1",
