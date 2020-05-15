@@ -71,6 +71,7 @@ module.exports = async (api, siteId, dir, opts) => {
       files,
       functions,
       async: Object.keys(files).length > opts.syncFileLimit,
+      branch: opts.branch,
       draft: opts.draft
     }
   })
