@@ -171,6 +171,7 @@ Optional `opts` include:
 ```js
 {
   fnDir: null, // path to a folder of functions to deploy
+  branch: null, // branch to pass onto the netlify api
   configPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
   draft: false, // draft deploy or production deploy
   message: undefined, // a short message to associate with the deploy
