@@ -31,9 +31,7 @@ const getMethod = function(method, NetlifyApi) {
 const callMethod = async function(method, NetlifyApi, params, opts) {
   const requestParams = Object.assign({}, NetlifyApi.globalParams, params)
   const url = getUrl(method, NetlifyApi, requestParams)
-  const optsA = getOpts(method, NetlifyApi, requestParams, opts)
-
-  const response = await makeRequestOrRetry(url, optsA)
+  const response = await makeRequestOrRetry({ url, method, NetlifyApi, requestParams, opts })
 
   const parsedResponse = await parseResponse(response)
   return parsedResponse
@@ -68,9 +66,10 @@ const addAgent = function(NetlifyApi, opts) {
   }
 }
 
-const makeRequestOrRetry = async function(url, opts) {
+const makeRequestOrRetry = async function({ url, method, NetlifyApi, requestParams, opts }) {
   for (let index = 0; index <= MAX_RETRY; index++) {
-    const response = await makeRequest(url, opts)
+    const optsA = getOpts(method, NetlifyApi, requestParams, opts)
+    const response = await makeRequest(url, optsA)
 
     if (shouldRetry(response, index)) {
       await waitForRetry(response)
