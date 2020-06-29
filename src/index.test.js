@@ -553,6 +553,26 @@ test('Gives up retrying on API rate limiting after a timeout', async t => {
   t.false(scope.isDone())
 })
 
+test('Recreates a function body when handling API rate limiting', async t => {
+  const deploy_id = '3'
+  const path = 'testPath'
+  const body = 'test'
+  const retryAtMs = Date.now() + TEST_RATE_LIMIT_DELAY
+  const retryAt = Math.ceil(retryAtMs / SECS_TO_MSECS)
+  const expectedResponse = { test: 'test' }
+  const scope = nock(origin)
+    .put(`${pathPrefix}/deploys/${deploy_id}/files/${path}`, body, { 'Content-Type': 'application/octet-stream' })
+    .reply(429, { retryAt }, { 'X-RateLimit-Reset': retryAt })
+    .put(`${pathPrefix}/deploys/${deploy_id}/files/${path}`, body, { 'Content-Type': 'application/octet-stream' })
+    .reply(200, expectedResponse)
+  const client = getClient()
+  const response = await client.uploadDeployFile({ deploy_id, path, body: () => fromString(body) })
+
+  t.true(Date.now() >= retryAtMs)
+  t.deepEqual(response, expectedResponse)
+  t.true(scope.isDone())
+})
+
 test('Can set (proxy) agent', async t => {
   const client = getClient({ accessToken, agent })
   t.is(client.agent, agent)
