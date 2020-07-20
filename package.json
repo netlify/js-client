@@ -84,7 +84,7 @@
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "@babel/runtime": "^7.9.2",
-    "auto-changelog": "^1.16.4",
+    "auto-changelog": "^2.0.0",
     "ava": "^2.4.0",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
