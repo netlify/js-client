@@ -165,12 +165,14 @@ The following paths can be passed in the options:
 
 - `configPath` (path to a `netlify.toml` file that includes redirect rules for the deploy, etc.)
 - `fnDir` (a folder with lambda functions to deploy)
+- `deployDir` (the name of the folder you want to deploy, should be the folder name referenced by `buildDir` above)
 
 Optional `opts` include:
 
 ```js
 {
   fnDir: null, // path to a folder of functions to deploy
+  deployDir: null // name of the folder in the `buildDir` path
   branch: null, // branch to pass onto the netlify api
   configPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
   draft: false, // draft deploy or production deploy

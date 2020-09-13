@@ -3,14 +3,24 @@ const path = require('path')
 const flatten = require('lodash.flatten')
 const pWaitFor = require('p-wait-for')
 
-// Default filter when scanning for files
-exports.defaultFilter = filename => {
-  if (filename == null) return false
-  const n = path.basename(filename)
+const removeSlashes = path => path && path.replace(/\/+$/, '')
+
+/**
+ * Default filter when scanning for files
+ * @param {string} filePath - path to file to test filter on
+ * @param {string} [baseDir] - base directory to whitelist
+ */
+exports.defaultFilter = (filePath, baseDir = null) => {
+  if (filePath == null) return false
+  const fileName = path.basename(filePath)
+
+  // Always allow scanning files in the base directory
+  if (fileName === removeSlashes(baseDir)) return true
+
   switch (true) {
-    case n === 'node_modules':
-    case n.startsWith('.') && n !== '.well-known':
-    case n.match(/(\/__MACOSX|\/\.)/):
+    case fileName === 'node_modules':
+    case fileName.startsWith('.') && fileName !== '.well-known':
+    case fileName.match(/(\/__MACOSX|\/\.)/):
       return false
     default:
       return true
