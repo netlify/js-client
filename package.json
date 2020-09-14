@@ -94,7 +94,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.1.2",
     "from2-string": "^1.1.0",
-    "gh-release": "^3.5.0",
+    "gh-release": "^4.0.0",
     "husky": "^4.2.3",
     "nock": "^11.9.1",
     "npm-run-all": "^4.1.3",
