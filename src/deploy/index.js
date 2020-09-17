@@ -78,7 +78,7 @@ module.exports = async (api, siteId, dir, opts) => {
     }
   })
   if (opts.deployId === null) {
-    if(title) {
+    if (title) {
       deployParams = { ...deployParams, title }
     }
     deploy = await api.createSiteDeploy(deployParams)
