@@ -32,7 +32,9 @@ module.exports = async (api, siteId, dir, opts) => {
             phase: [start, progress, stop],
             spinner: a spinner from cli-spinners package
         } */
-      }
+      },
+      // allows updating an existing deploy
+      deployId: null
     },
     opts
   )
@@ -64,9 +66,9 @@ module.exports = async (api, siteId, dir, opts) => {
     phase: 'start'
   })
 
-  const deployParams = cleanDeep({
+  let deploy
+  let deployParams = cleanDeep({
     siteId,
-    title,
     body: {
       files,
       functions,
@@ -75,8 +77,16 @@ module.exports = async (api, siteId, dir, opts) => {
       draft: opts.draft
     }
   })
+  if (opts.deployId === null) {
+    if(title) {
+      deployParams = { ...deployParams, title }
+    }
+    deploy = await api.createSiteDeploy(deployParams)
+  } else {
+    deployParams = { ...deployParams, deploy_id: opts.deployId }
+    deploy = await api.updateSiteDeploy(deployParams)
+  }
 
-  let deploy = await api.createSiteDeploy(deployParams)
   if (deployParams.body.async) deploy = await waitForDiff(api, deploy.id, siteId, opts.deployTimeout)
 
   const { id: deployId, required: requiredFiles, required_functions: requiredFns } = deploy

@@ -190,7 +190,9 @@ Optional `opts` include:
         } */
     // See https://github.com/netlify/cli/blob/v2.0.0-beta.3/src/commands/deploy.js#L161-L195
     // for an example of how this can be used.
-  }
+  },
+  // passing a deployId will update an existing deploy based on the provided options
+  deployId: null
  }
 ```
 
