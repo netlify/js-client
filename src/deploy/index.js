@@ -52,13 +52,18 @@ module.exports = async (api, siteId, dir, opts) => {
     hashFns(fnDir, opts)
   ])
 
+  const filesCount = Object.keys(files).length
+  const functionsCount = Object.keys(functions).length
+
   statusCb({
     type: 'hashing',
-    msg:
-      `Finished hashing ${Object.keys(files).length} files` +
-      (fnDir ? ` and ${Object.keys(functions).length} functions` : ''),
+    msg: `Finished hashing ${filesCount} files` + (fnDir ? ` and ${functionsCount} functions` : ''),
     phase: 'stop'
   })
+
+  if (filesCount === 0 && functionsCount === 0) {
+    throw new Error('No files or functions to deploy')
+  }
 
   statusCb({
     type: 'create-deploy',
