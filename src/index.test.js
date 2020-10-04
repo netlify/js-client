@@ -320,6 +320,78 @@ test('Can parse text responses', async t => {
   t.true(scope.isDone())
 })
 
+test('Can retrieve multiple pages', async t => {
+  // Expected responses are arrays, since pagination makes sense in the context
+  // calls that return multiple items:
+  // https://docs.netlify.com/api/get-started/#pagination
+  const expectedResponsePages = [
+    [
+      { id: '1', content: 'page 1' },
+      { id: '2', content: 'page 1' }
+    ],
+    [
+      { id: '3', content: 'page 2' },
+      { id: '4', content: 'page 2' }
+    ],
+    [{ id: '5', content: 'page 3' }]
+  ]
+  const expectedResponse = expectedResponsePages.flatMap(x => x)
+
+  const baseUrl = `${pathPrefix}/sites`
+  const baseUrlFull = `${origin}${baseUrl}`
+  const scope = nock(origin)
+    .persist()
+    .get(baseUrl)
+    .reply(200, expectedResponsePages[0], {
+      Link: `<${baseUrlFull}?page=3>; rel="last", <${baseUrlFull}?page=2>; rel="next"`
+    })
+    .get(`${baseUrl}?page=2`)
+    .reply(200, expectedResponsePages[1], {
+      Link: `<${baseUrlFull}?page=3>; rel="last", <${baseUrlFull}?page=3>; rel="next"`
+    })
+    .get(`${baseUrl}?page=3`)
+    .reply(200, expectedResponsePages[2], {
+      Link: `<${baseUrlFull}?page=3>; rel="last"`
+    })
+    .persist(false)
+
+  const client = getClient()
+  const response = await client.listSites({}, { exhaustive: true })
+
+  t.deepEqual(response, expectedResponse)
+  t.true(scope.isDone())
+})
+
+test('Retrieves the first page if exhaustive is not specified', async t => {
+  // The entire dataset, split into multiple pages.
+  const datasetPages = [
+    [
+      { id: '1', content: 'page 1' },
+      { id: '2', content: 'page 1' }
+    ],
+    [
+      { id: '3', content: 'page 2' },
+      { id: '4', content: 'page 2' }
+    ],
+    [{ id: '5', content: 'page 3' }]
+  ]
+  const expectedResponse = datasetPages[0]
+
+  const baseUrl = `${pathPrefix}/sites`
+  const baseUrlFull = `${origin}${baseUrl}`
+  const scope = nock(origin)
+    .get(baseUrl)
+    .reply(200, expectedResponse, {
+      Link: `<${baseUrlFull}?page=3>; rel="last", <${baseUrlFull}?page=2>; rel="next"`
+    })
+
+  const client = getClient()
+  const response = await client.listSites()
+
+  t.deepEqual(response, expectedResponse)
+  t.true(scope.isDone())
+})
+
 test('Handle error empty responses', async t => {
   const account_id = '8'
   const status = 404
