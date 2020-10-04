@@ -335,7 +335,7 @@ test('Can retrieve multiple pages', async t => {
     ],
     [{ id: '5', content: 'page 3' }]
   ]
-  const expectedResponse = expectedResponsePages.flatMap(x => x)
+  const expectedResponse = expectedResponsePages.reduce((response, page) => response.concat(page), [])
 
   const baseUrl = `${pathPrefix}/sites`
   const baseUrlFull = `${origin}${baseUrl}`

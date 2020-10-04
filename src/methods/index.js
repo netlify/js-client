@@ -61,8 +61,8 @@ const retrieveResponseForNextPages = async function({
   parsedResponse,
   headers
 }) {
-  // Responses for each page are accumulated, until finally flattened.
-  const results = [parsedResponse]
+  // Responses for each page are accumulated in a flattened manner.
+  let results = parsedResponse
 
   // The API directly provides the link to the next page (if any)
   // in the `Link` header.
@@ -72,11 +72,11 @@ const retrieveResponseForNextPages = async function({
   // method until we exhaust the entire dataset.
   while (url) {
     const { parsedResponse, headers } = await retrieveResponse({ url, method, NetlifyApi, requestParams, opts })
-    results.push(parsedResponse)
+    results = results.concat(parsedResponse)
     url = getNextPageUrl(headers)
   }
 
-  return results.flatMap(i => i)
+  return results
 }
 
 const getNextPageUrl = function(headers) {
