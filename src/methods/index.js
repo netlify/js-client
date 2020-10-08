@@ -69,21 +69,28 @@ const addAgent = function(NetlifyApi, opts) {
 const makeRequestOrRetry = async function({ url, method, NetlifyApi, requestParams, opts }) {
   for (let index = 0; index <= MAX_RETRY; index++) {
     const optsA = getOpts(method, NetlifyApi, requestParams, opts)
-    const response = await makeRequest(url, optsA)
+    const { response, error } = await makeRequest(url, optsA)
 
-    if (shouldRetry(response, index)) {
+    if (shouldRetry({ response, error }) && index !== MAX_RETRY) {
       await waitForRetry(response)
-    } else {
-      return response
+      continue
     }
+
+    if (error !== undefined) {
+      throw error
+    }
+
+    return response
   }
 }
 
 const makeRequest = async function(url, opts) {
   try {
-    return await fetch(url, opts)
+    const response = await fetch(url, opts)
+    return { response }
   } catch (error) {
-    throw getFetchError(error, url, opts)
+    const errorA = getFetchError(error, url, opts)
+    return { error: errorA }
   }
 }
 
