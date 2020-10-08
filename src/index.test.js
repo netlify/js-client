@@ -553,6 +553,24 @@ test('Gives up retrying on API rate limiting after a timeout', async t => {
   t.false(scope.isDone())
 })
 
+test('Retries on ETIMEDOUT connection errors', async t => {
+  const account_id = '17'
+  const retryAtMs = Date.now() + TEST_RATE_LIMIT_DELAY
+  const expectedResponse = { test: 'test' }
+  const scope = nock(origin)
+    .get(`${pathPrefix}/accounts/${account_id}`)
+    .replyWithError({ code: 'ETIMEDOUT' })
+    .get(`${pathPrefix}/accounts/${account_id}`)
+    .reply(200, expectedResponse)
+
+  const client = getClient()
+  const response = await client.getAccount({ account_id })
+
+  t.true(Date.now() >= retryAtMs)
+  t.deepEqual(response, expectedResponse)
+  t.true(scope.isDone())
+})
+
 test('Recreates a function body when handling API rate limiting', async t => {
   const deploy_id = '3'
   const path = 'testPath'
@@ -590,7 +608,7 @@ test('(Proxy) agent is passed as request option', async t => {
 })
 
 test('(Proxy) agent is not passed as request option if not set', async t => {
-  const account_id = '15'
+  const account_id = '16'
   const scope = nock(origin)
     .get(`${pathPrefix}/accounts/${account_id}`)
     .reply(200)
