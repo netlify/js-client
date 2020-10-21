@@ -20,7 +20,7 @@ module.exports = async (api, siteId, dir, opts) => {
       tmpDir: tempy.directory(),
       deployTimeout: 1.2e6, // local deploy timeout: 20 mins
       concurrentHash: 100, // concurrent file hash calls
-      concurrentUpload: 15, // Number of concurrent uploads
+      concurrentUpload: 5, // Number of concurrent uploads
       filter: defaultFilter,
       syncFileLimit: 100, // number of files
       maxRetry: 5, // number of times to retry an upload

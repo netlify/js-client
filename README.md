@@ -177,7 +177,7 @@ Optional `opts` include:
   message: undefined, // a short message to associate with the deploy
   deployTimeout: 1.2e6, // 20 mins
   parallelHash: 100, // number of parallel hashing calls
-  parallelUpload: 15, // number of files to upload in parallel
+  parallelUpload: 5, // number of files to upload in parallel
   maxRetry: 5, // number of times to try on failed file uploads
   filter: filepath => { /* return false to filter a file  from the deploy */ },
   tmpDir: tempy.directory(), // a temporary directory to zip functions into
