@@ -13,28 +13,30 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        node: [8.3.0, 14]
+        node-version: [8.3.0, 14]
         exclude:
           - os: macOS-latest
-            node: 8.3.0
+            node-version: 8.3.0
           - os: windows-latest
-            node: 8.3.0
+            node-version: 8.3.0
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
-      - name: Node.js ${{ matrix.node }}
+      - name: Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node }}
+          node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: npm install
       - name: Linting
         run: npm run format
+        if: "${{ matrix.node-version == '14' }}"
       - name: Tests
         run: npm run test:ci
       - name: Build
         run: npm run build
+        if: "${{ matrix.node-version == '14' }}"
       - name: Codecov test coverage
-        run: bash scripts/coverage.sh "${{ matrix.os }}" "${{ matrix.node }}"
+        run: bash scripts/coverage.sh "${{ matrix.os }}" "${{ matrix.node-version }}"
