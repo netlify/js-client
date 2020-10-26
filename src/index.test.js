@@ -20,14 +20,14 @@ const agent = new http.Agent({
   keepAliveMsecs: 60000,
   maxSockets: 10,
   maxFreeSockets: 10,
-  timeout: 60000
+  timeout: 60000,
 })
 
-const getClient = function(opts = {}) {
+const getClient = function (opts = {}) {
   return new NetlifyAPI(opts.accessToken, Object.assign({ scheme, host, pathPrefix }, opts))
 }
 
-test('Default options', async t => {
+test('Default options', async (t) => {
   const client = new NetlifyAPI({})
   t.is(client.scheme, 'https')
   t.is(client.host, 'api.netlify.com')
@@ -37,31 +37,31 @@ test('Default options', async t => {
   t.deepEqual(client.globalParams, {})
   t.deepEqual(client.defaultHeaders, {
     'User-agent': 'netlify/js-client',
-    accept: 'application/json'
+    accept: 'application/json',
   })
 })
 
-test('Can set|get scheme', async t => {
+test('Can set|get scheme', async (t) => {
   const client = new NetlifyAPI({ scheme })
   t.is(client.scheme, scheme)
 })
 
-test('Can set|get host', async t => {
+test('Can set|get host', async (t) => {
   const client = new NetlifyAPI({ host })
   t.is(client.host, host)
 })
 
-test('Can set|get pathPrefix', async t => {
+test('Can set|get pathPrefix', async (t) => {
   const client = new NetlifyAPI({ pathPrefix })
   t.is(client.pathPrefix, pathPrefix)
 })
 
-test('Can set|get basePath', async t => {
+test('Can set|get basePath', async (t) => {
   const client = new NetlifyAPI({ scheme, host, pathPrefix })
   t.is(client.basePath, `${scheme}://${host}${pathPrefix}`)
 })
 
-test('Can update basePath', async t => {
+test('Can update basePath', async (t) => {
   const client = new NetlifyAPI({ scheme, host, pathPrefix })
 
   const newScheme = 'https'
@@ -74,19 +74,19 @@ test('Can update basePath', async t => {
   t.is(client.basePath, `${newScheme}://${newHost}${newPathPrefix}`)
 })
 
-test('Can set user agent', async t => {
+test('Can set user agent', async (t) => {
   const userAgent = 'test'
   const client = new NetlifyAPI({ userAgent })
   t.is(client.defaultHeaders['User-agent'], userAgent)
 })
 
-test('Can set|get globalParams', async t => {
+test('Can set|get globalParams', async (t) => {
   const testGlobalParams = { test: 'test' }
   const client = new NetlifyAPI({ globalParams: testGlobalParams })
   t.deepEqual(client.globalParams, testGlobalParams)
 })
 
-test('Can set|get access token', async t => {
+test('Can set|get access token', async (t) => {
   const client = getClient()
   client.accessToken = accessToken
   t.is(client.accessToken, accessToken)
@@ -101,21 +101,19 @@ test('Can set|get access token', async t => {
   t.is(client.defaultHeaders.Authorization, `Bearer ${accessToken}`)
 })
 
-test('Can specify access token as the first argument', async t => {
+test('Can specify access token as the first argument', async (t) => {
   const client = new NetlifyAPI(accessToken, {})
   t.is(client.accessToken, accessToken)
 })
 
-test('Can specify access token as an option', async t => {
+test('Can specify access token as an option', async (t) => {
   const client = new NetlifyAPI({ accessToken })
   t.is(client.accessToken, accessToken)
 })
 
-test('Can use underscored parameters in path variables', async t => {
+test('Can use underscored parameters in path variables', async (t) => {
   const account_id = uuidv4()
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(200)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(200)
 
   const client = getClient()
   await client.getAccount({ account_id })
@@ -123,11 +121,9 @@ test('Can use underscored parameters in path variables', async t => {
   t.true(scope.isDone())
 })
 
-test('Can use camelcase parameters in path variables', async t => {
+test('Can use camelcase parameters in path variables', async (t) => {
   const account_id = uuidv4()
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(200)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(200)
 
   const client = getClient()
   await client.getAccount({ accountId: account_id })
@@ -135,11 +131,9 @@ test('Can use camelcase parameters in path variables', async t => {
   t.true(scope.isDone())
 })
 
-test('Can use global parameters in path variables', async t => {
+test('Can use global parameters in path variables', async (t) => {
   const account_id = uuidv4()
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(200)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(200)
 
   const client = getClient({ globalParams: { account_id } })
   await client.getAccount()
@@ -147,12 +141,9 @@ test('Can use global parameters in path variables', async t => {
   t.true(scope.isDone())
 })
 
-test('Can use underscored parameters in query variables', async t => {
+test('Can use underscored parameters in query variables', async (t) => {
   const client_id = uuidv4()
-  const scope = nock(origin)
-    .post(`${pathPrefix}/oauth/tickets`)
-    .query({ client_id })
-    .reply(200)
+  const scope = nock(origin).post(`${pathPrefix}/oauth/tickets`).query({ client_id }).reply(200)
 
   const client = getClient()
   await client.createTicket({ client_id })
@@ -160,12 +151,9 @@ test('Can use underscored parameters in query variables', async t => {
   t.true(scope.isDone())
 })
 
-test('Can use camelcase parameters in query variables', async t => {
+test('Can use camelcase parameters in query variables', async (t) => {
   const client_id = uuidv4()
-  const scope = nock(origin)
-    .post(`${pathPrefix}/oauth/tickets`)
-    .query({ client_id })
-    .reply(200)
+  const scope = nock(origin).post(`${pathPrefix}/oauth/tickets`).query({ client_id }).reply(200)
 
   const client = getClient()
   await client.createTicket({ clientId: client_id })
@@ -173,12 +161,9 @@ test('Can use camelcase parameters in query variables', async t => {
   t.true(scope.isDone())
 })
 
-test('Can use global parameters in query variables', async t => {
+test('Can use global parameters in query variables', async (t) => {
   const client_id = uuidv4()
-  const scope = nock(origin)
-    .post(`${pathPrefix}/oauth/tickets`)
-    .query({ client_id })
-    .reply(200)
+  const scope = nock(origin).post(`${pathPrefix}/oauth/tickets`).query({ client_id }).reply(200)
 
   const client = getClient({ globalParams: { client_id } })
   await client.createTicket()
@@ -186,11 +171,9 @@ test('Can use global parameters in query variables', async t => {
   t.true(scope.isDone())
 })
 
-test('Can specify JSON request body as an object', async t => {
+test('Can specify JSON request body as an object', async (t) => {
   const body = { test: 'test' }
-  const scope = nock(origin)
-    .post(`${pathPrefix}/accounts`, body, { 'Content-Type': 'application/json' })
-    .reply(200)
+  const scope = nock(origin).post(`${pathPrefix}/accounts`, body, { 'Content-Type': 'application/json' }).reply(200)
 
   const client = getClient()
   await client.createAccount({ body })
@@ -198,11 +181,9 @@ test('Can specify JSON request body as an object', async t => {
   t.true(scope.isDone())
 })
 
-test('Can specify JSON request body as a function', async t => {
+test('Can specify JSON request body as a function', async (t) => {
   const body = { test: 'test' }
-  const scope = nock(origin)
-    .post(`${pathPrefix}/accounts`, body, { 'Content-Type': 'application/json' })
-    .reply(200)
+  const scope = nock(origin).post(`${pathPrefix}/accounts`, body, { 'Content-Type': 'application/json' }).reply(200)
 
   const client = getClient()
   await client.createAccount({ body: () => body })
@@ -210,7 +191,7 @@ test('Can specify JSON request body as a function', async t => {
   t.true(scope.isDone())
 })
 
-test('Can specify binary request body as a stream', async t => {
+test('Can specify binary request body as a stream', async (t) => {
   const deploy_id = uuidv4()
   const path = 'testPath'
   const body = 'test'
@@ -226,7 +207,7 @@ test('Can specify binary request body as a stream', async t => {
   t.true(scope.isDone())
 })
 
-test('Can specify binary request body as a function', async t => {
+test('Can specify binary request body as a function', async (t) => {
   const deploy_id = uuidv4()
   const path = 'testPath'
   const body = 'test'
@@ -242,11 +223,9 @@ test('Can specify binary request body as a function', async t => {
   t.true(scope.isDone())
 })
 
-test('Can use global parameters in request body', async t => {
+test('Can use global parameters in request body', async (t) => {
   const body = { test: 'test' }
-  const scope = nock(origin)
-    .post(`${pathPrefix}/accounts`, body)
-    .reply(200)
+  const scope = nock(origin).post(`${pathPrefix}/accounts`, body).reply(200)
 
   const client = getClient({ globalParams: { body } })
   await client.createAccount()
@@ -254,11 +233,9 @@ test('Can use global parameters in request body', async t => {
   t.true(scope.isDone())
 })
 
-test('Validates required path parameters', async t => {
+test('Validates required path parameters', async (t) => {
   const account_id = uuidv4()
-  const scope = nock(origin)
-    .put(`${pathPrefix}/accounts/${account_id}`)
-    .reply(200)
+  const scope = nock(origin).put(`${pathPrefix}/accounts/${account_id}`).reply(200)
 
   const client = getClient()
   await t.throwsAsync(client.updateAccount(), "Missing required path variable 'account_id'")
@@ -266,11 +243,9 @@ test('Validates required path parameters', async t => {
   t.false(scope.isDone())
 })
 
-test('Validates required query parameters', async t => {
+test('Validates required query parameters', async (t) => {
   const account_slug = uuidv4()
-  const scope = nock(origin)
-    .post(`${pathPrefix}/${account_slug}/members`)
-    .reply(200)
+  const scope = nock(origin).post(`${pathPrefix}/${account_slug}/members`).reply(200)
 
   const client = getClient()
   await t.throwsAsync(client.addMemberToAccount({ account_slug }), "Missing required query variable 'email'")
@@ -278,14 +253,11 @@ test('Validates required query parameters', async t => {
   t.false(scope.isDone())
 })
 
-test('Can set request headers', async t => {
+test('Can set request headers', async (t) => {
   const headerName = 'test'
   const headerValue = 'test'
   const account_id = uuidv4()
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .matchHeader(headerName, headerValue)
-    .reply(200)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).matchHeader(headerName, headerValue).reply(200)
 
   const client = getClient()
   await client.getAccount({ account_id }, { headers: { [headerName]: headerValue } })
@@ -293,12 +265,10 @@ test('Can set request headers', async t => {
   t.true(scope.isDone())
 })
 
-test('Can parse JSON responses', async t => {
+test('Can parse JSON responses', async (t) => {
   const account_id = uuidv4()
   const expectedResponse = { test: 'test' }
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(200, expectedResponse)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(200, expectedResponse)
 
   const client = getClient()
   const response = await client.getAccount({ account_id })
@@ -307,12 +277,10 @@ test('Can parse JSON responses', async t => {
   t.true(scope.isDone())
 })
 
-test('Can parse text responses', async t => {
+test('Can parse text responses', async (t) => {
   const account_id = uuidv4()
   const expectedResponse = 'test'
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(200, expectedResponse)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(200, expectedResponse)
 
   const client = getClient()
   const response = await client.getAccount({ account_id })
@@ -321,12 +289,10 @@ test('Can parse text responses', async t => {
   t.true(scope.isDone())
 })
 
-test('Handle error empty responses', async t => {
+test('Handle error empty responses', async (t) => {
   const account_id = uuidv4()
   const status = 404
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(status)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(status)
 
   const client = getClient()
   const error = await t.throwsAsync(client.getAccount({ account_id }))
@@ -339,13 +305,11 @@ test('Handle error empty responses', async t => {
   t.true(scope.isDone())
 })
 
-test('Handle error text responses', async t => {
+test('Handle error text responses', async (t) => {
   const account_id = uuidv4()
   const status = 404
   const expectedResponse = 'test'
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(status, expectedResponse)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(status, expectedResponse)
 
   const client = getClient()
   const error = await t.throwsAsync(client.getAccount({ account_id }))
@@ -358,7 +322,7 @@ test('Handle error text responses', async t => {
   t.true(scope.isDone())
 })
 
-test('Handle error text responses on JSON endpoints', async t => {
+test('Handle error text responses on JSON endpoints', async (t) => {
   const account_id = uuidv4()
   const status = 404
   const expectedResponse = 'test'
@@ -377,13 +341,11 @@ test('Handle error text responses on JSON endpoints', async t => {
   t.true(scope.isDone())
 })
 
-test('Handle error JSON responses', async t => {
+test('Handle error JSON responses', async (t) => {
   const account_id = uuidv4()
   const status = 404
   const errorJson = { error: true }
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(status, errorJson)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(status, errorJson)
 
   const client = getClient()
   const error = await t.throwsAsync(client.getAccount({ account_id }))
@@ -396,13 +358,11 @@ test('Handle error JSON responses', async t => {
   t.true(scope.isDone())
 })
 
-test('Handle network errors', async t => {
+test('Handle network errors', async (t) => {
   const account_id = uuidv4()
   const expectedResponse = 'test'
   const url = `${pathPrefix}/accounts/${account_id}`
-  const scope = nock(origin)
-    .get(url)
-    .replyWithError(expectedResponse)
+  const scope = nock(origin).get(url).replyWithError(expectedResponse)
 
   const client = getClient()
   const error = await t.throwsAsync(client.getAccount({ account_id }))
@@ -415,7 +375,7 @@ test('Handle network errors', async t => {
   t.true(scope.isDone())
 })
 
-test('Can get an access token from a ticket', async t => {
+test('Can get an access token from a ticket', async (t) => {
   const ticket_id = uuidv4()
   const access_token = 'test'
   const scope = nock(origin)
@@ -432,7 +392,7 @@ test('Can get an access token from a ticket', async t => {
   t.true(scope.isDone())
 })
 
-test('Can poll for access token', async t => {
+test('Can poll for access token', async (t) => {
   const ticket_id = uuidv4()
   const access_token = 'test'
   const scope = nock(origin)
@@ -449,7 +409,7 @@ test('Can poll for access token', async t => {
   t.true(scope.isDone())
 })
 
-test('Can change access token polling', async t => {
+test('Can change access token polling', async (t) => {
   const ticket_id = uuidv4()
   const access_token = 'test'
   const scope = nock(origin)
@@ -466,7 +426,7 @@ test('Can change access token polling', async t => {
   t.true(scope.isDone())
 })
 
-test('Can timeout access token polling', async t => {
+test('Can timeout access token polling', async (t) => {
   const ticket_id = uuidv4()
   const access_token = 'test'
   const scope = nock(origin)
@@ -486,7 +446,7 @@ test('Can timeout access token polling', async t => {
   t.false(scope.isDone())
 })
 
-test('Handles API rate limiting', async t => {
+test('Handles API rate limiting', async (t) => {
   const account_id = uuidv4()
   const retryAtMs = Date.now() + TEST_RATE_LIMIT_DELAY
   const retryAt = Math.ceil(retryAtMs / SECS_TO_MSECS)
@@ -505,7 +465,7 @@ test('Handles API rate limiting', async t => {
   t.true(scope.isDone())
 })
 
-test('Handles API rate limiting when date is in the past', async t => {
+test('Handles API rate limiting when date is in the past', async (t) => {
   const account_id = uuidv4()
   const expectedResponse = { test: 'test' }
   const scope = nock(origin)
@@ -520,7 +480,7 @@ test('Handles API rate limiting when date is in the past', async t => {
   t.true(scope.isDone())
 })
 
-test('Handles API rate limiting when X-RateLimit-Reset is missing', async t => {
+test('Handles API rate limiting when X-RateLimit-Reset is missing', async (t) => {
   const account_id = uuidv4()
   const expectedResponse = { test: 'test' }
   const retryAt = 'invalid'
@@ -536,7 +496,7 @@ test('Handles API rate limiting when X-RateLimit-Reset is missing', async t => {
   t.true(scope.isDone())
 })
 
-test('Gives up retrying on API rate limiting after a timeout', async t => {
+test('Gives up retrying on API rate limiting after a timeout', async (t) => {
   const account_id = uuidv4()
   const retryAt = Math.ceil(Date.now() / SECS_TO_MSECS)
   const expectedResponse = { test: 'test' }
@@ -557,7 +517,7 @@ test('Gives up retrying on API rate limiting after a timeout', async t => {
   t.false(scope.isDone())
 })
 
-test('Retries on ETIMEDOUT connection errors', async t => {
+test('Retries on ETIMEDOUT connection errors', async (t) => {
   const account_id = uuidv4()
   const retryAtMs = Date.now() + TEST_RATE_LIMIT_DELAY
   const expectedResponse = { test: 'test' }
@@ -575,7 +535,7 @@ test('Retries on ETIMEDOUT connection errors', async t => {
   t.true(scope.isDone())
 })
 
-test('Recreates a function body when handling API rate limiting', async t => {
+test('Recreates a function body when handling API rate limiting', async (t) => {
   const deploy_id = uuidv4()
   const path = 'testPath'
   const body = 'test'
@@ -595,27 +555,23 @@ test('Recreates a function body when handling API rate limiting', async t => {
   t.true(scope.isDone())
 })
 
-test('Can set (proxy) agent', async t => {
+test('Can set (proxy) agent', async (t) => {
   const client = getClient({ accessToken, agent })
   t.is(client.agent, agent)
 })
 
-test('(Proxy) agent is passed as request option', async t => {
+test('(Proxy) agent is passed as request option', async (t) => {
   const account_id = uuidv4()
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(200)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(200)
 
   const client = getClient({ accessToken, agent })
   await client.getAccount({ account_id })
   t.is(scope.interceptors[0].req.options.agent, agent)
 })
 
-test('(Proxy) agent is not passed as request option if not set', async t => {
+test('(Proxy) agent is not passed as request option if not set', async (t) => {
   const account_id = uuidv4()
-  const scope = nock(origin)
-    .get(`${pathPrefix}/accounts/${account_id}`)
-    .reply(200)
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${account_id}`).reply(200)
 
   const client = getClient({ accessToken })
   await client.getAccount({ account_id })

@@ -25,14 +25,14 @@ const sites = await client.listSites()
 // Create a site. Notice `body` here for sending OpenAPI body
 const site = await client.createSite({
   body: {
-    name: `my-awesome-site`
+    name: `my-awesome-site`,
     // ... https://open-api.netlify.com/#/default/createSite
-  }
+  },
 })
 
 // Delete site. Notice `site_id` is a path parameter https://open-api.netlify.com/#/default/deleteSite
 await client.deleteSite({
-  site_id: siteId
+  site_id: siteId,
 })
 ```
 
@@ -113,7 +113,7 @@ async function getSomeData() {
   try {
     return await client.getSiteDeploy({
       siteId: '1234abcd',
-      deploy_id: '4567'
+      deploy_id: '4567',
     })
   } catch (e) {
     // handle error
@@ -146,7 +146,7 @@ See the [authenticating](https://www.netlify.com/docs/api/#authenticating) docs 
 // example:
 async function login() {
   const ticket = await api.createTicket({
-    clientId: CLIENT_ID
+    clientId: CLIENT_ID,
   })
   // Open browser for authentication
   await openBrowser(`https://app.netlify.com/authorize?response_type=ticket&ticket=${ticket.id}`)

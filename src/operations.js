@@ -3,7 +3,7 @@ const { paths } = require('@netlify/open-api')
 const { omit } = require('./utils/omit')
 
 // Retrieve all OpenAPI operations
-const getOperations = function() {
+const getOperations = function () {
   return [].concat(
     ...Object.entries(paths).map(([path, pathItem]) => {
       const operations = omit(pathItem, ['parameters'])
@@ -15,14 +15,14 @@ const getOperations = function() {
   )
 }
 
-const getParameters = function(pathParameters = [], operationParameters = []) {
+const getParameters = function (pathParameters = [], operationParameters = []) {
   const parameters = [...pathParameters, ...operationParameters]
   return parameters.reduce(addParameter, { path: {}, query: {}, body: {} })
 }
 
-const addParameter = function(parameters, param) {
+const addParameter = function (parameters, param) {
   return Object.assign({}, parameters, {
-    [param.in]: Object.assign({}, parameters[param.in], { [param.name]: param })
+    [param.in]: Object.assign({}, parameters[param.in], { [param.name]: param }),
   })
 }
 

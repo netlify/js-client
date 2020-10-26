@@ -1,5 +1,5 @@
 // Handle request body
-const addBody = function(body, parameters, opts) {
+const addBody = function (body, parameters, opts) {
   if (!body) {
     return opts
   }
@@ -10,22 +10,22 @@ const addBody = function(body, parameters, opts) {
     return {
       ...opts,
       body: bodyA,
-      headers: { 'Content-Type': 'application/octet-stream', ...opts.headers }
+      headers: { 'Content-Type': 'application/octet-stream', ...opts.headers },
     }
   }
 
   return {
     ...opts,
     body: JSON.stringify(bodyA),
-    headers: { 'Content-Type': 'application/json', ...opts.headers }
+    headers: { 'Content-Type': 'application/json', ...opts.headers },
   }
 }
 
-const isBinaryBody = function(parameters) {
+const isBinaryBody = function (parameters) {
   return Object.values(parameters.body).some(isBodyParam)
 }
 
-const isBodyParam = function({ schema }) {
+const isBodyParam = function ({ schema }) {
   return schema && schema.format === 'binary'
 }
 
