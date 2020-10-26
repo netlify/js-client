@@ -34,7 +34,7 @@ module.exports = async (api, siteId, dir, opts) => {
         } */
       },
       // allows updating an existing deploy
-      deployId: null
+      deployId: null,
     },
     opts
   )
@@ -44,12 +44,12 @@ module.exports = async (api, siteId, dir, opts) => {
   statusCb({
     type: 'hashing',
     msg: `Hashing files...`,
-    phase: 'start'
+    phase: 'start',
   })
 
   const [{ files, filesShaMap }, { functions, fnShaMap }] = await Promise.all([
     hashFiles(dir, configPath, opts),
-    hashFns(fnDir, opts)
+    hashFns(fnDir, opts),
   ])
 
   const filesCount = Object.keys(files).length
@@ -58,7 +58,7 @@ module.exports = async (api, siteId, dir, opts) => {
   statusCb({
     type: 'hashing',
     msg: `Finished hashing ${filesCount} files` + (fnDir ? ` and ${functionsCount} functions` : ''),
-    phase: 'stop'
+    phase: 'stop',
   })
 
   if (filesCount === 0 && functionsCount === 0) {
@@ -68,7 +68,7 @@ module.exports = async (api, siteId, dir, opts) => {
   statusCb({
     type: 'create-deploy',
     msg: 'CDN diffing files...',
-    phase: 'start'
+    phase: 'start',
   })
 
   let deploy
@@ -79,8 +79,8 @@ module.exports = async (api, siteId, dir, opts) => {
       functions,
       async: Object.keys(files).length > opts.syncFileLimit,
       branch: opts.branch,
-      draft: opts.draft
-    }
+      draft: opts.draft,
+    },
   })
   if (opts.deployId === null) {
     if (title) {
@@ -101,7 +101,7 @@ module.exports = async (api, siteId, dir, opts) => {
     msg:
       `CDN requesting ${requiredFiles.length} files` +
       (Array.isArray(requiredFns) ? ` and ${requiredFns.length} functions` : ''),
-    phase: 'stop'
+    phase: 'stop',
   })
 
   const uploadList = getUploadList(requiredFiles, filesShaMap).concat(getUploadList(requiredFns, fnShaMap))
@@ -111,14 +111,14 @@ module.exports = async (api, siteId, dir, opts) => {
   statusCb({
     type: 'wait-for-deploy',
     msg: 'Waiting for deploy to go live...',
-    phase: 'start'
+    phase: 'start',
   })
   deploy = await waitForDeploy(api, deployId, siteId, opts.deployTimeout)
 
   statusCb({
     type: 'wait-for-deploy',
     msg: opts.draft ? 'Draft deploy is live!' : 'Deploy is live!',
-    phase: 'stop'
+    phase: 'stop',
   })
 
   await rimraf(opts.tmpDir)
@@ -126,7 +126,7 @@ module.exports = async (api, siteId, dir, opts) => {
   const deployManifest = {
     deployId,
     deploy,
-    uploadList
+    uploadList,
   }
   return deployManifest
 }

@@ -9,7 +9,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
   statusCb({
     type: 'upload',
     msg: `Uploading ${uploadList.length} files`,
-    phase: 'start'
+    phase: 'start',
   })
 
   const uploadFile = async (fileObj, index) => {
@@ -19,7 +19,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
     statusCb({
       type: 'upload',
       msg: `(${index}/${uploadList.length}) Uploading ${normalizedPath}...`,
-      phase: 'progress'
+      phase: 'progress',
     })
     let response
     switch (assetType) {
@@ -29,7 +29,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
             api.uploadDeployFile({
               body: readStreamCtor,
               deployId,
-              path: encodeURI(normalizedPath)
+              path: encodeURI(normalizedPath),
             }),
           maxRetry
         )
@@ -42,7 +42,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
               body: readStreamCtor,
               deployId,
               name: encodeURI(normalizedPath),
-              runtime
+              runtime,
             }),
           maxRetry
         )
@@ -62,7 +62,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
   statusCb({
     type: 'upload',
     msg: `Finished uploading ${uploadList.length} assets`,
-    phase: 'stop'
+    phase: 'stop',
   })
   return results
 }
@@ -73,7 +73,7 @@ function retryUpload(uploadFn, maxRetry) {
     const fibonacciBackoff = backoff.fibonacci({
       randomisationFactor: 0.5,
       initialDelay: 5000,
-      maxDelay: 90000
+      maxDelay: 90000,
     })
     fibonacciBackoff.failAfter(maxRetry)
 
@@ -90,8 +90,8 @@ function retryUpload(uploadFn, maxRetry) {
 
     function tryUpload() {
       uploadFn()
-        .then(results => resolve(results))
-        .catch(e => {
+        .then((results) => resolve(results))
+        .catch((e) => {
           lastError = e
           switch (true) {
             case e.status >= 400: // observed errors: 408, 401 (4** swallowed), 502

@@ -10,11 +10,11 @@ async function createAddon(settings, netlifyApiToken) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${netlifyApiToken}`
+      Authorization: `Bearer ${netlifyApiToken}`,
     },
     body: JSON.stringify({
-      config: config
-    })
+      config: config,
+    }),
   })
 
   const data = await response.json()
@@ -32,8 +32,8 @@ async function getAddons(siteId, netlifyApiToken) {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${netlifyApiToken}`
-    }
+      Authorization: `Bearer ${netlifyApiToken}`,
+    },
   })
 
   const data = await response.json()
@@ -52,8 +52,8 @@ async function deleteAddon(settings, netlifyApiToken) {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${netlifyApiToken}`
-    }
+      Authorization: `Bearer ${netlifyApiToken}`,
+    },
   })
 
   if (response.status === 422) {
@@ -72,11 +72,11 @@ async function updateAddon(settings, netlifyApiToken) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${netlifyApiToken}`
+      Authorization: `Bearer ${netlifyApiToken}`,
     },
     body: JSON.stringify({
-      config: config
-    })
+      config: config,
+    }),
   })
 
   if (response.status === 422) {
@@ -91,5 +91,5 @@ module.exports = {
   getAddons: getAddons,
   createAddon: createAddon,
   updateAddon: updateAddon,
-  deleteAddon: deleteAddon
+  deleteAddon: deleteAddon,
 }

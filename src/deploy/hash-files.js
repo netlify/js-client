@@ -11,7 +11,7 @@ async function hashFiles(dir, configPath, opts) {
     {
       concurrentHash: 100,
       assetType: 'file',
-      statusCb: () => {}
+      statusCb: () => {},
     },
     opts
   )

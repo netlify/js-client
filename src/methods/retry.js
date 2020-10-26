@@ -1,16 +1,16 @@
 // We retry:
 //  - when receiving a rate limiting response
 //  - on network failures due to timeouts
-const shouldRetry = function({ response = {}, error = {} }) {
+const shouldRetry = function ({ response = {}, error = {} }) {
   return response.status === RATE_LIMIT_STATUS || RETRY_ERROR_CODES.includes(error.code)
 }
 
-const waitForRetry = async function(response) {
+const waitForRetry = async function (response) {
   const delay = getDelay(response)
   await sleep(delay)
 }
 
-const getDelay = function(response) {
+const getDelay = function (response) {
   if (response === undefined) {
     return DEFAULT_RETRY_DELAY
   }
@@ -24,8 +24,8 @@ const getDelay = function(response) {
   return Math.max(Number(rateLimitReset) * SECS_TO_MSECS - Date.now(), MIN_RETRY_DELAY)
 }
 
-const sleep = function(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
+const sleep = function (ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 const DEFAULT_RETRY_DELAY = 5e3

@@ -15,7 +15,7 @@ async function hashFns(dir, opts) {
       assetType: 'function',
       hashAlgorithm: 'sha256',
       // tmpDir,
-      statusCb: () => {}
+      statusCb: () => {},
     },
     opts
   )
@@ -34,7 +34,7 @@ async function hashFns(dir, opts) {
     type: 'file',
     assetType: 'function',
     normalizedPath: path.basename(functionPath, path.extname(functionPath)),
-    runtime
+    runtime,
   }))
 
   const functionStream = fromArray.obj(fileObjs)
