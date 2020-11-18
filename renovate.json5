@@ -7,10 +7,8 @@
   ignoreDeps: [
     // Those cannot be upgraded until we drop support for Node 8
     'ava',
-    'eslint',
     'nock',
     'p-map',
-    'prettier',
     'tempy',
   ],
 }

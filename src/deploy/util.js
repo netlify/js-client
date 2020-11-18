@@ -4,7 +4,7 @@ const flatten = require('lodash.flatten')
 const pWaitFor = require('p-wait-for')
 
 // Default filter when scanning for files
-exports.defaultFilter = filename => {
+exports.defaultFilter = (filename) => {
   if (filename == null) return false
   const n = path.basename(filename)
   switch (true) {
@@ -18,7 +18,7 @@ exports.defaultFilter = filename => {
 }
 
 // normalize windows paths to unix paths
-exports.normalizePath = relname => {
+exports.normalizePath = (relname) => {
   if (relname.includes('#') || relname.includes('?')) {
     throw new Error(`Invalid filename ${relname}. Deployed filenames cannot contain # or ? characters`)
   }
@@ -38,7 +38,7 @@ async function waitForDiff(api, deployId, siteId, timeout) {
   await pWaitFor(loadDeploy, {
     interval: 1000,
     timeout,
-    message: 'Timeout while waiting for deploy'
+    message: 'Timeout while waiting for deploy',
   })
 
   return deploy
@@ -76,7 +76,7 @@ async function waitForDeploy(api, deployId, siteId, timeout) {
   await pWaitFor(loadDeploy, {
     interval: 1000,
     timeout,
-    message: 'Timeout while waiting for deploy'
+    message: 'Timeout while waiting for deploy',
   })
 
   return deploy
@@ -106,9 +106,9 @@ async function waitForDeploy(api, deployId, siteId, timeout) {
 }
 
 // Transform the fileShaMap and fnShaMap into a generic shaMap that file-uploader.js can use
-exports.getUploadList = function(required, shaMap) {
+exports.getUploadList = function (required, shaMap) {
   if (!required || !shaMap) return []
-  return flatten(required.map(sha => shaMap[sha]))
+  return flatten(required.map((sha) => shaMap[sha]))
 }
 
 exports.retry = async () => {}

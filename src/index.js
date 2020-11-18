@@ -24,14 +24,14 @@ class NetlifyAPI {
         host: dfn.host,
         pathPrefix: dfn.basePath,
         accessToken,
-        globalParams: {}
+        globalParams: {},
       },
       opts
     )
 
     this.defaultHeaders = {
       'User-agent': opts.userAgent,
-      accept: 'application/json'
+      accept: 'application/json',
     }
 
     this.scheme = opts.scheme
@@ -77,7 +77,7 @@ class NetlifyAPI {
     await pWaitFor(checkTicket, {
       interval: opts.poll,
       timeout: opts.timeout,
-      message: 'Timeout while waiting for ticket grant'
+      message: 'Timeout while waiting for ticket grant',
     })
 
     const accessTokenResponse = await api.exchangeTicket({ ticketId: authorizedTicket.id })

@@ -14,15 +14,15 @@ exports.hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
     hasha
       .fromFile(fileObj.filepath, hashaOpts)
       // insert hash and asset type to file obj
-      .then(hash => cb(null, Object.assign({}, fileObj, { hash })))
-      .catch(err => cb(err))
+      .then((hash) => cb(null, Object.assign({}, fileObj, { hash })))
+      .catch((err) => cb(err))
   })
 }
 
 // Inject normalized file names into normalizedPath and assetType
 exports.fileNormalizerCtor = fileNormalizerCtor
 function fileNormalizerCtor({ assetType = 'file' }) {
-  return map(fileObj => {
+  return map((fileObj) => {
     return Object.assign({}, fileObj, { assetType, normalizedPath: normalizePath(fileObj.relname) })
   })
 }
@@ -44,13 +44,13 @@ exports.manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
     statusCb({
       type: 'hashing',
       msg: `Hashing ${fileObj.relname}`,
-      phase: 'progress'
+      phase: 'progress',
     })
     cb(null)
   })
 }
 
 // transform stream ctor that filters folder-walker results for only files
-exports.fileFilterCtor = objFilterCtor(fileObj => {
+exports.fileFilterCtor = objFilterCtor((fileObj) => {
   return fileObj.type === 'file'
 })
