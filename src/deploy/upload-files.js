@@ -31,7 +31,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
               deployId,
               path: encodeURI(normalizedPath),
             }),
-          maxRetry
+          maxRetry,
         )
         break
       }
@@ -44,7 +44,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
               name: encodeURI(normalizedPath),
               runtime,
             }),
-          maxRetry
+          maxRetry,
         )
         break
       }
@@ -91,15 +91,15 @@ function retryUpload(uploadFn, maxRetry) {
     function tryUpload() {
       uploadFn()
         .then((results) => resolve(results))
-        .catch((e) => {
-          lastError = e
+        .catch((error) => {
+          lastError = error
           switch (true) {
-            case e.status >= 400: // observed errors: 408, 401 (4** swallowed), 502
-            case e.name === 'FetchError': {
+            case error.status >= 400: // observed errors: 408, 401 (4** swallowed), 502
+            case error.name === 'FetchError': {
               return fibonacciBackoff.backoff()
             }
             default: {
-              return reject(e)
+              return reject(error)
             }
           }
         })

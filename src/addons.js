@@ -1,6 +1,6 @@
-/* temp api until endpoints in openAPI spec
- TODO update openAPI spec and update `addons` commands
-*/
+// temp api until endpoints in openAPI spec
+// TODO update openAPI spec and update `addons` commands
+//
 const fetch = require('node-fetch')
 
 async function createAddon(settings, netlifyApiToken) {
@@ -13,7 +13,7 @@ async function createAddon(settings, netlifyApiToken) {
       Authorization: `Bearer ${netlifyApiToken}`,
     },
     body: JSON.stringify({
-      config: config,
+      config,
     }),
   })
 
@@ -75,7 +75,7 @@ async function updateAddon(settings, netlifyApiToken) {
       Authorization: `Bearer ${netlifyApiToken}`,
     },
     body: JSON.stringify({
-      config: config,
+      config,
     }),
   })
 
@@ -88,8 +88,8 @@ async function updateAddon(settings, netlifyApiToken) {
 }
 
 module.exports = {
-  getAddons: getAddons,
-  createAddon: createAddon,
-  updateAddon: updateAddon,
-  deleteAddon: deleteAddon,
+  getAddons,
+  createAddon,
+  updateAddon,
+  deleteAddon,
 }
