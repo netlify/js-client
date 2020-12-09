@@ -9,31 +9,38 @@ A Netlify [OpenAPI](https://github.com/netlify/open-api) client that works in th
 
 ```js
 const NetlifyAPI = require('netlify')
-const client = new NetlifyAPI('1234myAccessToken')
-const sites = await client.listSites()
+
+const listNetlifySites = async function() {
+  const client = new NetlifyAPI('1234myAccessToken')
+  const sites = await client.listSites()
+  return sites
+}
 ```
 
 ## Using OpenAPI operations
 
 ```js
 const NetlifyAPI = require('netlify')
+
 const client = new NetlifyAPI('1234myAccessToken')
 
-// Fetch sites
-const sites = await client.listSites()
+const listCreateAndDeleteSite = async function() {
+  // Fetch sites
+  const sites = await client.listSites()
 
-// Create a site. Notice `body` here for sending OpenAPI body
-const site = await client.createSite({
-  body: {
-    name: `my-awesome-site`,
-    // ... https://open-api.netlify.com/#/default/createSite
-  },
-})
+  // Create a site. Notice `body` here for sending OpenAPI body
+  const site = await client.createSite({
+    body: {
+      name: `my-awesome-site`,
+      // ... https://open-api.netlify.com/#/default/createSite
+    },
+  })
 
-// Delete site. Notice `site_id` is a path parameter https://open-api.netlify.com/#/default/deleteSite
-await client.deleteSite({
-  site_id: siteId,
-})
+  // Delete site. Notice `site_id` is a path parameter https://open-api.netlify.com/#/default/deleteSite
+  await client.deleteSite({
+    site_id: siteId,
+  })
+}
 ```
 
 ## API
@@ -47,7 +54,7 @@ Create a new instance of the Netlify API client with the provided `accessToken`.
 `opts` includes:
 
 ```js
-{
+const opts = {
   userAgent: 'netlify/js-client',
   scheme: 'https',
   host: 'api.netlify.com',
@@ -83,7 +90,7 @@ Performs a call to the given endpoint corresponding with the `operationId`. Retu
 
 ```js
 // example params
-{
+const params = {
   any_param_needed,
   paramsCanAlsoBeCamelCase,
   body: {
@@ -96,7 +103,7 @@ Optional `opts` can include any property you want passed to [`node-fetch`](https
 
 ```js
 // example opts
-{
+const opts = {
   headers: { // Default headers
     'User-agent': 'netlify-js-client',
     accept: 'application/json'
@@ -115,7 +122,7 @@ async function getSomeData() {
       siteId: '1234abcd',
       deploy_id: '4567',
     })
-  } catch (e) {
+  } catch (error) {
     // handle error
   }
 }
@@ -134,7 +141,7 @@ Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an
 Optional `opts` include:
 
 ```js
-{
+const opts = {
   poll: 1000, // number of ms to wait between polling
   timeout: 3.6e6 // number of ms to wait before timing out
 }
@@ -169,7 +176,7 @@ The following paths can be passed in the options:
 Optional `opts` include:
 
 ```js
-{
+const opts = {
   fnDir: null, // path to a folder of functions to deploy
   branch: null, // branch to pass onto the netlify api
   configPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
@@ -183,17 +190,17 @@ Optional `opts` include:
   tmpDir: tempy.directory(), // a temporary directory to zip functions into
   statusCb: statusObj => {
     // a callback function to receive status events
-    /* statusObj: {
-            type: name-of-step
-            msg: msg to print
-            phase: [start, progress, stop]
-        } */
+    // statusObj: {
+    //      type: name-of-step
+    //      msg: msg to print
+    //      phase: [start, progress, stop]
+    //  }
     // See https://github.com/netlify/cli/blob/v2.0.0-beta.3/src/commands/deploy.js#L161-L195
     // for an example of how this can be used.
   },
   // passing a deployId will update an existing deploy based on the provided options
   deployId: null
- }
+}
 ```
 
 ## Proxy support

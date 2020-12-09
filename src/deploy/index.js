@@ -11,33 +11,31 @@ const { waitForDiff } = require('./util')
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
 module.exports = async (api, siteId, dir, opts) => {
-  opts = Object.assign(
-    {
-      fnDir: null,
-      configPath: null,
-      draft: false,
-      message: undefined, // API calls this the 'title'
-      tmpDir: tempy.directory(),
-      deployTimeout: 1.2e6, // local deploy timeout: 20 mins
-      concurrentHash: 100, // concurrent file hash calls
-      concurrentUpload: 5, // Number of concurrent uploads
-      filter: defaultFilter,
-      syncFileLimit: 100, // number of files
-      maxRetry: 5, // number of times to retry an upload
-      statusCb: () => {
-        /* default to noop */
-        /* statusObj: {
-            type: name-of-step
-            msg: msg to print
-            phase: [start, progress, stop],
-            spinner: a spinner from cli-spinners package
-        } */
-      },
-      // allows updating an existing deploy
-      deployId: null,
+  opts = {
+    fnDir: null,
+    configPath: null,
+    draft: false,
+    message: undefined, // API calls this the 'title'
+    tmpDir: tempy.directory(),
+    deployTimeout: 1.2e6, // local deploy timeout: 20 mins
+    concurrentHash: 100, // concurrent file hash calls
+    concurrentUpload: 5, // Number of concurrent uploads
+    filter: defaultFilter,
+    syncFileLimit: 100, // number of files
+    maxRetry: 5, // number of times to retry an upload
+    statusCb: () => {
+      /* default to noop */
+      // statusObj: {
+      //     type: name-of-step
+      //     msg: msg to print
+      //     phase: [start, progress, stop],
+      //     spinner: a spinner from cli-spinners package
+      // }
     },
-    opts
-  )
+    // allows updating an existing deploy
+    deployId: null,
+    ...opts,
+  }
 
   const { fnDir, configPath, statusCb, message: title } = opts
 
@@ -57,7 +55,7 @@ module.exports = async (api, siteId, dir, opts) => {
 
   statusCb({
     type: 'hashing',
-    msg: `Finished hashing ${filesCount} files` + (fnDir ? ` and ${functionsCount} functions` : ''),
+    msg: `Finished hashing ${filesCount} files${fnDir ? ` and ${functionsCount} functions` : ''}`,
     phase: 'stop',
   })
 
@@ -98,9 +96,9 @@ module.exports = async (api, siteId, dir, opts) => {
 
   statusCb({
     type: 'create-deploy',
-    msg:
-      `CDN requesting ${requiredFiles.length} files` +
-      (Array.isArray(requiredFns) ? ` and ${requiredFns.length} functions` : ''),
+    msg: `CDN requesting ${requiredFiles.length} files${
+      Array.isArray(requiredFns) ? ` and ${requiredFns.length} functions` : ''
+    }`,
     phase: 'stop',
   })
 

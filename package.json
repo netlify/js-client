@@ -17,14 +17,25 @@
   "scripts": {
     "prepublishOnly": "npm run build && git push && git push --tags && gh-release",
     "test": "npm run format && npm run test:dev",
-    "format": "run-s format:*",
+    "format": "run-s format:check-fix:*",
     "format:lint": "eslint --ignore-path .gitignore --fix --cache --format=codeframe --max-warnings=0 \"src/**/*.js\"",
     "format:prettier": "prettier --ignore-path .gitignore --write --loglevel warn \"src/**/*.js\" \"*.{js,md,yml,json}\" \"!package-lock.json\"",
+    "format:ci": "run-s format:check:*",
+    "format:check-fix:lint": "run-e format:check:lint format:fix:lint",
+    "format:check:lint": "cross-env-shell eslint $npm_package_scriptsArgs_eslint",
+    "format:fix:lint": "cross-env-shell eslint --fix $npm_package_scriptsArgs_eslint",
+    "format:check-fix:prettier": "run-e format:check:prettier format:fix:prettier",
+    "format:check:prettier": "cross-env-shell prettier --check $npm_package_scriptsArgs_prettier",
+    "format:fix:prettier": "cross-env-shell prettier --write $npm_package_scriptsArgs_prettier",
     "test:dev": "ava",
     "test:ci": "nyc -r lcovonly -r text -r json ava",
     "update-snapshots": "ava -u",
     "build": "webpack",
     "version": "auto-changelog -p --template keepachangelog --breaking-pattern breaking && npm run format:prettier && git add CHANGELOG.md"
+  },
+  "scriptsArgs": {
+    "eslint": "--ignore-path .gitignore --cache --format=codeframe --max-warnings=0 \"{src,tests,.github}/**/*.{js,md,html}\" \"*.{js,md,html}\" \".*.{js,md,html}\"",
+    "prettier": "--ignore-path .gitignore --loglevel=warn \"{src,tests,.github}/**/*.{js,md,yml,json,html}\" \"*.{js,yml,json,html}\" \".*.{js,yml,json,html}\" \"!package-lock.json\""
   },
   "husky": {
     "hooks": {
@@ -84,6 +95,7 @@
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "@babel/runtime": "^7.9.2",
+    "@netlify/eslint-config-node": "^2.0.1",
     "auto-changelog": "^2.0.0",
     "ava": "^2.4.0",
     "babel-eslint": "^10.1.0",
@@ -106,5 +118,13 @@
   },
   "engines": {
     "node": ">=8.3.0"
+  },
+  "ava": {
+    "files": [
+      "src/**/*.test.js"
+    ],
+    "compileEnhancements": false,
+    "babel": false,
+    "verbose": true
   }
 }

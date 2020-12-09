@@ -29,7 +29,7 @@ const getMethod = function (method, NetlifyApi) {
 }
 
 const callMethod = async function (method, NetlifyApi, params, opts) {
-  const requestParams = Object.assign({}, NetlifyApi.globalParams, params)
+  const requestParams = { ...NetlifyApi.globalParams, ...params }
   const url = getUrl(method, NetlifyApi, requestParams)
   const response = await makeRequestOrRetry({ url, method, NetlifyApi, requestParams, opts })
 
@@ -47,23 +47,20 @@ const getOpts = function ({ verb, parameters }, NetlifyApi, { body }, opts) {
 
 // Add the HTTP method based on the OpenAPI definition
 const addHttpMethod = function (verb, opts) {
-  return Object.assign({}, opts, { method: verb.toUpperCase() })
+  return { ...opts, method: verb.toUpperCase() }
 }
 
 // Assign default HTTP headers
 const addDefaultHeaders = function (NetlifyApi, opts) {
-  return Object.assign({}, opts, {
-    headers: Object.assign({}, NetlifyApi.defaultHeaders, opts.headers),
-  })
+  return { ...opts, headers: { ...NetlifyApi.defaultHeaders, ...opts.headers } }
 }
 
 // Assign fetch agent (like for example HttpsProxyAgent) if there is one
 const addAgent = function (NetlifyApi, opts) {
   if (NetlifyApi.agent) {
-    return Object.assign({}, opts, { agent: NetlifyApi.agent })
-  } else {
-    return opts
+    return { ...opts, agent: NetlifyApi.agent }
   }
+  return opts
 }
 
 const makeRequestOrRetry = async function ({ url, method, NetlifyApi, requestParams, opts }) {

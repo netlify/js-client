@@ -17,17 +17,15 @@ class NetlifyAPI {
       accessToken = null
     }
     // default opts
-    opts = Object.assign(
-      {
-        userAgent: 'netlify/js-client',
-        scheme: dfn.schemes[0],
-        host: dfn.host,
-        pathPrefix: dfn.basePath,
-        accessToken,
-        globalParams: {},
-      },
-      opts
-    )
+    opts = {
+      userAgent: 'netlify/js-client',
+      scheme: dfn.schemes[0],
+      host: dfn.host,
+      pathPrefix: dfn.basePath,
+      accessToken,
+      globalParams: {},
+      ...opts,
+    }
 
     this.defaultHeaders = {
       'User-agent': opts.userAgent,
@@ -48,7 +46,7 @@ class NetlifyAPI {
 
   set accessToken(token) {
     if (token) {
-      set(this, 'defaultHeaders.Authorization', 'Bearer ' + token)
+      set(this, 'defaultHeaders.Authorization', `Bearer ${token}`)
     } else {
       delete this.defaultHeaders.Authorization
     }
@@ -59,7 +57,7 @@ class NetlifyAPI {
   }
 
   async getAccessToken(ticket, opts) {
-    opts = Object.assign({ poll: 1000, timeout: 3.6e6 }, opts)
+    opts = { poll: 1000, timeout: 3.6e6, ...opts }
 
     const api = this
 
@@ -71,7 +69,7 @@ class NetlifyAPI {
       if (t.authorized) {
         authorizedTicket = t
       }
-      return !!t.authorized
+      return Boolean(t.authorized)
     }
 
     await pWaitFor(checkTicket, {
