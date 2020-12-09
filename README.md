@@ -1,7 +1,7 @@
 # netlify/js-client
 
-[![npm version][npm-img]][npm] [![build status][build-img]][build]
-[![coverage][coverage-img]][coverage] [![dependencies][david-img]][david] [![downloads][dl-img]][dl]
+[![npm version][npm-img]][npm] [![build status][build-img]][build] [![coverage][coverage-img]][coverage]
+[![dependencies][david-img]][david] [![downloads][dl-img]][dl]
 
 A Netlify [OpenAPI](https://github.com/netlify/open-api) client that works in the browser and Node.js.
 
@@ -10,7 +10,7 @@ A Netlify [OpenAPI](https://github.com/netlify/open-api) client that works in th
 ```js
 const NetlifyAPI = require('netlify')
 
-const listNetlifySites = async function() {
+const listNetlifySites = async function () {
   const client = new NetlifyAPI('1234myAccessToken')
   const sites = await client.listSites()
   return sites
@@ -24,7 +24,7 @@ const NetlifyAPI = require('netlify')
 
 const client = new NetlifyAPI('1234myAccessToken')
 
-const listCreateAndDeleteSite = async function() {
+const listCreateAndDeleteSite = async function () {
   // Fetch sites
   const sites = await client.listSites()
 
@@ -61,14 +61,15 @@ const opts = {
   pathPrefix: '/api/v1',
   accessToken: '1234myAccessToken',
   agent: undefined, // e.g. HttpsProxyAgent
-  globalParams: {} // parameters you want available for every request.
+  globalParams: {}, // parameters you want available for every request.
   // Global params are only sent of the OpenAPI spec specifies the provided params.
 }
 ```
 
 ### `client.accessToken`
 
-A setter/getter that returns the `accessToken` that the client is configured to use. You can set this after the class is instantiated, and all subsequent calls will use the newly set `accessToken`.
+A setter/getter that returns the `accessToken` that the client is configured to use. You can set this after the class is
+instantiated, and all subsequent calls will use the newly set `accessToken`.
 
 ### `client.basePath`
 
@@ -76,17 +77,23 @@ A getter that returns the formatted base URL of the endpoint the client is confi
 
 ### OpenAPI Client methods
 
-The client is dynamically generated from the [OpenAPI](https://github.com/netlify/open-api) definition file. Each method is is named after the `operationId` name of each operation. **To see a list of available operations, please see the [OpenAPI website](https://open-api.netlify.com/)**.
+The client is dynamically generated from the [OpenAPI](https://github.com/netlify/open-api) definition file. Each method
+is is named after the `operationId` name of each operation. **To see a list of available operations, please see the
+[OpenAPI website](https://open-api.netlify.com/)**.
 
 Every OpenAPI operation has the following signature:
 
 #### `response = await client.operationId([params], [opts])`
 
-Performs a call to the given endpoint corresponding with the `operationId`. Returns a promise resolved with the body of the response, or rejected with an error with the details about the request attached. Rejects if the `status` > 400.
+Performs a call to the given endpoint corresponding with the `operationId`. Returns a promise resolved with the body of
+the response, or rejected with an error with the details about the request attached. Rejects if the `status` > 400.
 
 - `params` is an object that includes any of the required or optional endpoint parameters.
-- `params.body` should be an object which gets serialized to JSON automatically. Any object can live here but refer to the OpenAPI specification for allowed fields in a particular request body. It can also be a function returning an object.
-- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream or a function returning one (e.g. `() => fs.createReadStream('./foo')`). Using a function is recommended.
+- `params.body` should be an object which gets serialized to JSON automatically. Any object can live here but refer to
+  the OpenAPI specification for allowed fields in a particular request body. It can also be a function returning an
+  object.
+- If the endpoint accepts `binary`, `params.body` can be a Node.js readable stream or a function returning one (e.g.
+  `() => fs.createReadStream('./foo')`). Using a function is recommended.
 
 ```js
 // example params
@@ -94,20 +101,22 @@ const params = {
   any_param_needed,
   paramsCanAlsoBeCamelCase,
   body: {
-    an: 'arbitrary js object'
-  }
+    an: 'arbitrary js object',
+  },
 }
 ```
 
-Optional `opts` can include any property you want passed to [`node-fetch`](https://github.com/bitinn/node-fetch). The `headers` property is merged with some `defaultHeaders`.
+Optional `opts` can include any property you want passed to [`node-fetch`](https://github.com/bitinn/node-fetch). The
+`headers` property is merged with some `defaultHeaders`.
 
 ```js
 // example opts
 const opts = {
-  headers: { // Default headers
+  headers: {
+    // Default headers
     'User-agent': 'netlify-js-client',
-    accept: 'application/json'
-  }
+    accept: 'application/json',
+  },
   // any other properties for node-fetch
 }
 ```
@@ -128,7 +137,8 @@ async function getSomeData() {
 }
 ```
 
-If the response includes `json` in the `contentType` header, fetch will deserialize the JSON body. Otherwise the `text` of the response is returned.
+If the response includes `json` in the `contentType` header, fetch will deserialize the JSON body. Otherwise the `text`
+of the response is returned.
 
 ### API Flow Methods
 
@@ -136,14 +146,16 @@ Some methods have been added in addition to the open API operations that make ce
 
 #### `accessToken = await client.getAccessToken(ticket, [opts])`
 
-Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an `accessToken`. Call this with the response from a `client.createTicket({ client_id })` call. Automatically sets the `accessToken` to `this.accessToken` and returns `accessToken` for the consumer to save for later.
+Pass in a [`ticket`](https://open-api.netlify.com/#model-ticket) and get back an `accessToken`. Call this with the
+response from a `client.createTicket({ client_id })` call. Automatically sets the `accessToken` to `this.accessToken`
+and returns `accessToken` for the consumer to save for later.
 
 Optional `opts` include:
 
 ```js
 const opts = {
   poll: 1000, // number of ms to wait between polling
-  timeout: 3.6e6 // number of ms to wait before timing out
+  timeout: 3.6e6, // number of ms to wait before timing out
 }
 ```
 
@@ -165,8 +177,9 @@ async function login() {
 
 #### `deploy = await client.deploy(siteId, buildDir, [opts])`
 
-**Node.js only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the contents of that folder.
-Sometimes this method needs to write to a `tmpDir`. By default `tmpDir` is a folder in the system temporary directory.
+**Node.js only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the
+contents of that folder. Sometimes this method needs to write to a `tmpDir`. By default `tmpDir` is a folder in the
+system temporary directory.
 
 The following paths can be passed in the options:
 
@@ -186,9 +199,11 @@ const opts = {
   parallelHash: 100, // number of parallel hashing calls
   parallelUpload: 5, // number of files to upload in parallel
   maxRetry: 5, // number of times to try on failed file uploads
-  filter: filepath => { /* return false to filter a file  from the deploy */ },
+  filter: (filepath) => {
+    /* return false to filter a file  from the deploy */
+  },
   tmpDir: tempy.directory(), // a temporary directory to zip functions into
-  statusCb: statusObj => {
+  statusCb: (statusObj) => {
     // a callback function to receive status events
     // statusObj: {
     //      type: name-of-step
@@ -199,13 +214,14 @@ const opts = {
     // for an example of how this can be used.
   },
   // passing a deployId will update an existing deploy based on the provided options
-  deployId: null
+  deployId: null,
 }
 ```
 
 ## Proxy support
 
-**Node.js only**: If this client is used behind a corporate proxy, you can pass an `HttpsProxyAgent` or any other `http.Agent` that can handle your situation as `agent` option:
+**Node.js only**: If this client is used behind a corporate proxy, you can pass an `HttpsProxyAgent` or any other
+`http.Agent` that can handle your situation as `agent` option:
 
 ```js
 const HttpsProxyAgent = require('https-proxy-agent')
@@ -217,7 +233,8 @@ const client = new NetlifyAPI('1234myAccessToken', { agent })
 
 ## UMD Builds
 
-A UMD build is provided for your convenience, however browser support is still experimental. Contributions to improve browser support are welcome.
+A UMD build is provided for your convenience, however browser support is still experimental. Contributions to improve
+browser support are welcome.
 
 ## Contributing
 
