@@ -6,7 +6,6 @@ module.exports = {
     // TODO: enable those rules
     'array-callback-return': 0,
     complexity: 0,
-    'consistent-this': 0,
     'id-length': 0,
     'line-comment-position': 0,
     'max-nested-callbacks': 0,
