@@ -7,7 +7,7 @@ const map = require('through2-map').obj
 const { normalizePath } = require('./util')
 
 // a parallel transform stream segment ctor that hashes fileObj's created by folder-walker
-exports.hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
+const hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
   const hashaOpts = { algorithm: hashAlgorithm }
   if (!concurrentHash) throw new Error('Missing required opts')
   return transform(concurrentHash, { objectMode: true }, (fileObj, cb) => {
@@ -20,13 +20,11 @@ exports.hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
 }
 
 // Inject normalized file names into normalizedPath and assetType
-exports.fileNormalizerCtor = fileNormalizerCtor
-function fileNormalizerCtor({ assetType = 'file' }) {
-  return map((fileObj) => ({ ...fileObj, assetType, normalizedPath: normalizePath(fileObj.relname) }))
-}
+const fileNormalizerCtor = ({ assetType = 'file' }) =>
+  map((fileObj) => ({ ...fileObj, assetType, normalizedPath: normalizePath(fileObj.relname) }))
 
 // A writable stream segment ctor that normalizes file paths, and writes shaMap's
-exports.manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
+const manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
   if (!statusCb || !assetType) throw new Error('Missing required options')
   return objWriter((fileObj, _, cb) => {
     filesObj[fileObj.normalizedPath] = fileObj.hash
@@ -49,4 +47,11 @@ exports.manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
 }
 
 // transform stream ctor that filters folder-walker results for only files
-exports.fileFilterCtor = objFilterCtor((fileObj) => fileObj.type === 'file')
+const fileFilterCtor = objFilterCtor((fileObj) => fileObj.type === 'file')
+
+module.exports = {
+  hasherCtor,
+  fileNormalizerCtor,
+  manifestCollectorCtor,
+  fileFilterCtor,
+}

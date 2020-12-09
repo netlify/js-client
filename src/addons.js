@@ -3,7 +3,7 @@
 //
 const fetch = require('node-fetch')
 
-async function createAddon(settings, netlifyApiToken) {
+const createAddon = async (settings, netlifyApiToken) => {
   const { siteId, addon, config } = settings
   const url = `https://api.netlify.com/api/v1/sites/${siteId}/services/${addon}/instances`
   const response = await fetch(url, {
@@ -26,7 +26,7 @@ async function createAddon(settings, netlifyApiToken) {
   return data
 }
 
-async function getAddons(siteId, netlifyApiToken) {
+const getAddons = async (siteId, netlifyApiToken) => {
   const url = `https://api.netlify.com/api/v1/sites/${siteId}/service-instances`
   const response = await fetch(url, {
     method: 'GET',
@@ -45,7 +45,7 @@ async function getAddons(siteId, netlifyApiToken) {
   return data
 }
 
-async function deleteAddon(settings, netlifyApiToken) {
+const deleteAddon = async (settings, netlifyApiToken) => {
   const { siteId, addon, instanceId } = settings
   const url = `https://api.netlify.com/api/v1/sites/${siteId}/services/${addon}/instances/${instanceId}`
   const response = await fetch(url, {
@@ -64,7 +64,7 @@ async function deleteAddon(settings, netlifyApiToken) {
   return response
 }
 
-async function updateAddon(settings, netlifyApiToken) {
+const updateAddon = async (settings, netlifyApiToken) => {
   const { siteId, addon, config, instanceId } = settings
   const url = `https://api.netlify.com/api/v1/sites/${siteId}/services/${addon}/instances/${instanceId}`
 

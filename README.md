@@ -124,7 +124,7 @@ const opts = {
 All operations are conveniently consumed with async/await:
 
 ```js
-async function getSomeData() {
+const getSomeData = async () => {
   // Calls may fail!
   try {
     return await client.getSiteDeploy({
@@ -163,7 +163,7 @@ See the [authenticating](https://www.netlify.com/docs/api/#authenticating) docs 
 
 ```js
 // example:
-async function login() {
+const login = async () => {
   const ticket = await api.createTicket({
     clientId: CLIENT_ID,
   })

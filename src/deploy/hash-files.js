@@ -5,8 +5,7 @@ const pump = promisify(require('pump'))
 
 const { hasherCtor, manifestCollectorCtor, fileFilterCtor, fileNormalizerCtor } = require('./hasher-segments')
 
-module.exports = hashFiles
-async function hashFiles(dir, configPath, opts) {
+const hashFiles = async (dir, configPath, opts) => {
   opts = {
     concurrentHash: 100,
     assetType: 'file',
@@ -29,3 +28,5 @@ async function hashFiles(dir, configPath, opts) {
 
   return { files, filesShaMap }
 }
+
+module.exports = hashFiles
