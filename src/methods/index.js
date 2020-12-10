@@ -1,4 +1,5 @@
-const fetch = require('node-fetch').default || require('node-fetch') // Webpack will sometimes export default exports in different places
+// Webpack will sometimes export default exports in different places
+const fetch = require('node-fetch').default || require('node-fetch')
 
 const { getOperations } = require('../operations')
 

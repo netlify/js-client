@@ -81,7 +81,8 @@ const retryUpload = (uploadFn, maxRetry) =>
         .catch((error) => {
           lastError = error
           switch (true) {
-            case error.status >= 400: // observed errors: 408, 401 (4** swallowed), 502
+            // observed errors: 408, 401 (4** swallowed), 502
+            case error.status >= 400:
             case error.name === 'FetchError': {
               return fibonacciBackoff.backoff()
             }

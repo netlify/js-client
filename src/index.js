@@ -61,7 +61,8 @@ class NetlifyAPI {
 
     const { id } = ticket
 
-    let authorizedTicket // ticket capture
+    // ticket capture
+    let authorizedTicket
     const checkTicket = async () => {
       const t = await this.showTicket({ ticketId: id })
       if (t.authorized) {
