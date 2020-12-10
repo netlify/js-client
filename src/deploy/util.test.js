@@ -62,5 +62,7 @@ test('pass empty name to defaultFilter', (t) => {
       expect: true,
     },
   ]
-  cases.forEach((c) => t.is(defaultFilter(c.input), c.expect))
+  cases.forEach((c) => {
+    t.is(defaultFilter(c.input), c.expect)
+  })
 })

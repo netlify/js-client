@@ -4,7 +4,6 @@ module.exports = {
   extends: '@netlify/eslint-config-node',
   rules: {
     // TODO: enable those rules
-    'array-callback-return': 0,
     complexity: 0,
     'consistent-this': 0,
     'id-length': 0,
