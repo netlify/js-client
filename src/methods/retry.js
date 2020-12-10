@@ -25,7 +25,9 @@ const getDelay = function (response) {
 }
 
 const sleep = function (ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
 }
 
 const DEFAULT_RETRY_DELAY = 5e3

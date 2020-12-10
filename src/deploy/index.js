@@ -10,7 +10,7 @@ const uploadFiles = require('./upload-files')
 const { waitForDiff } = require('./util')
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
-module.exports = async (api, siteId, dir, opts) => {
+const deploySite = async (api, siteId, dir, opts) => {
   opts = {
     fnDir: null,
     configPath: null,
@@ -128,3 +128,5 @@ module.exports = async (api, siteId, dir, opts) => {
   }
   return deployManifest
 }
+
+module.exports = deploySite

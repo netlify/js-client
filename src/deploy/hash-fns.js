@@ -7,8 +7,7 @@ const pump = promisify(require('pump'))
 
 const { hasherCtor, manifestCollectorCtor } = require('./hasher-segments')
 
-module.exports = hashFns
-async function hashFns(dir, opts) {
+const hashFns = async (dir, opts) => {
   opts = {
     concurrentHash: 100,
     assetType: 'function',
@@ -48,3 +47,5 @@ async function hashFns(dir, opts) {
 
   return { functions, fnShaMap }
 }
+
+module.exports = hashFns
