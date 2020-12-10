@@ -13,7 +13,6 @@ module.exports = {
     'no-inline-comments': 0,
     'no-magic-numbers': 0,
     'no-param-reassign': 0,
-    'no-shadow': 0,
     'fp/no-class': 0,
     'fp/no-delete': 0,
     'fp/no-let': 0,

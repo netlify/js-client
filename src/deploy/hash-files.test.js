@@ -10,8 +10,8 @@ test('hashes files in a folder', async (t) => {
     filter: defaultFilter,
   })
   t.truthy(files['netlify.toml'], 'includes the netlify.toml file')
-  Object.keys(files).forEach((path) => {
-    t.truthy(path, 'each file has a path')
+  Object.keys(files).forEach((filePath) => {
+    t.truthy(filePath, 'each file has a path')
   })
   t.truthy(filesShaMap, 'filesShaMap is returned')
   Object.values(filesShaMap).forEach((fileObjArray) => {
