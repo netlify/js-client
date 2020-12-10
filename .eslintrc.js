@@ -28,7 +28,6 @@ module.exports = {
     'promise/prefer-await-to-callbacks': 0,
     'promise/prefer-await-to-then': 0,
     'unicorn/filename-case': 0,
-    'you-dont-need-lodash-underscore/flatten': 0,
   },
   overrides: [...overrides],
 }

@@ -1,6 +1,5 @@
 const path = require('path')
 
-const flatten = require('lodash.flatten')
 const pWaitFor = require('p-wait-for')
 
 // Default filter when scanning for files
@@ -106,7 +105,8 @@ const waitForDeploy = async (api, deployId, siteId, timeout) => {
 // Transform the fileShaMap and fnShaMap into a generic shaMap that file-uploader.js can use
 const getUploadList = (required, shaMap) => {
   if (!required || !shaMap) return []
-  return flatten(required.map((sha) => shaMap[sha]))
+  // TODO: use `Array.flatMap()` instead once we remove support for Node <11.0.0
+  return [].concat(...required.map((sha) => shaMap[sha]))
 }
 
 module.exports = {
