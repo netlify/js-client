@@ -108,4 +108,4 @@ const retryUpload = (uploadFn, maxRetry) =>
     tryUpload(0, 0)
   })
 
-module.exports = { uploadFiles }
+module.exports = uploadFiles
