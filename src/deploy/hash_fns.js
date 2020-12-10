@@ -5,7 +5,7 @@ const zipIt = require('@netlify/zip-it-and-ship-it')
 const fromArray = require('from2-array')
 const pump = promisify(require('pump'))
 
-const { hasherCtor, manifestCollectorCtor } = require('./hasher-segments')
+const { hasherCtor, manifestCollectorCtor } = require('./hasher_segments')
 
 const hashFns = async (dir, opts) => {
   opts = {

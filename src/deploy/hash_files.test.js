@@ -2,7 +2,7 @@ const path = require('path')
 
 const test = require('ava')
 
-const hashFiles = require('./hash-files')
+const hashFiles = require('./hash_files')
 const { defaultFilter } = require('./util')
 
 test('hashes files in a folder', async (t) => {

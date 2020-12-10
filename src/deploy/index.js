@@ -4,9 +4,9 @@ const cleanDeep = require('clean-deep')
 const rimraf = promisify(require('rimraf'))
 const tempy = require('tempy')
 
-const hashFiles = require('./hash-files')
-const hashFns = require('./hash-fns')
-const uploadFiles = require('./upload-files')
+const hashFiles = require('./hash_files')
+const hashFns = require('./hash_fns')
+const uploadFiles = require('./upload_files')
 const { waitForDiff } = require('./util')
 const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
