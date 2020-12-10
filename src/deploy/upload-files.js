@@ -75,22 +75,19 @@ const retryUpload = (uploadFn, maxRetry) =>
       maxDelay: 90000,
     })
 
-    const tryUpload = () => {
-      uploadFn()
-        .then((results) => resolve(results))
-        .catch((error) => {
-          lastError = error
-          switch (true) {
-            // observed errors: 408, 401 (4** swallowed), 502
-            case error.status >= 400:
-            case error.name === 'FetchError': {
-              return fibonacciBackoff.backoff()
-            }
-            default: {
-              return reject(error)
-            }
-          }
-        })
+    const tryUpload = async () => {
+      try {
+        const results = await uploadFn()
+        return resolve(results)
+      } catch (error) {
+        lastError = error
+        // observed errors: 408, 401 (4** swallowed), 502
+        if (error.status >= 400 || error.name === 'FetchError') {
+          fibonacciBackoff.backoff()
+          return
+        }
+        return reject(error)
+      }
     }
 
     fibonacciBackoff.failAfter(maxRetry)

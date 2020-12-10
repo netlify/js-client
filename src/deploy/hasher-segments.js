@@ -10,12 +10,14 @@ const { normalizePath } = require('./util')
 const hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
   const hashaOpts = { algorithm: hashAlgorithm }
   if (!concurrentHash) throw new Error('Missing required opts')
-  return transform(concurrentHash, { objectMode: true }, (fileObj, cb) => {
-    hasha
-      .fromFile(fileObj.filepath, hashaOpts)
+  return transform(concurrentHash, { objectMode: true }, async (fileObj, cb) => {
+    try {
+      const hash = await hasha.fromFile(fileObj.filepath, hashaOpts)
       // insert hash and asset type to file obj
-      .then((hash) => cb(null, { ...fileObj, hash }))
-      .catch((error) => cb(error))
+      return cb(null, { ...fileObj, hash })
+    } catch (error) {
+      return cb(error)
+    }
   })
 }
 
