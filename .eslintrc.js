@@ -6,11 +6,9 @@ module.exports = {
     // TODO: enable those rules
     complexity: 0,
     'id-length': 0,
-    'line-comment-position': 0,
     'max-nested-callbacks': 0,
     'max-statements': 0,
     'no-await-in-loop': 0,
-    'no-inline-comments': 0,
     'no-magic-numbers': 0,
     'no-param-reassign': 0,
     'no-shadow': 0,

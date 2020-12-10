@@ -39,8 +39,10 @@ const hashFns = async (dir, opts) => {
   const hasher = hasherCtor(opts)
 
   // Written to by manifestCollector
-  const functions = {} // normalizedPath: hash (wanted by deploy API)
-  const fnShaMap = {} // hash: [fileObj, fileObj, fileObj]
+  // normalizedPath: hash (wanted by deploy API)
+  const functions = {}
+  // hash: [fileObj, fileObj, fileObj]
+  const fnShaMap = {}
   const manifestCollector = manifestCollectorCtor(functions, fnShaMap, opts)
 
   await pump(functionStream, hasher, manifestCollector)

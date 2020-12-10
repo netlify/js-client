@@ -20,8 +20,10 @@ const hashFiles = async (dir, configPath, opts) => {
   const fileNormalizer = fileNormalizerCtor(opts)
 
   // Written to by manifestCollector
-  const files = {} // normalizedPath: hash (wanted by deploy API)
-  const filesShaMap = {} // hash: [fileObj, fileObj, fileObj]
+  // normalizedPath: hash (wanted by deploy API)
+  const files = {}
+  // hash: [fileObj, fileObj, fileObj]
+  const filesShaMap = {}
   const manifestCollector = manifestCollectorCtor(files, filesShaMap, opts)
 
   await pump(fileStream, filter, hasher, fileNormalizer, manifestCollector)

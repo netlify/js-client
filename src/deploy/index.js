@@ -15,14 +15,20 @@ const deploySite = async (api, siteId, dir, opts) => {
     fnDir: null,
     configPath: null,
     draft: false,
-    message: undefined, // API calls this the 'title'
+    // API calls this the 'title'
+    message: undefined,
     tmpDir: tempy.directory(),
-    deployTimeout: 1.2e6, // local deploy timeout: 20 mins
-    concurrentHash: 100, // concurrent file hash calls
-    concurrentUpload: 5, // Number of concurrent uploads
+    // local deploy timeout: 20 mins
+    deployTimeout: 1.2e6,
+    // concurrent file hash calls
+    concurrentHash: 100,
+    // Number of concurrent uploads
+    concurrentUpload: 5,
     filter: defaultFilter,
-    syncFileLimit: 100, // number of files
-    maxRetry: 5, // number of times to retry an upload
+    // number of files
+    syncFileLimit: 100,
+    // number of times to retry an upload
+    maxRetry: 5,
     statusCb: () => {
       /* default to noop */
       // statusObj: {

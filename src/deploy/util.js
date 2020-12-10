@@ -31,7 +31,8 @@ const normalizePath = (relname) => {
 
 // poll an async deployId until its done diffing
 const waitForDiff = async (api, deployId, siteId, timeout) => {
-  let deploy // capture ready deploy during poll
+  // capture ready deploy during poll
+  let deploy
 
   const loadDeploy = async () => {
     const d = await api.getSiteDeploy({ siteId, deployId })
@@ -68,7 +69,8 @@ const waitForDiff = async (api, deployId, siteId, timeout) => {
 
 // Poll a deployId until its ready
 const waitForDeploy = async (api, deployId, siteId, timeout) => {
-  let deploy // capture ready deploy during poll
+  // capture ready deploy during poll
+  let deploy
 
   const loadDeploy = async () => {
     const d = await api.getSiteDeploy({ siteId, deployId })
