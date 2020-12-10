@@ -20,7 +20,6 @@ module.exports = {
     'fp/no-mutation': 0,
     'fp/no-this': 0,
     'node/global-require': 0,
-    'node/prefer-global/process': 0,
     'promise/no-callback-in-promise': 0,
     'promise/prefer-await-to-callbacks': 0,
     'promise/prefer-await-to-then': 0,
