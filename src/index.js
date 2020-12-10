@@ -59,13 +59,11 @@ class NetlifyAPI {
   async getAccessToken(ticket, opts) {
     opts = { poll: 1000, timeout: 3.6e6, ...opts }
 
-    const api = this
-
     const { id } = ticket
 
     let authorizedTicket // ticket capture
     const checkTicket = async () => {
-      const t = await api.showTicket({ ticketId: id })
+      const t = await this.showTicket({ ticketId: id })
       if (t.authorized) {
         authorizedTicket = t
       }
@@ -78,7 +76,7 @@ class NetlifyAPI {
       message: 'Timeout while waiting for ticket grant',
     })
 
-    const accessTokenResponse = await api.exchangeTicket({ ticketId: authorizedTicket.id })
+    const accessTokenResponse = await this.exchangeTicket({ ticketId: authorizedTicket.id })
     // See https://open-api.netlify.com/#/default/exchangeTicket for shape
     this.accessToken = accessTokenResponse.access_token
     return accessTokenResponse.access_token
