@@ -38,7 +38,7 @@ const parseJsonResponse = function (response, textResponse, responseType) {
 }
 
 const getFetchError = function (error, url, opts) {
-  const data = Object.assign({}, opts)
+  const data = { ...opts }
   delete data.Authorization
   Object.assign(error, { name: 'FetchError', url, data })
   return error

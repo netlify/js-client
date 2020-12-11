@@ -1,4 +1,5 @@
-const fetch = require('node-fetch').default || require('node-fetch') // Webpack will sometimes export default exports in different places
+// Webpack will sometimes export default exports in different places
+const fetch = require('node-fetch').default || require('node-fetch')
 const parseLinkHeader = require('parse-link-header')
 
 const { getOperations } = require('../operations')
@@ -31,7 +32,6 @@ const getMethod = function (method, NetlifyApi) {
 
 const callMethod = async function (method, NetlifyApi, params, opts) {
   const { exhaustive = false } = opts || {}
-  const requestParams = Object.assign({}, NetlifyApi.globalParams, params)
   const url = getUrl(method, NetlifyApi, requestParams)
   const { parsedResponse, headers } = await retrieveResponse({ url, method, NetlifyApi, requestParams, opts })
   if (!exhaustive || !Array.isArray(parsedResponse)) {
@@ -95,23 +95,20 @@ const getOpts = function ({ verb, parameters }, NetlifyApi, { body }, opts) {
 
 // Add the HTTP method based on the OpenAPI definition
 const addHttpMethod = function (verb, opts) {
-  return Object.assign({}, opts, { method: verb.toUpperCase() })
+  return { ...opts, method: verb.toUpperCase() }
 }
 
 // Assign default HTTP headers
 const addDefaultHeaders = function (NetlifyApi, opts) {
-  return Object.assign({}, opts, {
-    headers: Object.assign({}, NetlifyApi.defaultHeaders, opts.headers),
-  })
+  return { ...opts, headers: { ...NetlifyApi.defaultHeaders, ...opts.headers } }
 }
 
 // Assign fetch agent (like for example HttpsProxyAgent) if there is one
 const addAgent = function (NetlifyApi, opts) {
   if (NetlifyApi.agent) {
-    return Object.assign({}, opts, { agent: NetlifyApi.agent })
-  } else {
-    return opts
+    return { ...opts, agent: NetlifyApi.agent }
   }
+  return opts
 }
 
 const makeRequestOrRetry = async function ({ url, method, NetlifyApi, requestParams, opts }) {

@@ -1,10 +1,9 @@
 const path = require('path')
 
-const flatten = require('lodash.flatten')
 const pWaitFor = require('p-wait-for')
 
 // Default filter when scanning for files
-exports.defaultFilter = (filename) => {
+const defaultFilter = (filename) => {
   if (filename == null) return false
   const n = path.basename(filename)
   switch (true) {
@@ -18,7 +17,7 @@ exports.defaultFilter = (filename) => {
 }
 
 // normalize windows paths to unix paths
-exports.normalizePath = (relname) => {
+const normalizePath = (relname) => {
   if (relname.includes('#') || relname.includes('?')) {
     throw new Error(`Invalid filename ${relname}. Deployed filenames cannot contain # or ? characters`)
   }
@@ -30,20 +29,12 @@ exports.normalizePath = (relname) => {
   )
 }
 
-exports.waitForDiff = waitForDiff
 // poll an async deployId until its done diffing
-async function waitForDiff(api, deployId, siteId, timeout) {
-  let deploy // capture ready deploy during poll
+const waitForDiff = async (api, deployId, siteId, timeout) => {
+  // capture ready deploy during poll
+  let deploy
 
-  await pWaitFor(loadDeploy, {
-    interval: 1000,
-    timeout,
-    message: 'Timeout while waiting for deploy',
-  })
-
-  return deploy
-
-  async function loadDeploy() {
+  const loadDeploy = async () => {
     const d = await api.getSiteDeploy({ siteId, deployId })
 
     switch (d.state) {
@@ -66,22 +57,22 @@ async function waitForDiff(api, deployId, siteId, timeout) {
       }
     }
   }
+
+  await pWaitFor(loadDeploy, {
+    interval: 1000,
+    timeout,
+    message: 'Timeout while waiting for deploy',
+  })
+
+  return deploy
 }
 
 // Poll a deployId until its ready
-exports.waitForDeploy = waitForDeploy
-async function waitForDeploy(api, deployId, siteId, timeout) {
-  let deploy // capture ready deploy during poll
+const waitForDeploy = async (api, deployId, siteId, timeout) => {
+  // capture ready deploy during poll
+  let deploy
 
-  await pWaitFor(loadDeploy, {
-    interval: 1000,
-    timeout,
-    message: 'Timeout while waiting for deploy',
-  })
-
-  return deploy
-
-  async function loadDeploy() {
+  const loadDeploy = async () => {
     const d = await api.getSiteDeploy({ siteId, deployId })
     switch (d.state) {
       // https://github.com/netlify/bitballoon/blob/master/app/models/deploy.rb#L21-L33
@@ -103,12 +94,27 @@ async function waitForDeploy(api, deployId, siteId, timeout) {
       }
     }
   }
+
+  await pWaitFor(loadDeploy, {
+    interval: 1000,
+    timeout,
+    message: 'Timeout while waiting for deploy',
+  })
+
+  return deploy
 }
 
 // Transform the fileShaMap and fnShaMap into a generic shaMap that file-uploader.js can use
-exports.getUploadList = function (required, shaMap) {
+const getUploadList = (required, shaMap) => {
   if (!required || !shaMap) return []
-  return flatten(required.map((sha) => shaMap[sha]))
+  // TODO: use `Array.flatMap()` instead once we remove support for Node <11.0.0
+  return [].concat(...required.map((sha) => shaMap[sha]))
 }
 
-exports.retry = async () => {}
+module.exports = {
+  defaultFilter,
+  normalizePath,
+  waitForDiff,
+  waitForDeploy,
+  getUploadList,
+}

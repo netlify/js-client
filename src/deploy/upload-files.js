@@ -3,8 +3,7 @@ const fs = require('fs')
 const backoff = require('backoff')
 const pMap = require('p-map')
 
-module.exports = uploadFiles
-async function uploadFiles(api, deployId, uploadList, { concurrentUpload, statusCb, maxRetry }) {
+const uploadFiles = async (api, deployId, uploadList, { concurrentUpload, statusCb, maxRetry }) => {
   if (!concurrentUpload || !statusCb || !maxRetry) throw new Error('Missing required option concurrentUpload')
   statusCb({
     type: 'upload',
@@ -31,7 +30,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
               deployId,
               path: encodeURI(normalizedPath),
             }),
-          maxRetry
+          maxRetry,
         )
         break
       }
@@ -44,7 +43,7 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
               name: encodeURI(normalizedPath),
               runtime,
             }),
-          maxRetry
+          maxRetry,
         )
         break
       }
@@ -67,14 +66,30 @@ async function uploadFiles(api, deployId, uploadList, { concurrentUpload, status
   return results
 }
 
-function retryUpload(uploadFn, maxRetry) {
-  return new Promise((resolve, reject) => {
+const retryUpload = (uploadFn, maxRetry) =>
+  new Promise((resolve, reject) => {
     let lastError
     const fibonacciBackoff = backoff.fibonacci({
       randomisationFactor: 0.5,
       initialDelay: 5000,
       maxDelay: 90000,
     })
+
+    const tryUpload = async () => {
+      try {
+        const results = await uploadFn()
+        return resolve(results)
+      } catch (error) {
+        lastError = error
+        // observed errors: 408, 401 (4** swallowed), 502
+        if (error.status >= 400 || error.name === 'FetchError') {
+          fibonacciBackoff.backoff()
+          return
+        }
+        return reject(error)
+      }
+    }
+
     fibonacciBackoff.failAfter(maxRetry)
 
     fibonacciBackoff.on('backoff', () => {
@@ -88,23 +103,7 @@ function retryUpload(uploadFn, maxRetry) {
       reject(lastError)
     })
 
-    function tryUpload() {
-      uploadFn()
-        .then((results) => resolve(results))
-        .catch((e) => {
-          lastError = e
-          switch (true) {
-            case e.status >= 400: // observed errors: 408, 401 (4** swallowed), 502
-            case e.name === 'FetchError': {
-              return fibonacciBackoff.backoff()
-            }
-            default: {
-              return reject(e)
-            }
-          }
-        })
-    }
-
     tryUpload(0, 0)
   })
-}
+
+module.exports = uploadFiles

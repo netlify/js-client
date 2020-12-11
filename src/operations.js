@@ -9,9 +9,9 @@ const getOperations = function () {
       const operations = omit(pathItem, ['parameters'])
       return Object.entries(operations).map(([method, operation]) => {
         const parameters = getParameters(pathItem.parameters, operation.parameters)
-        return Object.assign({}, operation, { verb: method, path, parameters })
+        return { ...operation, verb: method, path, parameters }
       })
-    })
+    }),
   )
 }
 
@@ -21,9 +21,7 @@ const getParameters = function (pathParameters = [], operationParameters = []) {
 }
 
 const addParameter = function (parameters, param) {
-  return Object.assign({}, parameters, {
-    [param.in]: Object.assign({}, parameters[param.in], { [param.name]: param }),
-  })
+  return { ...parameters, [param.in]: { ...parameters[param.in], [param.name]: param } }
 }
 
 module.exports = { getOperations }

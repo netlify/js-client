@@ -17,17 +17,15 @@ class NetlifyAPI {
       accessToken = null
     }
     // default opts
-    opts = Object.assign(
-      {
-        userAgent: 'netlify/js-client',
-        scheme: dfn.schemes[0],
-        host: dfn.host,
-        pathPrefix: dfn.basePath,
-        accessToken,
-        globalParams: {},
-      },
-      opts
-    )
+    opts = {
+      userAgent: 'netlify/js-client',
+      scheme: dfn.schemes[0],
+      host: dfn.host,
+      pathPrefix: dfn.basePath,
+      accessToken,
+      globalParams: {},
+      ...opts,
+    }
 
     this.defaultHeaders = {
       'User-agent': opts.userAgent,
@@ -48,7 +46,7 @@ class NetlifyAPI {
 
   set accessToken(token) {
     if (token) {
-      set(this, 'defaultHeaders.Authorization', 'Bearer ' + token)
+      set(this, 'defaultHeaders.Authorization', `Bearer ${token}`)
     } else {
       delete this.defaultHeaders.Authorization
     }
@@ -59,19 +57,18 @@ class NetlifyAPI {
   }
 
   async getAccessToken(ticket, opts) {
-    opts = Object.assign({ poll: 1000, timeout: 3.6e6 }, opts)
-
-    const api = this
+    opts = { poll: 1000, timeout: 3.6e6, ...opts }
 
     const { id } = ticket
 
-    let authorizedTicket // ticket capture
+    // ticket capture
+    let authorizedTicket
     const checkTicket = async () => {
-      const t = await api.showTicket({ ticketId: id })
+      const t = await this.showTicket({ ticketId: id })
       if (t.authorized) {
         authorizedTicket = t
       }
-      return !!t.authorized
+      return Boolean(t.authorized)
     }
 
     await pWaitFor(checkTicket, {
@@ -80,7 +77,7 @@ class NetlifyAPI {
       message: 'Timeout while waiting for ticket grant',
     })
 
-    const accessTokenResponse = await api.exchangeTicket({ ticketId: authorizedTicket.id })
+    const accessTokenResponse = await this.exchangeTicket({ ticketId: authorizedTicket.id })
     // See https://open-api.netlify.com/#/default/exchangeTicket for shape
     this.accessToken = accessTokenResponse.access_token
     return accessTokenResponse.access_token
