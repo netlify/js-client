@@ -1,19 +1,20 @@
-const path = require('path')
+const { basename, sep } = require('path')
 
 const pWaitFor = require('p-wait-for')
 
 // Default filter when scanning for files
 const defaultFilter = (filePath) => {
-  if (filePath == null) return false
-  const filename = path.basename(filePath)
-  switch (true) {
-    case filename === 'node_modules':
-    case filename.startsWith('.') && filename !== '.well-known':
-    case filename.match(/(\/__MACOSX|\/\.)/):
-      return false
-    default:
-      return true
+  if (filePath == null) {
+    return false
   }
+
+  const filename = basename(filePath)
+  return (
+    filename !== 'node_modules' &&
+    !(filename.startsWith('.') && filename !== '.well-known') &&
+    !filename.includes('/__MACOSX') &&
+    !filename.includes('/.')
+  )
 }
 
 // normalize windows paths to unix paths
@@ -23,7 +24,7 @@ const normalizePath = (relname) => {
   }
   return (
     relname
-      .split(path.sep)
+      .split(sep)
       // .map(segment => encodeURI(segment)) // TODO I'm fairly certain we shouldn't encodeURI here, thats only for the file upload step
       .join('/')
   )

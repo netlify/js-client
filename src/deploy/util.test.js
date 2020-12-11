@@ -16,38 +16,16 @@ test('normalizePath should throw the error if name is invalid', (t) => {
   t.throws(() => normalizePath('#'))
 })
 
-test('pass empty name to defaultFilter', (t) => {
-  const cases = [
-    {
-      input: null,
-      expect: false,
-    },
-    {
-      input: undefined,
-      expect: false,
-    },
-    {
-      input: 'foo/bar/baz.js',
-      expect: true,
-    },
-    {
-      input: 'directory/node_modules',
-      expect: false,
-    },
-    {
-      input: 'directory/.gitignore',
-      expect: false,
-    },
-    {
-      input: 'directory/.well-known',
-      expect: true,
-    },
-    {
-      input: '__MACOSX',
-      expect: true,
-    },
-  ]
-  cases.forEach(({ input, expect }) => {
-    t.is(defaultFilter(input), expect)
+const filteredFiles = ['foo/bar/baz.js', 'directory/.well-known', '__MACOSX']
+filteredFiles.forEach((filePath) => {
+  test(`filters ${filePath}`, (t) => {
+    t.true(defaultFilter(filePath))
+  })
+})
+
+const unfilteredFiles = [null, undefined, 'directory/node_modules', 'directory/.gitignore']
+unfilteredFiles.forEach((filePath) => {
+  test(`does not filter ${filePath}`, (t) => {
+    t.false(defaultFilter(filePath))
   })
 })
