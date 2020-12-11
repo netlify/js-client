@@ -12,7 +12,6 @@ module.exports = {
     'no-magic-numbers': 0,
     'no-param-reassign': 0,
     'fp/no-class': 0,
-    'fp/no-delete': 0,
     'fp/no-let': 0,
     'fp/no-loops': 0,
     'fp/no-mutating-assign': 0,

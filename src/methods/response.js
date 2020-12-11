@@ -1,4 +1,5 @@
 const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
+const omit = require('omit.js').default
 
 // Read and parse the HTTP response
 const parseResponse = async function (response) {
@@ -38,8 +39,7 @@ const parseJsonResponse = function (response, textResponse, responseType) {
 }
 
 const getFetchError = function (error, url, opts) {
-  const data = { ...opts }
-  delete data.Authorization
+  const data = omit(opts, ['Authorization'])
   Object.assign(error, { name: 'FetchError', url, data })
   return error
 }
