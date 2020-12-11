@@ -3,13 +3,13 @@ const path = require('path')
 const pWaitFor = require('p-wait-for')
 
 // Default filter when scanning for files
-const defaultFilter = (filename) => {
-  if (filename == null) return false
-  const n = path.basename(filename)
+const defaultFilter = (filePath) => {
+  if (filePath == null) return false
+  const filename = path.basename(filePath)
   switch (true) {
-    case n === 'node_modules':
-    case n.startsWith('.') && n !== '.well-known':
-    case n.match(/(\/__MACOSX|\/\.)/):
+    case filename === 'node_modules':
+    case filename.startsWith('.') && filename !== '.well-known':
+    case filename.match(/(\/__MACOSX|\/\.)/):
       return false
     default:
       return true
@@ -35,20 +35,20 @@ const waitForDiff = async (api, deployId, siteId, timeout) => {
   let deploy
 
   const loadDeploy = async () => {
-    const d = await api.getSiteDeploy({ siteId, deployId })
+    const siteDeploy = await api.getSiteDeploy({ siteId, deployId })
 
-    switch (d.state) {
+    switch (siteDeploy.state) {
       // https://github.com/netlify/bitballoon/blob/master/app/models/deploy.rb#L21-L33
       case 'error': {
         const deployError = new Error(`Deploy ${deployId} had an error`)
-        deployError.deploy = d
+        deployError.deploy = siteDeploy
         throw deployError
       }
       case 'prepared':
       case 'uploading':
       case 'uploaded':
       case 'ready': {
-        deploy = d
+        deploy = siteDeploy
         return true
       }
       case 'preparing':
@@ -73,16 +73,16 @@ const waitForDeploy = async (api, deployId, siteId, timeout) => {
   let deploy
 
   const loadDeploy = async () => {
-    const d = await api.getSiteDeploy({ siteId, deployId })
-    switch (d.state) {
+    const siteDeploy = await api.getSiteDeploy({ siteId, deployId })
+    switch (siteDeploy.state) {
       // https://github.com/netlify/bitballoon/blob/master/app/models/deploy.rb#L21-L33
       case 'error': {
         const deployError = new Error(`Deploy ${deployId} had an error`)
-        deployError.deploy = d
+        deployError.deploy = siteDeploy
         throw deployError
       }
       case 'ready': {
-        deploy = d
+        deploy = siteDeploy
         return true
       }
       case 'preparing':

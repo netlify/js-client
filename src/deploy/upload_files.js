@@ -48,9 +48,9 @@ const uploadFiles = async (api, deployId, uploadList, { concurrentUpload, status
         break
       }
       default: {
-        const e = new Error('File Object missing assetType property')
-        e.fileObj = fileObj
-        throw e
+        const error = new Error('File Object missing assetType property')
+        error.fileObj = fileObj
+        throw error
       }
     }
 
