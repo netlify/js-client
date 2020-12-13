@@ -1,6 +1,4 @@
 const dfn = require('@netlify/open-api')
-const get = require('lodash.get')
-const set = require('lodash.set')
 const pWaitFor = require('p-wait-for')
 
 const deploy = require('./deploy')
@@ -41,15 +39,24 @@ class NetlifyAPI {
   }
 
   get accessToken() {
-    return (get(this, 'defaultHeaders.Authorization') || '').replace('Bearer ', '') || null
+    const {
+      defaultHeaders: { Authorization },
+    } = this
+    if (typeof Authorization !== 'string' || !Authorization.startsWith('Bearer ')) {
+      return null
+    }
+
+    return Authorization.replace('Bearer ', '')
   }
 
   set accessToken(token) {
-    if (token) {
-      set(this, 'defaultHeaders.Authorization', `Bearer ${token}`)
-    } else {
+    if (!token) {
+      // eslint-disable-next-line fp/no-delete
       delete this.defaultHeaders.Authorization
+      return
     }
+
+    this.defaultHeaders.Authorization = `Bearer ${token}`
   }
 
   get basePath() {
