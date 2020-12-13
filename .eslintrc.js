@@ -22,7 +22,6 @@ module.exports = {
     'node/global-require': 0,
     'promise/no-callback-in-promise': 0,
     'promise/prefer-await-to-callbacks': 0,
-    'unicorn/filename-case': 0,
   },
   overrides: [...overrides],
 }
