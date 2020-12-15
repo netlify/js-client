@@ -3,11 +3,12 @@ const { promisify } = require('util')
 const walker = require('folder-walker')
 const pump = promisify(require('pump'))
 
+const { DEFAULT_CONCURRENT_HASH } = require('./constants')
 const { hasherCtor, manifestCollectorCtor, fileFilterCtor, fileNormalizerCtor } = require('./hasher_segments')
 
 const hashFiles = async (dir, configPath, opts) => {
   opts = {
-    concurrentHash: 100,
+    concurrentHash: DEFAULT_CONCURRENT_HASH,
     assetType: 'file',
     statusCb: () => {},
     ...opts,

@@ -64,7 +64,7 @@ class NetlifyAPI {
   }
 
   async getAccessToken(ticket, opts) {
-    opts = { poll: 1000, timeout: 3.6e6, ...opts }
+    opts = { poll: DEFAULT_TICKET_POLL, timeout: DEFAULT_TICKET_TIMEOUT, ...opts }
 
     const { id } = ticket
 
@@ -97,6 +97,11 @@ class NetlifyAPI {
     return await deploy(this, siteId, buildDir, opts)
   }
 }
+
+// 1 second
+const DEFAULT_TICKET_POLL = 1e3
+// 1 hour
+const DEFAULT_TICKET_TIMEOUT = 3.6e6
 
 module.exports = NetlifyAPI
 
