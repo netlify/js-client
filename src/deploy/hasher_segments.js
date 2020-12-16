@@ -1,4 +1,4 @@
-const objWriter = require('flush-write-stream').obj
+const flushWriteStream = require('flush-write-stream')
 const hasha = require('hasha')
 const transform = require('parallel-transform')
 const objFilterCtor = require('through2-filter').objCtor
@@ -28,13 +28,14 @@ const fileNormalizerCtor = ({ assetType = 'file' }) =>
 // A writable stream segment ctor that normalizes file paths, and writes shaMap's
 const manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
   if (!statusCb || !assetType) throw new Error('Missing required options')
-  return objWriter((fileObj, _, cb) => {
+  return flushWriteStream.obj((fileObj, _, cb) => {
     filesObj[fileObj.normalizedPath] = fileObj.hash
 
     // We map a hash to multiple fileObj's because the same file
     // might live in two different locations
 
     if (Array.isArray(shaMap[fileObj.hash])) {
+      // eslint-disable-next-line fp/no-mutating-methods
       shaMap[fileObj.hash].push(fileObj)
     } else {
       shaMap[fileObj.hash] = [fileObj]

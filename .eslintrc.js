@@ -12,7 +12,6 @@ module.exports = {
     'fp/no-class': 0,
     'fp/no-let': 0,
     'fp/no-loops': 0,
-    'fp/no-mutating-methods': 0,
     'fp/no-mutation': 0,
     'fp/no-this': 0,
     'promise/no-callback-in-promise': 0,
