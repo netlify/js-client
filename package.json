@@ -39,6 +39,7 @@
   },
   "husky": {
     "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
       "pre-push": "npm run format"
     }
   },
@@ -92,7 +93,7 @@
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "@babel/runtime": "^7.9.2",
-    "@netlify/eslint-config-node": "^2.0.1",
+    "@netlify/eslint-config-node": "^2.1.0",
     "auto-changelog": "^2.0.0",
     "ava": "^2.4.0",
     "babel-loader": "^8.1.0",
