@@ -40,7 +40,9 @@ const parseJsonResponse = function (response, textResponse, responseType) {
 
 const getFetchError = function (error, url, opts) {
   const data = omit(opts, ['Authorization'])
-  Object.assign(error, { name: 'FetchError', url, data })
+  error.name = 'FetchError'
+  error.url = url
+  error.data = data
   return error
 }
 

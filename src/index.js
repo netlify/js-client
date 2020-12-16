@@ -2,13 +2,11 @@ const dfn = require('@netlify/open-api')
 const pWaitFor = require('p-wait-for')
 
 const deploy = require('./deploy')
-const { addMethods } = require('./methods')
+const { getMethods } = require('./methods')
 const { getOperations } = require('./operations')
 
 class NetlifyAPI {
   constructor(accessToken, opts) {
-    addMethods(this)
-
     // variadic arguments
     if (typeof accessToken === 'object') {
       opts = accessToken
@@ -36,6 +34,10 @@ class NetlifyAPI {
     this.globalParams = opts.globalParams
     this.accessToken = opts.accessToken
     this.agent = opts.agent
+
+    const methods = getMethods(this)
+    // eslint-disable-next-line fp/no-mutating-assign
+    Object.assign(this, methods)
   }
 
   get accessToken() {

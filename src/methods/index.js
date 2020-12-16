@@ -11,39 +11,34 @@ const { getUrl } = require('./url.js')
 
 // For each OpenAPI operation, add a corresponding method.
 // The `operationId` is the method name.
-const addMethods = function (NetlifyApi) {
-  const methods = getMethods(NetlifyApi)
-  Object.assign(NetlifyApi, methods)
-}
-
-const getMethods = function (NetlifyApi) {
+const getMethods = function ({ basePath, defaultHeaders, agent, globalParams }) {
   const operations = getOperations()
-  const methods = operations.map((method) => getMethod(method, NetlifyApi))
+  const methods = operations.map((method) => getMethod({ method, basePath, defaultHeaders, agent, globalParams }))
   return Object.assign({}, ...methods)
 }
 
-const getMethod = function (method, NetlifyApi) {
+const getMethod = function ({ method, basePath, defaultHeaders, agent, globalParams }) {
   return {
     [method.operationId](params, opts) {
-      return callMethod(method, NetlifyApi, params, opts)
+      return callMethod({ method, basePath, defaultHeaders, agent, globalParams, params, opts })
     },
   }
 }
 
-const callMethod = async function (method, NetlifyApi, params, opts) {
-  const requestParams = { ...NetlifyApi.globalParams, ...params }
-  const url = getUrl(method, NetlifyApi, requestParams)
-  const response = await makeRequestOrRetry({ url, method, NetlifyApi, requestParams, opts })
+const callMethod = async function ({ method, basePath, defaultHeaders, agent, globalParams, params, opts }) {
+  const requestParams = { ...globalParams, ...params }
+  const url = getUrl(method, basePath, requestParams)
+  const response = await makeRequestOrRetry({ url, method, defaultHeaders, agent, requestParams, opts })
 
   const parsedResponse = await parseResponse(response)
   return parsedResponse
 }
 
-const getOpts = function ({ verb, parameters }, NetlifyApi, { body }, opts) {
+const getOpts = function ({ method: { verb, parameters }, defaultHeaders, agent, requestParams: { body }, opts }) {
   const optsA = addHttpMethod(verb, opts)
-  const optsB = addDefaultHeaders(NetlifyApi, optsA)
+  const optsB = addDefaultHeaders(defaultHeaders, optsA)
   const optsC = addBody(body, parameters, optsB)
-  const optsD = addAgent(NetlifyApi, optsC)
+  const optsD = addAgent(agent, optsC)
   return optsD
 }
 
@@ -53,21 +48,21 @@ const addHttpMethod = function (verb, opts) {
 }
 
 // Assign default HTTP headers
-const addDefaultHeaders = function (NetlifyApi, opts) {
-  return { ...opts, headers: { ...NetlifyApi.defaultHeaders, ...opts.headers } }
+const addDefaultHeaders = function (defaultHeaders, opts) {
+  return { ...opts, headers: { ...defaultHeaders, ...opts.headers } }
 }
 
 // Assign fetch agent (like for example HttpsProxyAgent) if there is one
-const addAgent = function (NetlifyApi, opts) {
-  if (NetlifyApi.agent) {
-    return { ...opts, agent: NetlifyApi.agent }
+const addAgent = function (agent, opts) {
+  if (agent) {
+    return { ...opts, agent }
   }
   return opts
 }
 
-const makeRequestOrRetry = async function ({ url, method, NetlifyApi, requestParams, opts }) {
+const makeRequestOrRetry = async function ({ url, method, defaultHeaders, agent, requestParams, opts }) {
   for (let index = 0; index <= MAX_RETRY; index++) {
-    const optsA = getOpts(method, NetlifyApi, requestParams, opts)
+    const optsA = getOpts({ method, defaultHeaders, agent, requestParams, opts })
     const { response, error } = await makeRequest(url, optsA)
 
     if (shouldRetry({ response, error }) && index !== MAX_RETRY) {
@@ -93,4 +88,4 @@ const makeRequest = async function (url, opts) {
   }
 }
 
-module.exports = { addMethods }
+module.exports = { getMethods }
