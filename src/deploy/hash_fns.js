@@ -5,11 +5,12 @@ const zipIt = require('@netlify/zip-it-and-ship-it')
 const fromArray = require('from2-array')
 const pump = promisify(require('pump'))
 
+const { DEFAULT_CONCURRENT_HASH } = require('./constants')
 const { hasherCtor, manifestCollectorCtor } = require('./hasher_segments')
 
 const hashFns = async (dir, opts) => {
   opts = {
-    concurrentHash: 100,
+    concurrentHash: DEFAULT_CONCURRENT_HASH,
     assetType: 'function',
     hashAlgorithm: 'sha256',
     // tmpDir,

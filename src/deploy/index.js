@@ -4,11 +4,17 @@ const cleanDeep = require('clean-deep')
 const rimraf = promisify(require('rimraf'))
 const tempy = require('tempy')
 
+const {
+  DEFAULT_DEPLOY_TIMEOUT,
+  DEFAULT_CONCURRENT_HASH,
+  DEFAULT_CONCURRENT_UPLOAD,
+  DEFAULT_SYNC_LIMIT,
+  DEFAULT_MAX_RETRY,
+} = require('./constants')
 const hashFiles = require('./hash_files')
 const hashFns = require('./hash_fns')
 const uploadFiles = require('./upload_files')
-const { waitForDiff } = require('./util')
-const { waitForDeploy, getUploadList, defaultFilter } = require('./util')
+const { waitForDiff, waitForDeploy, getUploadList, defaultFilter } = require('./util')
 
 const deploySite = async (api, siteId, dir, opts) => {
   opts = {
@@ -18,17 +24,12 @@ const deploySite = async (api, siteId, dir, opts) => {
     // API calls this the 'title'
     message: undefined,
     tmpDir: tempy.directory(),
-    // local deploy timeout: 20 mins
-    deployTimeout: 1.2e6,
-    // concurrent file hash calls
-    concurrentHash: 100,
-    // Number of concurrent uploads
-    concurrentUpload: 5,
+    deployTimeout: DEFAULT_DEPLOY_TIMEOUT,
+    concurrentHash: DEFAULT_CONCURRENT_HASH,
+    concurrentUpload: DEFAULT_CONCURRENT_UPLOAD,
     filter: defaultFilter,
-    // number of files
-    syncFileLimit: 100,
-    // number of times to retry an upload
-    maxRetry: 5,
+    syncFileLimit: DEFAULT_SYNC_LIMIT,
+    maxRetry: DEFAULT_MAX_RETRY,
     statusCb: () => {
       /* default to noop */
       // statusObj: {

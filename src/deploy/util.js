@@ -2,6 +2,8 @@ const { basename, sep } = require('path')
 
 const pWaitFor = require('p-wait-for')
 
+const { DEPLOY_POLL } = require('./constants')
+
 // Default filter when scanning for files
 const defaultFilter = (filePath) => {
   if (filePath == null) {
@@ -60,7 +62,7 @@ const waitForDiff = async (api, deployId, siteId, timeout) => {
   }
 
   await pWaitFor(loadDeploy, {
-    interval: 1000,
+    interval: DEPLOY_POLL,
     timeout,
     message: 'Timeout while waiting for deploy',
   })
@@ -97,7 +99,7 @@ const waitForDeploy = async (api, deployId, siteId, timeout) => {
   }
 
   await pWaitFor(loadDeploy, {
-    interval: 1000,
+    interval: DEPLOY_POLL,
     timeout,
     message: 'Timeout while waiting for deploy',
   })

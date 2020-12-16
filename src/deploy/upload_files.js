@@ -3,6 +3,8 @@ const fs = require('fs')
 const backoff = require('backoff')
 const pMap = require('p-map')
 
+const { UPLOAD_RANDOM_FACTOR, UPLOAD_INITIAL_DELAY, UPLOAD_MAX_DELAY } = require('./constants')
+
 const uploadFiles = async (api, deployId, uploadList, { concurrentUpload, statusCb, maxRetry }) => {
   if (!concurrentUpload || !statusCb || !maxRetry) throw new Error('Missing required option concurrentUpload')
   statusCb({
@@ -70,9 +72,9 @@ const retryUpload = (uploadFn, maxRetry) =>
   new Promise((resolve, reject) => {
     let lastError
     const fibonacciBackoff = backoff.fibonacci({
-      randomisationFactor: 0.5,
-      initialDelay: 5000,
-      maxDelay: 90000,
+      randomisationFactor: UPLOAD_RANDOM_FACTOR,
+      initialDelay: UPLOAD_INITIAL_DELAY,
+      maxDelay: UPLOAD_MAX_DELAY,
     })
 
     const tryUpload = async () => {
