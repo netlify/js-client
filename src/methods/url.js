@@ -3,8 +3,8 @@ const queryString = require('qs')
 
 // Replace path parameters and query parameters in the URI, using the OpenAPI
 // definition
-const getUrl = function ({ path, parameters }, NetlifyApi, requestParams) {
-  const url = `${NetlifyApi.basePath}${path}`
+const getUrl = function ({ path, parameters }, basePath, requestParams) {
+  const url = `${basePath}${path}`
   const urlA = addPathParams(url, parameters, requestParams)
   const urlB = addQueryParams(urlA, parameters, requestParams)
   return urlB
