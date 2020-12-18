@@ -7,7 +7,6 @@ module.exports = {
     complexity: 0,
     'max-statements': 0,
     'fp/no-let': 0,
-    'fp/no-loops': 0,
     'fp/no-mutation': 0,
     'promise/prefer-await-to-callbacks': 0,
   },

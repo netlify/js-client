@@ -61,6 +61,8 @@ const addAgent = function (agent, opts) {
 }
 
 const makeRequestOrRetry = async function ({ url, method, defaultHeaders, agent, requestParams, opts }) {
+  // Using a loop is simpler here
+  // eslint-disable-next-line fp/no-loops
   for (let index = 0; index <= MAX_RETRY; index++) {
     const optsA = getOpts({ method, defaultHeaders, agent, requestParams, opts })
     // eslint-disable-next-line no-await-in-loop
