@@ -7,6 +7,8 @@ const map = require('through2-map').obj
 const { normalizePath } = require('./util')
 
 // a parallel transform stream segment ctor that hashes fileObj's created by folder-walker
+// TODO: use promises instead of callbacks
+/* eslint-disable promise/prefer-await-to-callbacks */
 const hasherCtor = ({ concurrentHash, hashAlgorithm }) => {
   const hashaOpts = { algorithm: hashAlgorithm }
   if (!concurrentHash) throw new Error('Missing required opts')
@@ -50,6 +52,7 @@ const manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
     cb(null)
   })
 }
+/* eslint-enable promise/prefer-await-to-callbacks */
 
 // transform stream ctor that filters folder-walker results for only files
 const fileFilterCtor = objFilterCtor((fileObj) => fileObj.type === 'file')
