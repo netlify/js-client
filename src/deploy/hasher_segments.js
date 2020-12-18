@@ -7,7 +7,7 @@ const map = require('through2-map').obj
 const { normalizePath } = require('./util')
 
 // a parallel transform stream segment ctor that hashes fileObj's created by folder-walker
-const hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
+const hasherCtor = ({ concurrentHash, hashAlgorithm }) => {
   const hashaOpts = { algorithm: hashAlgorithm }
   if (!concurrentHash) throw new Error('Missing required opts')
   return transform(concurrentHash, { objectMode: true }, async (fileObj, cb) => {
@@ -22,13 +22,14 @@ const hasherCtor = ({ concurrentHash, hashAlgorithm = 'sha1' }) => {
 }
 
 // Inject normalized file names into normalizedPath and assetType
-const fileNormalizerCtor = ({ assetType = 'file' }) =>
+const fileNormalizerCtor = ({ assetType }) =>
   map((fileObj) => ({ ...fileObj, assetType, normalizedPath: normalizePath(fileObj.relname) }))
 
 // A writable stream segment ctor that normalizes file paths, and writes shaMap's
 const manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
   if (!statusCb || !assetType) throw new Error('Missing required options')
   return flushWriteStream.obj((fileObj, _, cb) => {
+    // eslint-disable-next-line no-param-reassign
     filesObj[fileObj.normalizedPath] = fileObj.hash
 
     // We map a hash to multiple fileObj's because the same file
@@ -38,6 +39,7 @@ const manifestCollectorCtor = (filesObj, shaMap, { statusCb, assetType }) => {
       // eslint-disable-next-line fp/no-mutating-methods
       shaMap[fileObj.hash].push(fileObj)
     } else {
+      // eslint-disable-next-line no-param-reassign
       shaMap[fileObj.hash] = [fileObj]
     }
     statusCb({

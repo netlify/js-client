@@ -3,31 +3,27 @@ const { promisify } = require('util')
 const walker = require('folder-walker')
 const pump = promisify(require('pump'))
 
-const { DEFAULT_CONCURRENT_HASH } = require('./constants')
 const { hasherCtor, manifestCollectorCtor, fileFilterCtor, fileNormalizerCtor } = require('./hasher_segments')
 
-const hashFiles = async (dir, configPath, opts) => {
-  opts = {
-    concurrentHash: DEFAULT_CONCURRENT_HASH,
-    assetType: 'file',
-    statusCb: () => {},
-    ...opts,
-  }
-
-  if (!opts.filter) throw new Error('Missing filter function option')
-  const fileStream = walker([configPath, dir], { filter: opts.filter })
-  const filter = fileFilterCtor()
-  const hasher = hasherCtor(opts)
-  const fileNormalizer = fileNormalizerCtor(opts)
+const hashFiles = async (
+  dir,
+  configPath,
+  { concurrentHash, hashAlgorithm = 'sha1', assetType = 'file', statusCb, filter },
+) => {
+  if (!filter) throw new Error('Missing filter function option')
+  const fileStream = walker([configPath, dir], { filter })
+  const fileFilter = fileFilterCtor()
+  const hasher = hasherCtor({ concurrentHash, hashAlgorithm })
+  const fileNormalizer = fileNormalizerCtor({ assetType })
 
   // Written to by manifestCollector
   // normalizedPath: hash (wanted by deploy API)
   const files = {}
   // hash: [fileObj, fileObj, fileObj]
   const filesShaMap = {}
-  const manifestCollector = manifestCollectorCtor(files, filesShaMap, opts)
+  const manifestCollector = manifestCollectorCtor(files, filesShaMap, { statusCb, assetType })
 
-  await pump(fileStream, filter, hasher, fileNormalizer, manifestCollector)
+  await pump(fileStream, fileFilter, hasher, fileNormalizer, manifestCollector)
 
   return { files, filesShaMap }
 }
