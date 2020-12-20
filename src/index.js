@@ -5,6 +5,8 @@ const deploy = require('./deploy')
 const { getMethods } = require('./methods')
 const { getOperations } = require('./operations')
 
+/* eslint-disable fp/no-this */
+// eslint-disable-next-line fp/no-class
 class NetlifyAPI {
   constructor(firstArg, secondArg) {
     // variadic arguments
@@ -89,6 +91,7 @@ class NetlifyAPI {
     return await deploy(this, siteId, buildDir, opts)
   }
 }
+/* eslint-enable fp/no-this */
 
 const getBasePath = function ({ scheme, host, pathPrefix }) {
   return `${scheme}://${host}${pathPrefix}`
