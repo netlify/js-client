@@ -63,9 +63,11 @@ const addAgent = function (agent, opts) {
 const makeRequestOrRetry = async function ({ url, method, defaultHeaders, agent, requestParams, opts }) {
   for (let index = 0; index <= MAX_RETRY; index++) {
     const optsA = getOpts({ method, defaultHeaders, agent, requestParams, opts })
+    // eslint-disable-next-line no-await-in-loop
     const { response, error } = await makeRequest(url, optsA)
 
     if (shouldRetry({ response, error }) && index !== MAX_RETRY) {
+      // eslint-disable-next-line no-await-in-loop
       await waitForRetry(response)
       continue
     }
