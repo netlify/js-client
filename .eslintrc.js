@@ -5,7 +5,6 @@ module.exports = {
   rules: {
     // TODO: enable those rules
     complexity: 0,
-    'max-nested-callbacks': 0,
     'max-statements': 0,
     'fp/no-class': 0,
     'fp/no-let': 0,
