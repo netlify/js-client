@@ -15,7 +15,7 @@
     "./src/deploy/index.js": "./src/deploy/index.browser.js"
   },
   "scripts": {
-    "prepublishOnly": "npm run build && git push && git push --tags && gh-release",
+    "prepublishOnly": "npm run build",
     "test": "npm run format && npm run test:dev",
     "format": "run-s format:check-fix:*",
     "format:lint": "eslint --ignore-path .gitignore --fix --cache --format=codeframe --max-warnings=0 \"src/**/*.js\"",
@@ -30,12 +30,11 @@
     "test:dev": "ava",
     "test:ci": "nyc -r lcovonly -r text -r json ava",
     "update-snapshots": "ava -u",
-    "build": "webpack",
-    "version": "auto-changelog -p --template keepachangelog --breaking-pattern breaking && npm run format:prettier && git add CHANGELOG.md"
+    "build": "webpack"
   },
   "scriptsArgs": {
     "eslint": "--ignore-path .gitignore --cache --format=codeframe --max-warnings=0 \"{src,tests,.github}/**/*.{js,md,html}\" \"*.{js,md,html}\" \".*.{js,md,html}\"",
-    "prettier": "--ignore-path .gitignore --loglevel=warn \"{src,tests,.github}/**/*.{js,md,yml,json,html}\" \"*.{js,yml,json,html}\" \".*.{js,yml,json,html}\" \"!package-lock.json\""
+    "prettier": "--ignore-path .gitignore --loglevel=warn \"{src,tests,.github}/**/*.{js,md,yml,json,html}\" \"*.{js,yml,json,html}\" \".*.{js,yml,json,html}\" \"!package-lock.json\" \"!CHANGELOG.md\""
   },
   "husky": {
     "hooks": {
@@ -94,11 +93,9 @@
     "@babel/preset-env": "^7.9.0",
     "@babel/runtime": "^7.9.2",
     "@netlify/eslint-config-node": "^2.1.0",
-    "auto-changelog": "^2.0.0",
     "ava": "^2.4.0",
     "babel-loader": "^8.1.0",
     "from2-string": "^1.1.0",
-    "gh-release": "^4.0.0",
     "husky": "^4.2.3",
     "nock": "^11.9.1",
     "npm-run-all": "^4.1.3",

@@ -42,10 +42,10 @@ Projects that depend heavily on this client that should be taken into considerat
 
 ## Releasing
 
-```console
-$ npm version [major|minor|patch]
-$ npm publish
-```
+1. Merge the release PR
+2. Switch to the default branch `git checkout master`
+3. Pull latest changes `git pull`
+4. Publish the package `npm publish`
 
 ## License
 
