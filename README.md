@@ -163,12 +163,14 @@ See the [authenticating](https://www.netlify.com/docs/api/#authenticating) docs 
 
 ```js
 // example:
+const open = require('open') // installed with 'npm i open'
+
 const login = async () => {
   const ticket = await api.createTicket({
     clientId: CLIENT_ID,
   })
   // Open browser for authentication
-  await openBrowser(`https://app.netlify.com/authorize?response_type=ticket&ticket=${ticket.id}`)
+  await open(`https://app.netlify.com/authorize?response_type=ticket&ticket=${ticket.id}`)
   const accessToken = await api.getAccessToken(ticket)
   // API is also set up to use the returned access token as a side effect
   return accessToken // Save this for later so you can quickly set up an authenticated client
