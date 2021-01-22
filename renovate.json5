@@ -4,6 +4,7 @@
   semanticCommits: true,
   masterIssue: true,
   automerge: false,
+  rangeStrategy: 'bump',
   packageRules: [
     {
       // Those cannot be upgraded to a major version until we drop support for Node 8
