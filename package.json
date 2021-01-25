@@ -88,13 +88,13 @@
     "through2-map": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/plugin-transform-runtime": "^7.9.0",
-    "@babel/preset-env": "^7.9.0",
-    "@babel/runtime": "^7.9.2",
+    "@babel/core": "^7.12.10",
+    "@babel/plugin-transform-runtime": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/runtime": "^7.12.5",
     "@netlify/eslint-config-node": "^2.2.5",
     "ava": "^2.4.0",
-    "babel-loader": "^8.1.0",
+    "babel-loader": "^8.2.2",
     "from2-string": "^1.1.0",
     "husky": "^4.2.3",
     "nock": "^11.9.1",
