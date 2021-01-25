@@ -75,7 +75,7 @@
     "hasha": "^5.2.2",
     "lodash.camelcase": "^4.3.0",
     "micro-api-client": "^3.3.0",
-    "node-fetch": "^2.2.0",
+    "node-fetch": "^2.6.1",
     "omit.js": "^2.0.2",
     "p-map": "^3.0.0",
     "p-wait-for": "^3.1.0",
