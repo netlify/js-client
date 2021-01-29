@@ -1,7 +1,7 @@
 {
   "name": "netlify",
   "description": "Netlify Node.js API client",
-  "version": "6.1.4",
+  "version": "6.1.5",
   "files": [
     "src",
     "dist",
