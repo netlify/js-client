@@ -3,6 +3,7 @@ const omit = require('omit.js').default
 
 // Retrieve all OpenAPI operations
 const getOperations = function () {
+  // eslint-disable-next-line unicorn/prefer-spread
   return [].concat(
     ...Object.entries(paths).map(([path, pathItem]) => {
       const operations = omit(pathItem, ['parameters'])

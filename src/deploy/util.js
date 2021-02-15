@@ -111,6 +111,7 @@ const waitForDeploy = async (api, deployId, siteId, timeout) => {
 const getUploadList = (required, shaMap) => {
   if (!required || !shaMap) return []
   // TODO: use `Array.flatMap()` instead once we remove support for Node <11.0.0
+  // eslint-disable-next-line unicorn/prefer-spread
   return [].concat(...required.map((sha) => shaMap[sha]))
 }
 

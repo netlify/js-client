@@ -111,7 +111,9 @@ const deploySite = async (
     phase: 'stop',
   })
 
-  const uploadList = getUploadList(requiredFiles, filesShaMap).concat(getUploadList(requiredFns, fnShaMap))
+  const filesUploadList = getUploadList(requiredFiles, filesShaMap)
+  const functionsUploadList = getUploadList(requiredFns, fnShaMap)
+  const uploadList = [...filesUploadList, ...functionsUploadList]
 
   await uploadFiles(api, deployId, uploadList, { concurrentUpload, statusCb, maxRetry })
 
