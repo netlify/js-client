@@ -14,8 +14,8 @@ const uploadFiles = async (api, deployId, uploadList, { concurrentUpload, status
   })
 
   const uploadFile = async (fileObj, index) => {
-    const { normalizedPath, assetType, runtime } = fileObj
-    const readStreamCtor = () => fs.createReadStream(fileObj.filepath)
+    const { normalizedPath, assetType, runtime, filepath } = fileObj
+    const readStreamCtor = () => fs.createReadStream(filepath)
 
     statusCb({
       type: 'upload',
