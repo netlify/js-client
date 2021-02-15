@@ -92,7 +92,7 @@
     "@babel/plugin-transform-runtime": "^7.12.15",
     "@babel/preset-env": "^7.12.16",
     "@babel/runtime": "^7.12.13",
-    "@netlify/eslint-config-node": "^2.2.7",
+    "@netlify/eslint-config-node": "^2.3.0",
     "ava": "^2.4.0",
     "babel-loader": "^8.2.2",
     "from2-string": "^1.1.0",
