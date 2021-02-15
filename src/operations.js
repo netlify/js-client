@@ -3,6 +3,7 @@ const omit = require('omit.js').default
 
 // Retrieve all OpenAPI operations
 const getOperations = function () {
+  // TODO: switch to Array.flat() once we drop support for Node.js < 11.0.0
   // eslint-disable-next-line unicorn/prefer-spread
   return [].concat(
     ...Object.entries(paths).map(([path, pathItem]) => {
