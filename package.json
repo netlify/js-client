@@ -3,10 +3,9 @@
   "description": "Netlify Node.js API client",
   "version": "6.1.8",
   "files": [
-    "src",
-    "dist",
-    "!*.test.js*",
-    "!*~"
+    "src/**/*.js",
+    "!src/**/*.test.js",
+    "dist/main.js"
   ],
   "main": "./src/index.js",
   "unpkg": "./dist/main.js",
