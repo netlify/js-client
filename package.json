@@ -5,7 +5,8 @@
   "files": [
     "src/**/*.js",
     "!src/**/*.test.js",
-    "dist/main.js"
+    "dist/main.js",
+    "dist/main.js.map"
   ],
   "main": "./src/index.js",
   "unpkg": "./dist/main.js",
