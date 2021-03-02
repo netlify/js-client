@@ -1,4 +1,4 @@
-# netlify/js-client
+![netlify/js-client](js-client.png)
 
 [![npm version][npm-img]][npm] [![build status][build-img]][build] [![coverage][coverage-img]][coverage]
 [![dependencies][david-img]][david] [![downloads][dl-img]][dl]
