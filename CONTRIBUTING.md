@@ -43,7 +43,7 @@ Projects that depend heavily on this client that should be taken into considerat
 ## Releasing
 
 1. Merge the release PR
-2. Switch to the default branch `git checkout master`
+2. Switch to the default branch `git checkout main`
 3. Pull latest changes `git pull`
 4. Publish the package `npm publish`
 
