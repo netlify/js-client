@@ -252,7 +252,7 @@ MIT. See [LICENSE](LICENSE) for more details.
 [build]: https://github.com/netlify/js-client/actions
 [dl-img]: https://img.shields.io/npm/dm/netlify.svg
 [dl]: https://npmjs.org/package/netlify
-[coverage-img]: https://codecov.io/gh/netlify/js-client/branch/master/graph/badge.svg
+[coverage-img]: https://codecov.io/gh/netlify/js-client/branch/main/graph/badge.svg
 [coverage]: https://codecov.io/gh/netlify/js-client
 [david-img]: https://david-dm.org/netlify/js-client/status.svg
 [david]: https://david-dm.org/netlify/js-client
