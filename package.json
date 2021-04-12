@@ -15,7 +15,7 @@
     "./src/deploy/index.js": "./src/deploy/index.browser.js"
   },
   "scripts": {
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm ci && run-s test build",
     "test": "npm run format && npm run test:dev",
     "format": "run-s format:check-fix:*",
     "format:lint": "eslint --ignore-path .gitignore --fix --cache --format=codeframe --max-warnings=0 \"src/**/*.js\"",
