@@ -78,7 +78,7 @@
     "node-fetch": "^2.6.1",
     "omit.js": "^2.0.2",
     "p-map": "^3.0.0",
-    "p-wait-for": "^3.2.0",
+    "p-wait-for": "^4.0.0",
     "parallel-transform": "^1.2.0",
     "pump": "^3.0.0",
     "qs": "^6.9.6",
