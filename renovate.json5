@@ -6,8 +6,16 @@
   automerge: false,
   packageRules: [
     {
-      // Those cannot be upgraded to a major version until we drop support for Node 8
-      packageNames: ['ava', 'nock', 'p-map', 'tempy', 'p-wait-for'],
+      // Those cannot be upgraded to a major version
+      packageNames: [
+        // Requires Node.js >= 10
+        'ava',
+        'nock',
+        'p-map',
+        'tempy',
+        // Requires Node.js >= 12
+        'p-wait-for',
+      ],
       major: {
         enabled: false,
       },
