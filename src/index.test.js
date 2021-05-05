@@ -177,6 +177,20 @@ test('Can use global parameters in query variables', async (t) => {
   t.true(scope.isDone())
 })
 
+test('Allow array query parameters', async (t) => {
+  const siteId = uuidv4()
+  const scope = nock(origin)
+    .get(
+      `${pathPrefix}/sites/${siteId}/plugin_runs/latest?packages%5B%5D=%40scope%2Fpackage&packages%5B%5D=%40scope%2Fpackage-two`,
+    )
+    .reply(200)
+
+  const client = getClient()
+  await client.getLatestPluginRuns({ site_id: siteId, packages: ['@scope/package', '@scope/package-two'] })
+
+  t.true(scope.isDone())
+})
+
 test('Can specify JSON request body as an object', async (t) => {
   const body = { test: 'test' }
   const scope = nock(origin).post(`${pathPrefix}/accounts`, body, { 'Content-Type': 'application/json' }).reply(200)
