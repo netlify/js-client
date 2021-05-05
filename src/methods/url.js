@@ -26,7 +26,7 @@ const addQueryParams = function (url, parameters, requestParams) {
     return url
   }
 
-  return `${url}?${queryString.stringify(queryParams)}`
+  return `${url}?${queryString.stringify(queryParams, { arrayFormat: 'brackets' })}`
 }
 
 const getRequestParams = function (params, requestParams, name) {
