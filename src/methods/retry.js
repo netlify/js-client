@@ -2,7 +2,11 @@
 //  - when receiving a rate limiting response
 //  - on network failures due to timeouts
 const shouldRetry = function ({ response = {}, error = {} }) {
-  return response.status === RATE_LIMIT_STATUS || RETRY_ERROR_CODES.has(error.code)
+  return isRetryStatus(response) || RETRY_ERROR_CODES.has(error.code)
+}
+
+const isRetryStatus = function ({ status }) {
+  return typeof status === 'number' && (status === RATE_LIMIT_STATUS || String(status).startsWith('5'))
 }
 
 const waitForRetry = async function (response) {

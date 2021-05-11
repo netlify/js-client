@@ -470,6 +470,22 @@ test('Can timeout access token polling', async (t) => {
   t.false(scope.isDone())
 })
 
+test('Retries on server errors', async (t) => {
+  const accountId = uuidv4()
+  const expectedResponse = { test: 'test' }
+  const scope = nock(origin)
+    .get(`${pathPrefix}/accounts/${accountId}`)
+    .reply(500)
+    .get(`${pathPrefix}/accounts/${accountId}`)
+    .reply(200, expectedResponse)
+
+  const client = getClient()
+  const response = await client.getAccount({ account_id: accountId })
+
+  t.deepEqual(response, expectedResponse)
+  t.true(scope.isDone())
+})
+
 test('Handles API rate limiting', async (t) => {
   const accountId = uuidv4()
   const retryAtMs = Date.now() + TEST_RATE_LIMIT_DELAY
