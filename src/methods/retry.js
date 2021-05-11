@@ -36,6 +36,6 @@ const SECS_TO_MSECS = 1e3
 const MAX_RETRY = 10
 const RATE_LIMIT_STATUS = 429
 const RATE_LIMIT_HEADER = 'X-RateLimit-Reset'
-const RETRY_ERROR_CODES = new Set(['ETIMEDOUT'])
+const RETRY_ERROR_CODES = new Set(['ETIMEDOUT', 'ECONNRESET'])
 
 module.exports = { shouldRetry, waitForRetry, MAX_RETRY }
