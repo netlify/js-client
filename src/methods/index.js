@@ -4,10 +4,10 @@ const fetch = nodeFetch.default || nodeFetch
 
 const { getOperations } = require('../operations')
 
-const { addBody } = require('./body.js')
-const { parseResponse, getFetchError } = require('./response.js')
-const { shouldRetry, waitForRetry, MAX_RETRY } = require('./retry.js')
-const { getUrl } = require('./url.js')
+const { addBody } = require('./body')
+const { parseResponse, getFetchError } = require('./response')
+const { shouldRetry, waitForRetry, MAX_RETRY } = require('./retry')
+const { getUrl } = require('./url')
 
 // For each OpenAPI operation, add a corresponding method.
 // The `operationId` is the method name.
