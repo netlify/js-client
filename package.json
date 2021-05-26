@@ -11,9 +11,6 @@
   "main": "./src/index.js",
   "unpkg": "./dist/main.js",
   "umd:main": "./dist/main.js",
-  "browser": {
-    "./src/deploy/index.js": "./src/deploy/index.browser.js"
-  },
   "scripts": {
     "prepublishOnly": "npm ci && run-s test build",
     "test": "npm run format && npm run test:dev",
