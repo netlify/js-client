@@ -1,7 +1,6 @@
 const dfn = require('@netlify/open-api')
 const pWaitFor = require('p-wait-for')
 
-const deploy = require('./deploy')
 const { getMethods } = require('./methods')
 const { getOperations } = require('./operations')
 
@@ -82,13 +81,6 @@ class NetlifyAPI {
     // See https://open-api.netlify.com/#/default/exchangeTicket for shape
     this.accessToken = accessTokenResponse.access_token
     return accessTokenResponse.access_token
-  }
-
-  async deploy(siteId, buildDir, opts) {
-    if (!this.accessToken) throw new Error('Missing access token')
-    // the deploy function is swapped in the package.json browser field for different environments
-    // See https://github.com/defunctzombie/package-browser-field-spec
-    return await deploy(this, siteId, buildDir, opts)
   }
 }
 /* eslint-enable fp/no-this */

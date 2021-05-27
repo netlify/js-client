@@ -177,49 +177,6 @@ const login = async () => {
 }
 ```
 
-#### `deploy = await client.deploy(siteId, buildDir, [opts])`
-
-**Node.js only**: Pass in a `siteId`, a `buildDir` (the folder you want to deploy) and an options object to deploy the
-contents of that folder. Sometimes this method needs to write to a `tmpDir`. By default `tmpDir` is a folder in the
-system temporary directory.
-
-The following paths can be passed in the options:
-
-- `configPath` (path to a `netlify.toml` file that includes redirect rules for the deploy, etc.)
-- `fnDir` (a folder with lambda functions to deploy)
-
-Optional `opts` include:
-
-```js
-const opts = {
-  fnDir: null, // path to a folder of functions to deploy
-  branch: null, // branch to pass onto the netlify api
-  configPath: null, // path to a netlify.toml file to include in the deploy (e.g. redirect support for manual deploys)
-  draft: false, // draft deploy or production deploy
-  message: undefined, // a short message to associate with the deploy
-  deployTimeout: 1.2e6, // 20 mins
-  concurrentHash: 100, // number of parallel hashing calls
-  concurrentUpload: 5, // number of files to upload in parallel
-  maxRetry: 5, // number of times to try on failed file uploads
-  filter: (filepath) => {
-    /* return false to filter a file  from the deploy */
-  },
-  tmpDir: tempy.directory(), // a temporary directory to zip functions into
-  statusCb: (statusObj) => {
-    // a callback function to receive status events
-    // statusObj: {
-    //      type: name-of-step
-    //      msg: msg to print
-    //      phase: [start, progress, stop]
-    //  }
-    // See https://github.com/netlify/cli/blob/v2.0.0-beta.3/src/commands/deploy.js#L161-L195
-    // for an example of how this can be used.
-  },
-  // passing a deployId will update an existing deploy based on the provided options
-  deployId: null,
-}
-```
-
 ## Proxy support
 
 **Node.js only**: If this client is used behind a corporate proxy, you can pass an `HttpsProxyAgent` or any other
@@ -232,6 +189,11 @@ const proxyUri = 'http(s)://[user:password@]proxyhost:port'
 const agent = new HttpsProxyAgent(proxyUri)
 const client = new NetlifyAPI('1234myAccessToken', { agent })
 ```
+
+## Site deployment
+
+Support for site deployment has been removed from this package in version 7.0.0. You should consider using the
+[`deploy` command](https://cli.netlify.com/commands/deploy/) of Netlify CLI.
 
 ## UMD Builds
 
