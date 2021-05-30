@@ -4,8 +4,6 @@ const pWaitFor = require('p-wait-for')
 const { getMethods } = require('./methods')
 const { getOperations } = require('./operations')
 
-/* eslint-disable fp/no-this */
-// eslint-disable-next-line fp/no-class
 class NetlifyAPI {
   constructor(firstArg, secondArg) {
     // variadic arguments
@@ -29,7 +27,6 @@ class NetlifyAPI {
 
     const basePath = getBasePath({ scheme, host, pathPrefix })
     const methods = getMethods({ basePath, defaultHeaders, agent, globalParams })
-    // eslint-disable-next-line fp/no-mutating-assign
     Object.assign(this, { ...methods, defaultHeaders, scheme, host, pathPrefix, globalParams, accessToken, agent })
   }
 
@@ -46,7 +43,6 @@ class NetlifyAPI {
 
   set accessToken(token) {
     if (!token) {
-      // eslint-disable-next-line fp/no-delete
       delete this.defaultHeaders.Authorization
       return
     }
@@ -83,7 +79,6 @@ class NetlifyAPI {
     return accessTokenResponse.access_token
   }
 }
-/* eslint-enable fp/no-this */
 
 const getBasePath = function ({ scheme, host, pathPrefix }) {
   return `${scheme}://${host}${pathPrefix}`
