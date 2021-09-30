@@ -4,20 +4,18 @@
   semanticCommits: true,
   dependencyDashboard: true,
   packageRules: [
+    // Cannot be upgraded until we use ES modules natively (requires Node >=12.20.0)
     {
-      // Those cannot be upgraded to a major version
-      packageNames: [
-        // Requires Node.js >= 10
-        'ava',
-        'nock',
-        'p-map',
-        'tempy',
-        // Requires Node.js >= 12
-        'p-wait-for',
-      ],
-      major: {
-        enabled: false,
-      },
+      "matchPackageNames": ["p-map"],
+      "allowedVersions": "<5"
+    },
+    {
+      "matchPackageNames": ["p-wait-for"],
+      "allowedVersions": "<4"
+    },
+    {
+      "matchPackageNames": ["tempy"],
+      "allowedVersions": "<2"
     },
   ],
 }
