@@ -15,8 +15,6 @@
     "prepublishOnly": "npm ci && run-s test build",
     "test": "npm run format && npm run test:dev",
     "format": "run-s format:check-fix:*",
-    "format:lint": "eslint --ignore-path .gitignore --fix --cache --format=codeframe --max-warnings=0 \"src/**/*.js\"",
-    "format:prettier": "prettier --ignore-path .gitignore --write --loglevel warn \"src/**/*.js\" \"*.{js,md,yml,json}\" \"!package-lock.json\"",
     "format:ci": "run-s format:check:*",
     "format:check-fix:lint": "run-e format:check:lint format:fix:lint",
     "format:check:lint": "cross-env-shell eslint $npm_package_config_eslint",
