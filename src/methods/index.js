@@ -1,4 +1,4 @@
-import nodeFetch from 'node-fetch'
+import fetch from 'node-fetch'
 
 import { getOperations } from '../operations.js'
 
@@ -6,9 +6,6 @@ import { addBody } from './body.js'
 import { parseResponse, getFetchError } from './response.js'
 import { shouldRetry, waitForRetry, MAX_RETRY } from './retry.js'
 import { getUrl } from './url.js'
-
-// Webpack will sometimes export default exports in different places
-const fetch = nodeFetch.default || nodeFetch
 
 // For each OpenAPI operation, add a corresponding method.
 // The `operationId` is the method name.
