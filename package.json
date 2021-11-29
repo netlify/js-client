@@ -1,7 +1,7 @@
 {
   "name": "netlify",
   "description": "Netlify Node.js API client",
-  "version": "8.0.4",
+  "version": "9.0.0",
   "files": [
     "src/**/*.js",
     "!src/**/*.test.js",
@@ -75,7 +75,7 @@
     "@babel/plugin-transform-runtime": "^7.12.17",
     "@babel/preset-env": "^7.12.17",
     "@babel/runtime": "^7.12.18",
-    "@netlify/eslint-config-node": "^3.3.8",
+    "@netlify/eslint-config-node": "^3.3.9",
     "ava": "^2.4.0",
     "babel-loader": "^8.2.2",
     "from2-string": "^1.1.0",
@@ -88,7 +88,7 @@
     "webpack-cli": "^4.5.0"
   },
   "engines": {
-    "node": ">=10.18.0"
+    "node": "^12.20.0 || ^14.14.0 || >=16.0.0"
   },
   "ava": {
     "files": [
