@@ -1,13 +1,13 @@
 /* eslint-disable max-lines */
-const http = require('http')
+import http from 'http'
 
-const test = require('ava')
-const fromString = require('from2-string')
-const { TextHTTPError, JSONHTTPError } = require('micro-api-client')
-const nock = require('nock')
-const { v4: uuidv4 } = require('uuid')
+import test from 'ava'
+import fromString from 'from2-string'
+import { TextHTTPError, JSONHTTPError } from 'micro-api-client'
+import nock from 'nock'
+import { v4 as uuidv4 } from 'uuid'
 
-const NetlifyAPI = require('.')
+import { NetlifyAPI } from './index.js'
 
 const scheme = 'http'
 const domain = 'localhost'
@@ -258,7 +258,7 @@ test('Validates required path parameters', async (t) => {
   const scope = nock(origin).put(`${pathPrefix}/accounts/${accountId}`).reply(200)
 
   const client = getClient()
-  await t.throwsAsync(client.updateAccount(), "Missing required path variable 'account_id'")
+  await t.throwsAsync(client.updateAccount(), { message: "Missing required path variable 'account_id'" })
 
   t.false(scope.isDone())
 })
@@ -268,10 +268,9 @@ test('Validates required query parameters', async (t) => {
   const scope = nock(origin).post(`${pathPrefix}/${accountSlug}/members`).reply(200)
 
   const client = getClient()
-  await t.throwsAsync(
-    client.addMemberToAccount({ account_slug: accountSlug }),
-    "Missing required query variable 'email'",
-  )
+  await t.throwsAsync(client.addMemberToAccount({ account_slug: accountSlug }), {
+    message: "Missing required query variable 'email'",
+  })
 
   t.false(scope.isDone())
 })
@@ -462,10 +461,9 @@ test('Can timeout access token polling', async (t) => {
     .reply(200, { access_token: accessToken })
 
   const client = getClient()
-  await t.throwsAsync(
-    client.getAccessToken({ id: ticketId }, { poll: 1, timeout: 1 }),
-    'Promise timed out after 1 milliseconds',
-  )
+  await t.throwsAsync(client.getAccessToken({ id: ticketId }, { poll: 1, timeout: 1 }), {
+    message: 'Promise timed out after 1 milliseconds',
+  })
 
   t.false(scope.isDone())
 })

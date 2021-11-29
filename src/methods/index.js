@@ -1,17 +1,18 @@
-const nodeFetch = require('node-fetch')
+import nodeFetch from 'node-fetch'
+
+import { getOperations } from '../operations.js'
+
+import { addBody } from './body.js'
+import { parseResponse, getFetchError } from './response.js'
+import { shouldRetry, waitForRetry, MAX_RETRY } from './retry.js'
+import { getUrl } from './url.js'
+
 // Webpack will sometimes export default exports in different places
 const fetch = nodeFetch.default || nodeFetch
 
-const { getOperations } = require('../operations')
-
-const { addBody } = require('./body')
-const { parseResponse, getFetchError } = require('./response')
-const { shouldRetry, waitForRetry, MAX_RETRY } = require('./retry')
-const { getUrl } = require('./url')
-
 // For each OpenAPI operation, add a corresponding method.
 // The `operationId` is the method name.
-const getMethods = function ({ basePath, defaultHeaders, agent, globalParams }) {
+export const getMethods = function ({ basePath, defaultHeaders, agent, globalParams }) {
   const operations = getOperations()
   const methods = operations.map((method) => getMethod({ method, basePath, defaultHeaders, agent, globalParams }))
   return Object.assign({}, ...methods)
@@ -90,5 +91,3 @@ const makeRequest = async function (url, opts) {
     return { error: errorA }
   }
 }
-
-module.exports = { getMethods }

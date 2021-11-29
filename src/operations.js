@@ -1,10 +1,11 @@
-const { paths } = require('@netlify/open-api')
-const omit = require('omit.js').default
+import omit from 'omit.js'
+
+import { openApiSpec } from './open_api.js'
 
 // Retrieve all OpenAPI operations
-const getOperations = function () {
-  return Object.entries(paths).flatMap(([path, pathItem]) => {
-    const operations = omit(pathItem, ['parameters'])
+export const getOperations = function () {
+  return Object.entries(openApiSpec.paths).flatMap(([path, pathItem]) => {
+    const operations = omit.default(pathItem, ['parameters'])
     return Object.entries(operations).map(([method, operation]) => {
       const parameters = getParameters(pathItem.parameters, operation.parameters)
       return { ...operation, verb: method, path, parameters }
@@ -20,5 +21,3 @@ const getParameters = function (pathParameters = [], operationParameters = []) {
 const addParameter = function (parameters, param) {
   return { ...parameters, [param.in]: { ...parameters[param.in], [param.name]: param } }
 }
-
-module.exports = { getOperations }
