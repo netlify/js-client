@@ -8,39 +8,32 @@ A Netlify [OpenAPI](https://github.com/netlify/open-api) client that works in th
 ## Usage
 
 ```js
-const NetlifyAPI = require('netlify')
+import { NetlifyAPI } from 'netlify'
 
-const listNetlifySites = async function () {
-  const client = new NetlifyAPI('1234myAccessToken')
-  const sites = await client.listSites()
-  return sites
-}
+const client = new NetlifyAPI('1234myAccessToken')
+const sites = await client.listSites()
 ```
 
 ## Using OpenAPI operations
 
 ```js
-const NetlifyAPI = require('netlify')
+import { NetlifyAPI } from 'netlify'
 
 const client = new NetlifyAPI('1234myAccessToken')
 
-const listCreateAndDeleteSite = async function () {
-  // Fetch sites
-  const sites = await client.listSites()
+// Fetch sites
+const sites = await client.listSites()
 
-  // Create a site. Notice `body` here for sending OpenAPI body
-  const site = await client.createSite({
-    body: {
-      name: `my-awesome-site`,
-      // ... https://open-api.netlify.com/#/default/createSite
-    },
-  })
+// Create a site. Notice `body` here for sending OpenAPI body
+const site = await client.createSite({
+  body: {
+    name: `my-awesome-site`,
+    // ... https://open-api.netlify.com/#/default/createSite
+  },
+})
 
-  // Delete site. Notice `site_id` is a path parameter https://open-api.netlify.com/#/default/deleteSite
-  await client.deleteSite({
-    site_id: siteId,
-  })
-}
+// Delete site. Notice `site_id` is a path parameter https://open-api.netlify.com/#/default/deleteSite
+await client.deleteSite({ site_id: siteId })
 ```
 
 ## API
@@ -124,16 +117,14 @@ const opts = {
 All operations are conveniently consumed with async/await:
 
 ```js
-const getSomeData = async () => {
+try {
+  const siteDeploy = await client.getSiteDeploy({
+    siteId: '1234abcd',
+    deploy_id: '4567',
+  })
   // Calls may fail!
-  try {
-    return await client.getSiteDeploy({
-      siteId: '1234abcd',
-      deploy_id: '4567',
-    })
-  } catch (error) {
-    // handle error
-  }
+} catch (error) {
+  // handle error
 }
 ```
 
@@ -162,19 +153,15 @@ const opts = {
 See the [authenticating](https://www.netlify.com/docs/api/#authenticating) docs for more context.
 
 ```js
-// example:
-const open = require('open') // installed with 'npm i open'
+import open from 'open'
 
-const login = async () => {
-  const ticket = await client.createTicket({
-    clientId: CLIENT_ID,
-  })
-  // Open browser for authentication
-  await open(`https://app.netlify.com/authorize?response_type=ticket&ticket=${ticket.id}`)
-  const accessToken = await client.getAccessToken(ticket)
-  // API is also set up to use the returned access token as a side effect
-  return accessToken // Save this for later so you can quickly set up an authenticated client
-}
+const ticket = await client.createTicket({ clientId: CLIENT_ID })
+// Open browser for authentication
+await open(`https://app.netlify.com/authorize?response_type=ticket&ticket=${ticket.id}`)
+
+// API is also set up to use the returned access token as a side effect
+// Save this for later so you can quickly set up an authenticated client
+const accessToken = await client.getAccessToken(ticket)
 ```
 
 ## Proxy support
@@ -183,7 +170,7 @@ const login = async () => {
 `http.Agent` that can handle your situation as `agent` option:
 
 ```js
-const HttpsProxyAgent = require('https-proxy-agent')
+import HttpsProxyAgent from 'https-proxy-agent'
 
 const proxyUri = 'http(s)://[user:password@]proxyhost:port'
 const agent = new HttpsProxyAgent(proxyUri)

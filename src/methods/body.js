@@ -1,5 +1,5 @@
 // Handle request body
-const addBody = function (body, parameters, opts) {
+export const addBody = function (body, parameters, opts) {
   if (!body) {
     return opts
   }
@@ -28,5 +28,3 @@ const isBinaryBody = function (parameters) {
 const isBodyParam = function ({ schema }) {
   return schema && schema.format === 'binary'
 }
-
-module.exports = { addBody }

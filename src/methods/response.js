@@ -1,8 +1,8 @@
-const { JSONHTTPError, TextHTTPError } = require('micro-api-client')
-const omit = require('omit.js').default
+import { JSONHTTPError, TextHTTPError } from 'micro-api-client'
+import omit from 'omit.js'
 
 // Read and parse the HTTP response
-const parseResponse = async function (response) {
+export const parseResponse = async function (response) {
   const responseType = getResponseType(response)
   const textResponse = await response.text()
 
@@ -38,12 +38,10 @@ const parseJsonResponse = function (response, textResponse, responseType) {
   }
 }
 
-const getFetchError = function (error, url, opts) {
-  const data = omit(opts, ['Authorization'])
+export const getFetchError = function (error, url, opts) {
+  const data = omit.default(opts, ['Authorization'])
   error.name = 'FetchError'
   error.url = url
   error.data = data
   return error
 }
-
-module.exports = { parseResponse, getFetchError }
