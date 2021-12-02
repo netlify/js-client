@@ -68,7 +68,7 @@
     "qs": "^6.9.6"
   },
   "devDependencies": {
-    "@netlify/eslint-config-node": "^3.3.10",
+    "@netlify/eslint-config-node": "^3.3.11",
     "ava": "^3.0.0",
     "from2-string": "^1.1.0",
     "husky": "^4.3.8",
