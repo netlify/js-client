@@ -7,11 +7,6 @@ module.exports = {
   },
   rules: {
     'import/extensions': [2, 'ignorePackages'],
-    // TODO: enable those rules
-    complexity: 0,
-    'max-statements': 0,
-    'fp/no-let': 0,
-    'fp/no-mutation': 0,
   },
   overrides: [...overrides],
 }
