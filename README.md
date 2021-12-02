@@ -182,11 +182,6 @@ const client = new NetlifyAPI('1234myAccessToken', { agent })
 Support for site deployment has been removed from this package in version 7.0.0. You should consider using the
 [`deploy` command](https://cli.netlify.com/commands/deploy/) of Netlify CLI.
 
-## UMD Builds
-
-A UMD build is provided for your convenience, however browser support is still experimental. Contributions to improve
-browser support are welcome.
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more info on how to make contributions to this project.
