@@ -1,6 +1,6 @@
-const test = require('ava')
+import test from 'ava'
 
-const { getOperations } = require('./operations')
+import { getOperations } from './operations.js'
 
 test('Exported methods', (t) => {
   t.snapshot(getOperations())

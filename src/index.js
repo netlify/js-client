@@ -1,10 +1,10 @@
-const dfn = require('@netlify/open-api')
-const pWaitFor = require('p-wait-for')
+import pWaitFor from 'p-wait-for'
 
-const { getMethods } = require('./methods')
-const { getOperations } = require('./operations')
+import { getMethods } from './methods/index.js'
+import { openApiSpec } from './open_api.js'
+import { getOperations } from './operations.js'
 
-class NetlifyAPI {
+export class NetlifyAPI {
   constructor(firstArg, secondArg) {
     // variadic arguments
     const [accessTokenInput, opts = {}] = typeof firstArg === 'object' ? [null, firstArg] : [firstArg, secondArg]
@@ -12,9 +12,9 @@ class NetlifyAPI {
     // default opts
     const {
       userAgent = 'netlify/js-client',
-      scheme = dfn.schemes[0],
-      host = dfn.host,
-      pathPrefix = dfn.basePath,
+      scheme = openApiSpec.schemes[0],
+      host = openApiSpec.host,
+      pathPrefix = openApiSpec.basePath,
       accessToken = accessTokenInput,
       globalParams = {},
       agent,
@@ -89,6 +89,4 @@ const DEFAULT_TICKET_POLL = 1e3
 // 1 hour
 const DEFAULT_TICKET_TIMEOUT = 3.6e6
 
-module.exports = NetlifyAPI
-
-module.exports.methods = getOperations()
+export const methods = getOperations()

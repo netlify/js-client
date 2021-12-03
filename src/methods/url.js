@@ -1,9 +1,9 @@
-const camelCase = require('lodash.camelcase')
-const queryString = require('qs')
+import camelCase from 'lodash.camelcase'
+import queryString from 'qs'
 
 // Replace path parameters and query parameters in the URI, using the OpenAPI
 // definition
-const getUrl = function ({ path, parameters }, basePath, requestParams) {
+export const getUrl = function ({ path, parameters }, basePath, requestParams) {
   const url = `${basePath}${path}`
   const urlA = addPathParams(url, parameters, requestParams)
   const urlB = addQueryParams(urlA, parameters, requestParams)
@@ -45,5 +45,3 @@ const getRequestParam = function (param, requestParams, name) {
     throw new Error(`Missing required ${name} '${param.name}'`)
   }
 }
-
-module.exports = { getUrl }

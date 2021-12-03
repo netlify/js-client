@@ -48,6 +48,3 @@ jobs:
         with:
           file: coverage/coverage-final.json
           flags: ${{ steps.test-coverage-flags.outputs.os }},${{ steps.test-coverage-flags.outputs.node }}
-      - name: Build
-        run: npm run build
-        if: "${{ matrix.node-version == '*' }}"
