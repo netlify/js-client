@@ -17,10 +17,10 @@ const host = `${domain}:${port}`
 const origin = `${scheme}://${host}`
 const testAccessToken = 'testAccessToken'
 
-const AGENT_KEEP_ALIVE_MSECS = 60000
+const AGENT_KEEP_ALIVE_MSECS = 60_000
 const AGENT_MAX_SOCKETS = 10
 const AGENT_MAX_FREE_SOCKETS = 10
-const AGENT_TIMEOUT = 60000
+const AGENT_TIMEOUT = 60_000
 const agent = new http.Agent({
   keepAlive: true,
   keepAliveMsecs: AGENT_KEEP_ALIVE_MSECS,
