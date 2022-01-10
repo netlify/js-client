@@ -123,7 +123,7 @@ try {
     deploy_id: '4567',
   })
   // Calls may fail!
-} catch (error) {
+} catch {
   // handle error
 }
 ```

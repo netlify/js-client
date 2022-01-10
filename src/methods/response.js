@@ -33,7 +33,7 @@ const parseJsonResponse = function (response, textResponse, responseType) {
 
   try {
     return JSON.parse(textResponse)
-  } catch (error) {
+  } catch {
     throw new TextHTTPError(response, textResponse)
   }
 }
