@@ -314,14 +314,15 @@ test('Can parse text responses', async (t) => {
 test('Handle error empty responses', async (t) => {
   const accountId = uuidv4()
   const status = 404
-  const scope = nock(origin).get(`${pathPrefix}/accounts/${accountId}`).reply(status)
+  const expectedResponse = 'test'
+  const scope = nock(origin).get(`${pathPrefix}/accounts/${accountId}`).reply(status, expectedResponse)
 
   const client = getClient()
   const error = await t.throwsAsync(client.getAccount({ account_id: accountId }))
 
   t.is(error.status, status)
-  t.is(error.message, 'Not Found')
-  t.is(error.data, '')
+  t.is(error.message, expectedResponse)
+  t.is(error.data, expectedResponse)
   t.true(error instanceof TextHTTPError)
   t.true(error.stack !== undefined)
   t.true(scope.isDone())
@@ -337,7 +338,7 @@ test('Handle error text responses', async (t) => {
   const error = await t.throwsAsync(client.getAccount({ account_id: accountId }))
 
   t.is(error.status, status)
-  t.is(error.message, 'Not Found')
+  t.is(error.message, expectedResponse)
   t.is(error.data, expectedResponse)
   t.true(error instanceof TextHTTPError)
   t.true(error.stack !== undefined)
@@ -356,7 +357,7 @@ test('Handle error text responses on JSON endpoints', async (t) => {
   const error = await t.throwsAsync(client.getAccount({ account_id: accountId }))
 
   t.is(error.status, status)
-  t.is(error.message, 'Not Found')
+  t.is(error.message, expectedResponse)
   t.is(error.data, expectedResponse)
   t.true(error instanceof TextHTTPError)
   t.true(error.stack !== undefined)
@@ -373,7 +374,7 @@ test('Handle error JSON responses', async (t) => {
   const error = await t.throwsAsync(client.getAccount({ account_id: accountId }))
 
   t.is(error.status, status)
-  t.is(error.message, 'Not Found')
+  t.notThrows(() => JSON.parse(error.message))
   t.deepEqual(error.json, errorJson)
   t.true(error instanceof JSONHTTPError)
   t.true(error.stack !== undefined)
@@ -550,7 +551,7 @@ test('Gives up retrying on API rate limiting after a timeout', async (t) => {
   const error = await t.throwsAsync(client.getAccount({ account_id: accountId }))
 
   t.is(error.status, 429)
-  t.is(error.message, 'Too Many Requests')
+  t.is(error.message, JSON.stringify({ retryAt }))
   t.true(Number.isInteger(error.json.retryAt))
 
   t.false(scope.isDone())
