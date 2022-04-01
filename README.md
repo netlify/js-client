@@ -91,7 +91,7 @@ the response, or rejected with an error with the details about the request attac
 ```js
 // example params
 const params = {
-  any_param_needed,
+  any_param_needed: anyParamNeeded,
   paramsCanAlsoBeCamelCase,
   body: {
     an: 'arbitrary js object',
