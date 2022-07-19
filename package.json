@@ -52,7 +52,7 @@
     "node client"
   ],
   "dependencies": {
-    "@netlify/open-api": "^2.10.0",
+    "@netlify/open-api": "^2.11.0",
     "lodash.camelcase": "^4.3.0",
     "micro-api-client": "^3.3.0",
     "node-fetch": "^3.0.0",
