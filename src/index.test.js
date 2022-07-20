@@ -253,6 +253,31 @@ test('Can use global parameters in request body', async (t) => {
   t.true(scope.isDone())
 })
 
+test('Can set header parameters', async (t) => {
+  const deployId = uuidv4()
+  const functionName = 'testFunction'
+  const body = 'test'
+  const expectedResponse = { test: 'test' }
+  const retryCount = 3
+  const scope = nock(origin)
+    .put(`${pathPrefix}/deploys/${deployId}/functions/${functionName}`, body, {
+      'Content-Type': 'application/octet-stream',
+    })
+    .matchHeader('X-Nf-Retry-Count', retryCount.toString())
+    .reply(200, expectedResponse)
+
+  const client = getClient()
+  const response = await client.uploadDeployFunction({
+    deploy_id: deployId,
+    name: functionName,
+    body: fromString(body),
+    xNfRetryCount: retryCount,
+  })
+
+  t.deepEqual(response, expectedResponse)
+  t.true(scope.isDone())
+})
+
 test('Validates required path parameters', async (t) => {
   const accountId = uuidv4()
   const scope = nock(origin).put(`${pathPrefix}/accounts/${accountId}`).reply(200)
