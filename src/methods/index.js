@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import { getOperations } from '../operations.js'
 
 import { addBody } from './body.js'
+import { getRequestParams } from './params.js'
 import { parseResponse, getFetchError } from './response.js'
 import { shouldRetry, waitForRetry, MAX_RETRY } from './retry.js'
 import { getUrl } from './url.js'
@@ -32,12 +33,23 @@ const callMethod = async function ({ method, basePath, defaultHeaders, agent, gl
   return parsedResponse
 }
 
-const getOpts = function ({ method: { verb, parameters }, defaultHeaders, agent, requestParams: { body }, opts }) {
+const getOpts = function ({ method: { verb, parameters }, defaultHeaders, agent, requestParams, opts }) {
+  const { body } = requestParams
   const optsA = addHttpMethod(verb, opts)
-  const optsB = addDefaultHeaders(defaultHeaders, optsA)
-  const optsC = addBody(body, parameters, optsB)
-  const optsD = addAgent(agent, optsC)
-  return optsD
+  const optsB = addHeaderParams(parameters, requestParams, optsA)
+  const optsC = addDefaultHeaders(defaultHeaders, optsB)
+  const optsD = addBody(body, parameters, optsC)
+  const optsE = addAgent(agent, optsD)
+  return optsE
+}
+
+// Add header parameters
+const addHeaderParams = function (parameters, requestParams, opts) {
+  if (parameters.header === undefined) {
+    return opts
+  }
+
+  return { ...opts, headers: getRequestParams(parameters.header, requestParams, 'header parameter') }
 }
 
 // Add the HTTP method based on the OpenAPI definition
