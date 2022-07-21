@@ -1,12 +1,18 @@
 // We retry:
 //  - when receiving a rate limiting response
 //  - on network failures due to timeouts
-export const shouldRetry = function ({ response = {}, error = {} }) {
-  return isRetryStatus(response) || RETRY_ERROR_CODES.has(error.code)
-}
+export const shouldRetry = function ({ response = {}, error = {}, method = {} }) {
+  if (response.status === RATE_LIMIT_STATUS || RETRY_ERROR_CODES.has(error.code)) {
+    return true
+  }
 
-const isRetryStatus = function ({ status }) {
-  return typeof status === 'number' && (status === RATE_LIMIT_STATUS || String(status).startsWith('5'))
+  // Special case for the `getLatestPluginRuns` endpoint.
+  // See https://github.com/netlify/bitballoon/issues/9616.
+  if (method.operationId === 'getLatestPluginRuns' && response.status === 500) {
+    return true
+  }
+
+  return false
 }
 
 export const waitForRetry = async function (response) {
