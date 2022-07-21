@@ -76,7 +76,7 @@ const makeRequestOrRetry = async function ({ url, method, defaultHeaders, agent,
     const optsA = getOpts({ method, defaultHeaders, agent, requestParams, opts })
     const { response, error } = await makeRequest(url, optsA)
 
-    if (shouldRetry({ response, error }) && index !== MAX_RETRY) {
+    if (shouldRetry({ response, error, method }) && index !== MAX_RETRY) {
       await waitForRetry(response)
       continue
     }
