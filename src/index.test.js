@@ -494,17 +494,38 @@ test('Can timeout access token polling', async (t) => {
   t.false(scope.isDone())
 })
 
-test('Retries on server errors', async (t) => {
+test('Does not retry on server errors', async (t) => {
+  const errorMessage = 'Something went zap!'
   const accountId = uuidv4()
   const expectedResponse = { test: 'test' }
   const scope = nock(origin)
     .get(`${pathPrefix}/accounts/${accountId}`)
-    .reply(500)
+    .reply(500, errorMessage)
     .get(`${pathPrefix}/accounts/${accountId}`)
     .reply(200, expectedResponse)
 
   const client = getClient()
-  const response = await client.getAccount({ account_id: accountId })
+  const error = await t.throwsAsync(client.getAccount({ account_id: accountId }))
+
+  t.is(error.status, 500)
+  t.is(error.message, errorMessage)
+  t.false(scope.isDone())
+})
+
+test('Retries on server errors for the `getLatestPluginRuns` endpoint', async (t) => {
+  const packages = 'foo'
+  const siteId = uuidv4()
+  const expectedResponse = { test: 'test' }
+  const scope = nock(origin)
+    .get(`${pathPrefix}/sites/${siteId}/plugin_runs/latest`)
+    .query({ packages })
+    .reply(500)
+    .get(`${pathPrefix}/sites/${siteId}/plugin_runs/latest`)
+    .query({ packages })
+    .reply(200, expectedResponse)
+
+  const client = getClient()
+  const response = await client.getLatestPluginRuns({ site_id: siteId, packages })
 
   t.deepEqual(response, expectedResponse)
   t.true(scope.isDone())
