@@ -3,6 +3,7 @@ import pWaitFor from 'p-wait-for'
 import { getMethods } from './methods/index.js'
 import { openApiSpec } from './open_api.js'
 import { getOperations } from './operations.js'
+import { getUserAgent } from './user_agent.js'
 
 export class NetlifyAPI {
   constructor(firstArg, secondArg) {
@@ -11,7 +12,7 @@ export class NetlifyAPI {
 
     // default opts
     const {
-      userAgent = 'netlify/js-client',
+      userAgent = getUserAgent(),
       scheme = openApiSpec.schemes[0],
       host = openApiSpec.host,
       pathPrefix = openApiSpec.basePath,
