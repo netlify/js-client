@@ -1,3 +1,8 @@
+> ## !important Notice
+>
+> This repository was moved into the mono repository of [github.com/netlify/build](https://github.com/netlify/build) The
+> package name and the versions are preserved!
+
 ![netlify/js-client](js-client.png)
 
 [![npm version][npm-img]][npm] [![build status][build-img]][build] [![coverage][coverage-img]][coverage]
